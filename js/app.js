@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Init ───────────────────────────────────────────
 
+  initSearch();
   renderRecentNotes();
   loadOrCreateBlankNote();
   bodyEl.focus();
