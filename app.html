@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Palm Tree</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <meta name="description" content="Place all your thoughts under this tree." />
   <link rel="stylesheet" href="css/global.css" />
   <link rel="stylesheet" href="css/app.css" />
 </head>
@@ -72,6 +74,9 @@
 
     <!-- ── Editor ── -->
     <main class="editor">
+      <div class="editor-meta">
+        <span class="unsaved-dot" id="unsaved-dot"></span>
+      </div>
       <textarea
         class="editor-title"
         id="editor-title"

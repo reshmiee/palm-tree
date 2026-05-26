@@ -40,8 +40,10 @@ function openNote(id) {
 
 function scheduleAutoSave() {
   clearTimeout(saveTimer);
+  showUnsavedDot(true);
   saveTimer = setTimeout(() => {
     persistCurrentNote();
+    showUnsavedDot(false);
   }, 600);
 }
 
@@ -113,13 +115,31 @@ function renderRecentNotes() {
 
   panel.innerHTML = notes.map(note => `
     <div class="note-card ${note.id === activeNoteId ? 'active' : ''}" data-id="${note.id}">
+      <button class="note-card-delete" data-id="${note.id}" title="Delete">&#x2715;</button>
       <div class="note-card-title">${escapeHtml(note.title || 'Untitled')}</div>
       <div class="note-card-date">${formatDate(note.updatedAt)}</div>
     </div>
   `).join('');
 
   panel.querySelectorAll('.note-card').forEach(card => {
-    card.addEventListener('click', () => openNote(card.dataset.id));
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('note-card-delete')) return;
+      openNote(card.dataset.id);
+    });
+  });
+
+  panel.querySelectorAll('.note-card-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      deleteNote(id);
+      if (activeNoteId === id) {
+        activeNoteId = null;
+        clearEditor();
+        loadOrCreateBlankNote();
+      }
+      renderRecentNotes();
+    });
   });
 }
 
@@ -158,4 +178,11 @@ function escapeHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// ── Unsaved indicator ─────────────────────────────────
+
+function showUnsavedDot(show) {
+  const dot = document.getElementById('unsaved-dot');
+  if (dot) dot.classList.toggle('visible', show);
 }

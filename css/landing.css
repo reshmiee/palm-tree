@@ -118,3 +118,39 @@ body {
   background: var(--black);
   color: var(--white);
 }
+
+/* ── Mobile ── */
+
+@media (max-width: 640px) {
+  .landing {
+    gap: var(--space-xl);
+    padding: var(--space-lg);
+  }
+
+  .logo {
+    font-size: 44px;
+  }
+
+  .brand {
+    font-size: 36px;
+  }
+
+  .tagline {
+    font-size: 15px;
+  }
+
+  .bottom-row {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .carousel {
+    width: 100%;
+  }
+
+  .cta-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

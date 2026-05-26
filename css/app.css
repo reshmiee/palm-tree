@@ -493,3 +493,162 @@ mark {
   margin-left: 4px;
   vertical-align: middle;
 }
+
+/* ── Transitions ── */
+
+.note-card {
+  transition: background var(--transition), opacity 0.15s ease;
+}
+
+.tab-panel {
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sidebar {
+  transition: width 0.2s ease;
+}
+
+/* ── Focus states ── */
+
+.search-input:focus {
+  outline: none;
+}
+
+.search-wrap:focus-within {
+  background: var(--gray-200);
+}
+
+.editor-title:focus,
+.editor-body:focus {
+  outline: none;
+}
+
+/* ── Sidebar resize handle ── */
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+}
+
+/* ── Note card delete on hover ── */
+
+.note-card {
+  position: relative;
+}
+
+.note-card-delete {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--gray-300);
+  opacity: 0;
+  transition: opacity var(--transition), color var(--transition);
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+}
+
+.note-card:hover .note-card-delete {
+  opacity: 1;
+}
+
+.note-card-delete:hover {
+  color: #c0392b;
+  background: #fdecea;
+}
+
+/* ── Unsaved indicator ── */
+
+.unsaved-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--gray-400);
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.unsaved-dot.visible {
+  opacity: 1;
+}
+
+/* ── Mobile ── */
+
+@media (max-width: 640px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    max-height: 45vh;
+    border-right: none;
+    border-bottom: var(--border);
+  }
+
+  .editor {
+    height: 55vh;
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .editor-title {
+    font-size: 22px;
+  }
+
+  .bottom-row {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+}
+
+/* ── Scrollbar global ── */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-200) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--gray-200);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-300);
+}
+
+/* ── Editor meta bar ── */
+
+.editor-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 20px;
+  margin-bottom: var(--space-sm);
+}
