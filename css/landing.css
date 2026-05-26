@@ -1,0 +1,120 @@
+/* landing.css */
+
+body {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xl);
+  padding: var(--space-xl);
+  width: 100%;
+  max-width: 860px;
+}
+
+/* ── Hero ── */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  text-align: center;
+}
+
+.logo {
+  font-size: 56px;
+  line-height: 1;
+}
+
+.brand {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--black);
+}
+
+.tagline {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--gray-500);
+  letter-spacing: 0.2px;
+}
+
+/* ── Bottom Row ── */
+
+.bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-xl);
+}
+
+/* ── Carousel ── */
+
+.carousel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex: 1;
+}
+
+.carousel-btn {
+  font-size: 18px;
+  color: var(--gray-400);
+  padding: var(--space-xs) var(--space-sm);
+  transition: color var(--transition);
+  flex-shrink: 0;
+}
+
+.carousel-btn:hover {
+  color: var(--black);
+}
+
+.carousel-text {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--gray-600);
+  line-height: 1.6;
+  text-align: center;
+  flex: 1;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease;
+}
+
+.carousel-text.fade {
+  opacity: 0;
+}
+
+/* ── CTA Button ── */
+
+.cta-btn {
+  display: inline-block;
+  padding: 12px 28px;
+  border: 1.5px solid var(--black);
+  border-radius: var(--radius-md);
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--black);
+  background: var(--white);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cta-btn:hover {
+  background: var(--black);
+  color: var(--white);
+}
