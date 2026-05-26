@@ -77,7 +77,6 @@ function exportAllData() {
     folders: getAllFolders(),
   };
 }
-
 function importAllData(data) {
   if (data.notes) saveAllNotes(data.notes);
   if (data.folders) saveAllFolders(data.folders);
