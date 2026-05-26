@@ -1,14 +1,11 @@
-// landing.js — carousel logic
+// landing.js — nothing needed on this page// landing.js — info carousel
 
 const slides = [
-  "No accounts. No clouds. Just you and your words.",
-  "Everything you write stays with you, always.",
-  "A quiet place on the internet that's entirely yours.",
-  "Write freely. No one is watching.",
-  "Your thoughts, organized the way you think.",
-  "No distractions. No notifications. Just write.",
-  "Like a diary, but always in your pocket.",
-  "Export your mind, anytime you want.",
+  "Palm Tree is a private writing space that lives entirely in your browser. No accounts, no servers — just open and write.",
+  "Everything you write stays on your device. Nothing is ever sent anywhere. Your words are yours, always.",
+  "Organize notes into folders, browse by month, and search across everything instantly as you type.",
+  "Export all your notes as a JSON file anytime, and import them back whenever you need. Your data, your control.",
+  "No distractions, no notifications, no clutter. Just a clean space to think, write, and remember.",
 ];
 
 let current = 0;
@@ -23,7 +20,7 @@ function showSlide(index) {
   setTimeout(() => {
     textEl.textContent = slides[index];
     textEl.classList.remove('fade');
-  }, 300);
+  }, 350);
 }
 
 function next() {
@@ -37,7 +34,7 @@ function prev() {
 }
 
 function startAuto() {
-  autoTimer = setInterval(next, 3500);
+  autoTimer = setInterval(next, 4000);
 }
 
 function resetAuto() {
@@ -48,6 +45,5 @@ function resetAuto() {
 nextBtn.addEventListener('click', () => { next(); resetAuto(); });
 prevBtn.addEventListener('click', () => { prev(); resetAuto(); });
 
-// Init
 showSlide(current);
 startAuto();

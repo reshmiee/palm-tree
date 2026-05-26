@@ -5,30 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Palm Tree</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-  <meta name="description" content="Place all your thoughts under this tree." />
+  <meta name="description" content="Place all your memos under the tree." />
   <link rel="stylesheet" href="css/global.css" />
   <link rel="stylesheet" href="css/landing.css" />
 </head>
 <body>
-
   <main class="landing">
 
-    <!-- Hero -->
-    <section class="hero">
-      <div class="logo">🌴</div>
-      <h1 class="brand">Palm Tree</h1>
-      <p class="tagline">Place all your thoughts under this tree.</p>
-    </section>
-
-    <!-- Carousel + CTA -->
-    <section class="bottom-row">
-      <div class="carousel">
-        <button class="carousel-btn" id="prev-btn" aria-label="Previous">&#8592;</button>
-        <p class="carousel-text" id="carousel-text"></p>
-        <button class="carousel-btn" id="next-btn" aria-label="Next">&#8594;</button>
+    <!-- Branding top-left -->
+    <div class="brand">
+      <div class="brand-logo">🌴</div>
+      <div class="brand-text">
+        <span class="brand-name">Palm Tree</span>
+        <span class="brand-sub">Palm all your memos under the tree</span>
       </div>
-      <a href="app.html" class="cta-btn">Start Writing</a>
-    </section>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="bottom-row">
+
+      <div class="left-col">
+        <p class="carousel-text" id="carousel-text"></p>
+        <div class="carousel-nav">
+          <button class="carousel-btn" id="prev-btn" aria-label="Previous">&#8592;</button>
+          <button class="carousel-btn" id="next-btn" aria-label="Next">&#8594;</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="right-col">
+        <p class="cta-text">
+          That's enough blabbering,
+          start it off <a href="app.html" class="cta-now">now!</a>
+        </p>
+      </div>
+
+    </div>
 
   </main>
 

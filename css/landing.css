@@ -10,147 +10,174 @@ body {
 .landing {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: var(--space-2xl);
-  padding: var(--space-xl);
   width: 100%;
-  max-width: 860px;
+  max-width: 1060px;
+  padding: 0 80px;
+  gap: 64px;
+  margin-top: -80px;
 }
 
-/* ── Hero ── */
+/* ── Branding — stable in normal flow ── */
 
-.hero {
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transform: translateX(-120px);
+}
+
+.brand-logo {
+  font-size: 96px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.brand-text {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-md);
-  text-align: center;
+  gap: 8px;
 }
 
-.logo {
-  font-size: 56px;
+.brand-name {
+  font-size: 58px;
+  font-weight: 700;
+  color: var(--black);
+  letter-spacing: -2px;
   line-height: 1;
 }
 
-.brand {
-  font-size: 48px;
-  font-weight: 700;
-  letter-spacing: -1px;
-  color: var(--black);
-}
-
-.tagline {
-  font-size: 17px;
-  font-weight: 400;
+.brand-sub {
+  font-size: 20px;
+  font-weight: 500;
   color: var(--gray-500);
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
 }
 
-/* ── Bottom Row ── */
+/* ── Bottom row ── */
 
 .bottom-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: var(--space-xl);
 }
 
 /* ── Carousel ── */
 
-.carousel {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
+.left-col {
   flex: 1;
-}
-
-.carousel-btn {
-  font-size: 18px;
-  color: var(--gray-400);
-  padding: var(--space-xs) var(--space-sm);
-  transition: color var(--transition);
-  flex-shrink: 0;
-}
-
-.carousel-btn:hover {
-  color: var(--black);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-right: 56px;
+  position: relative;
+  min-height: 200px;
+  justify-content: center;
 }
 
 .carousel-text {
-  font-size: 15px;
-  font-weight: 400;
+  font-size: 27px;
+  font-weight: 500;
   color: var(--gray-600);
-  line-height: 1.6;
-  text-align: center;
-  flex: 1;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.3s ease;
+  line-height: 1.8;
+  height: 200px;
+  overflow: hidden;
+  transition: opacity 0.35s ease;
 }
 
 .carousel-text.fade {
   opacity: 0;
 }
 
-/* ── CTA Button ── */
-
-.cta-btn {
-  display: inline-block;
-  padding: 12px 28px;
-  border: 1.5px solid var(--black);
-  border-radius: var(--radius-md);
-  font-family: var(--font-main);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--black);
-  background: var(--white);
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-  white-space: nowrap;
-  flex-shrink: 0;
+.carousel-nav {
+  display: flex;
+  gap: 10px;
+  position: absolute;
+  bottom: -48px;
+  right: 32px;
 }
 
-.cta-btn:hover {
-  background: var(--black);
-  color: var(--white);
+.carousel-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  font-size: 17px;
+  color: var(--gray-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition);
+}
+
+.carousel-btn:hover {
+  border-color: transparent;
+  color: var(--black);
+  background: none;
+}
+
+/* ── Divider ── */
+
+.divider {
+  width: 1px;
+  height: 260px;
+  border-left: 1.5px dashed var(--gray-300);
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+/* ── CTA ── */
+
+.right-col {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 56px;
+}
+
+.cta-text {
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--black);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.cta-now {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--black);
+  font-weight: 700;
+  transition: opacity var(--transition);
+}
+
+.cta-now:hover {
+  opacity: 0.5;
 }
 
 /* ── Mobile ── */
 
-@media (max-width: 640px) {
-  .landing {
-    gap: var(--space-xl);
-    padding: var(--space-lg);
-  }
-
-  .logo {
-    font-size: 44px;
-  }
-
-  .brand {
-    font-size: 36px;
-  }
-
-  .tagline {
-    font-size: 15px;
-  }
+@media (max-width: 680px) {
+  .landing { padding: 0 28px; gap: 40px; }
+  .brand-logo { font-size: 56px; }
+  .brand-name { font-size: 34px; letter-spacing: -1px; }
 
   .bottom-row {
     flex-direction: column;
-    align-items: center;
-    gap: var(--space-lg);
+    align-items: flex-start;
+    gap: 32px;
   }
 
-  .carousel {
+  .left-col { padding-right: 0; }
+
+  .divider {
     width: 100%;
+    height: 0;
+    border-left: none;
+    border-top: 1.5px dashed var(--gray-300);
   }
 
-  .cta-btn {
-    width: 100%;
-    text-align: center;
-  }
+  .right-col { padding-left: 0; justify-content: flex-start; }
+  .cta-text { text-align: left; }
 }
