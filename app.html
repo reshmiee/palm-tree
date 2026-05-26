@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Palm Tree</title>
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+
+      <!-- Search + Menu -->
+      <div class="sidebar-top">
+        <div class="search-wrap">
+          <span class="search-icon">&#128269;</span>
+          <input type="text" class="search-input" placeholder="Search..." id="search-input" />
+        </div>
+        <div class="menu-wrap">
+          <button class="menu-btn" id="menu-btn" aria-label="Menu">&#8943;</button>
+          <div class="menu-dropdown hidden" id="menu-dropdown">
+            <button class="menu-item" id="export-btn">Export as JSON</button>
+            <button class="menu-item" id="import-btn">Import JSON</button>
+            <input type="file" id="import-file" accept=".json" class="hidden" />
+            <hr class="menu-divider" />
+            <button class="menu-item danger" id="clear-btn">Delete all notes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Three Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-recent" aria-label="Recent notes" title="Recent">
+          &#128196;
+        </button>
+        <button class="tab-btn" id="tab-folders" aria-label="Folders" title="Folders">
+          &#128193;
+        </button>
+        <button class="tab-btn" id="tab-months" aria-label="By month" title="By month">
+          &#128197;
+        </button>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="tab-panel active" id="panel-recent">
+        <!-- notes list renders here -->
+      </div>
+
+      <div class="tab-panel hidden" id="panel-folders">
+        <!-- folders render here -->
+      </div>
+
+      <div class="tab-panel hidden" id="panel-months">
+        <!-- months render here -->
+      </div>
+
+      <!-- New Note -->
+      <div class="sidebar-footer">
+        <button class="new-note-btn" id="new-note-btn">+ New Note</button>
+      </div>
+
+    </aside>
+
+    <!-- ── Editor ── -->
+    <main class="editor">
+      <textarea
+        class="editor-title"
+        id="editor-title"
+        placeholder="Title"
+        rows="1"
+        spellcheck="false"
+      ></textarea>
+      <textarea
+        class="editor-body"
+        id="editor-body"
+        placeholder="Start writing..."
+        spellcheck="true"
+      ></textarea>
+    </main>
+
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/folders.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+/* app.css */
+
+/* ── Layout ── */
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ── Sidebar ── */
+
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  height: 100vh;
+  border-right: var(--border);
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  overflow: hidden;
+}
+
+/* ── Sidebar Top ── */
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-bottom: var(--border);
+}
+
+.search-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+
+.search-icon {
+  font-size: 13px;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--black);
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: var(--gray-400);
+}
+
+/* ── Menu ── */
+
+.menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menu-btn {
+  font-size: 20px;
+  color: var(--gray-500);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), color var(--transition);
+}
+
+.menu-btn:hover {
+  background: var(--gray-100);
+  color: var(--black);
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--white);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  min-width: 180px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--black);
+  transition: background var(--transition);
+}
+
+.menu-item:hover {
+  background: var(--gray-100);
+}
+
+.menu-item.danger {
+  color: #c0392b;
+}
+
+.menu-divider {
+  border: none;
+  border-top: var(--border);
+  margin: 2px 0;
+}
+
+/* ── Tabs ── */
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border);
+}
+
+.tab-btn {
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--gray-400);
+  transition: background var(--transition), color var(--transition);
+}
+
+.tab-btn:hover {
+  background: var(--gray-100);
+  color: var(--black);
+}
+
+.tab-btn.active {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* ── Tab Panels ── */
+
+.tab-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-sm) 0;
+}
+
+.tab-panel::-webkit-scrollbar {
+  width: 3px;
+}
+
+.tab-panel::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 2px;
+}
+
+/* ── Note Cards ── */
+
+.note-card {
+  padding: 12px var(--space-md);
+  cursor: pointer;
+  border-bottom: var(--border);
+  transition: background var(--transition);
+}
+
+.note-card:hover {
+  background: var(--gray-100);
+}
+
+.note-card.active {
+  background: var(--gray-100);
+}
+
+.note-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+
+.note-card-date {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--gray-400);
+}
+
+/* ── Empty State ── */
+
+.empty-state {
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+  color: var(--gray-400);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.8;
+}
+
+/* ── Sidebar Footer ── */
+
+.sidebar-footer {
+  padding: var(--space-md);
+  border-top: var(--border);
+}
+
+.new-note-btn {
+  width: 100%;
+  padding: 9px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+
+.new-note-btn:hover {
+  border-color: var(--black);
+  color: var(--black);
+  background: var(--gray-100);
+}
+
+/* ── Editor ── */
+
+.editor {
+  flex: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2xl) var(--space-2xl);
+  overflow-y: auto;
+}
+
+.editor-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--black);
+  resize: none;
+  overflow: hidden;
+  line-height: 1.3;
+  margin-bottom: var(--space-lg);
+  width: 100%;
+}
+
+.editor-title::placeholder {
+  color: var(--gray-300);
+}
+
+.editor-body {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--black);
+  line-height: 1.8;
+  resize: none;
+  width: 100%;
+  min-height: calc(100vh - 200px);
+}
+
+.editor-body::placeholder {
+  color: var(--gray-300);
+}
+
+/* ── Utility ── */
+
+.hidden {
+  display: none !important;
+}
