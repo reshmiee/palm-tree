@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Palm Tree</title>
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <meta name="description" content="Place all your memos under the tree." />
   <link rel="stylesheet" href="css/global.css" />
   <link rel="stylesheet" href="css/landing.css" />
@@ -14,7 +14,12 @@
 
     <!-- Branding top-left -->
     <div class="brand">
-      <div class="brand-logo">🌴</div>
+      <div class="brand-logo" aria-hidden="true">
+        <svg class="brand-icon" viewBox="0 0 96 96">
+          <path d="M42 38c-8-10-20-18-36-20 10-9 29 1 39 13-4-13-13-22-28-28 17-5 31 7 35 24 7-15 20-23 38-19-7 2-22 13-29 27 13-10 25-11 35-4-11 1-26 8-38 20 8-1 17 2 25 8-12 0-23-3-32-7-2 4-3 9-4 15l-3 22H31l5-24c2-8 4-15 6-21-10 0-21 4-31 11 7-11 18-17 31-17Z"></path>
+          <path d="M24 89h48v6H24z"></path>
+        </svg>
+      </div>
       <div class="brand-text">
         <span class="brand-name">Palm Tree</span>
         <span class="brand-sub">Palm all your memos under the tree</span>
@@ -27,8 +32,12 @@
       <div class="left-col">
         <p class="carousel-text" id="carousel-text"></p>
         <div class="carousel-nav">
-          <button class="carousel-btn" id="prev-btn" aria-label="Previous">&#8592;</button>
-          <button class="carousel-btn" id="next-btn" aria-label="Next">&#8594;</button>
+          <button class="carousel-btn" id="prev-btn" aria-label="Previous">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+          </button>
+          <button class="carousel-btn" id="next-btn" aria-label="Next">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
         </div>
       </div>
 

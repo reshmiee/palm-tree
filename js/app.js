@@ -1,5 +1,56 @@
 // app.js — initialize app, wire up all events
 
+// ── Navigation history stack ──────────────────────────
+// Each entry: { type: 'note', id } | { type: 'folder' }
+const navHistory = [];
+let navCursor = -1; // points to current position in navHistory
+let navLock = false; // prevent pushNav during back/forward navigation
+
+function pushNav(entry) {
+  if (navLock) return;
+  // Don't push duplicate of current
+  const current = navHistory[navCursor];
+  if (current && current.type === entry.type && current.id === entry.id) return;
+  // Discard any forward history
+  navHistory.splice(navCursor + 1);
+  navHistory.push(entry);
+  navCursor = navHistory.length - 1;
+  updateNavBtns();
+}
+
+function updateNavBtns() {
+  const backBtn = document.getElementById('back-btn');
+  const fwdBtn = document.getElementById('forward-btn');
+  if (backBtn) backBtn.disabled = navCursor <= 0;
+  if (fwdBtn) fwdBtn.disabled = navCursor >= navHistory.length - 1;
+}
+
+function navigateTo(entry) {
+  navLock = true;
+  if (entry.type === 'folder') {
+    const sidePanel = document.getElementById('folder-side-panel');
+    if (sidePanel) sidePanel.remove();
+    openFolderView();
+  } else if (entry.type === 'note') {
+    closeFolderView();
+    openNote(entry.id);
+  }
+  navLock = false;
+  updateNavBtns();
+}
+
+function goBack() {
+  if (navCursor <= 0) return;
+  navCursor--;
+  navigateTo(navHistory[navCursor]);
+}
+
+function goForward() {
+  if (navCursor >= navHistory.length - 1) return;
+  navCursor++;
+  navigateTo(navHistory[navCursor]);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // ── Editor events ──────────────────────────────────
@@ -19,9 +70,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── New note button ────────────────────────────────
 
   document.getElementById('new-note-btn').addEventListener('click', () => {
+    // Close folder side panel if open
+    const sidePanel = document.getElementById('folder-side-panel');
+    if (sidePanel) sidePanel.remove();
+
+    // Close folder view overlay if open
+    if (folderViewOpen) closeFolderView();
+
+    const hasTitle = titleEl.value.trim().length > 0;
+    const hasBody = bodyEl.value.trim().length > 0;
+
+    if (!hasTitle && !hasBody) {
+      showToast('Oops, write something first.', true);
+      titleEl.focus();
+      return;
+    }
+
     persistCurrentNote();
     const note = createNewNote();
-    openNote(note.id);
+    activeNoteId = note.id;
+    clearEditor();
+    highlightActiveCard(note.id);
     renderRecentNotes();
     bodyEl.focus();
   });
@@ -30,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const tabs = [
     { btn: 'tab-recent',  panel: 'panel-recent'  },
-    { btn: 'tab-folders', panel: 'panel-folders' },
     { btn: 'tab-months',  panel: 'panel-months'  },
   ];
 
@@ -46,10 +114,21 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById(panel).classList.add('active');
 
       if (panel === 'panel-recent') renderRecentNotes();
-      if (panel === 'panel-folders') renderFolders();
       if (panel === 'panel-months') renderMonths();
     });
   });
+
+  // ── Folder nav button ──────────────────────────────
+
+  document.getElementById('folder-nav-btn').addEventListener('click', () => {
+    const wasOpen = folderViewOpen;
+    toggleFolderView();
+    if (!wasOpen) pushNav({ type: 'folder' });
+  });
+
+  // ── Back / Forward buttons ──────────────────────────
+  document.getElementById('back-btn').addEventListener('click', () => goBack());
+  document.getElementById('forward-btn').addEventListener('click', () => goForward());
 
   // ── Menu dropdown ──────────────────────────────────
 
@@ -68,15 +147,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Export ─────────────────────────────────────────
 
   document.getElementById('export-btn').addEventListener('click', () => {
-    exportJSON();
     menuDropdown.classList.add('hidden');
+    showPermissionModal('Export all notes and folders as JSON?', () => {
+      exportJSON();
+    });
   });
 
   // ── Import ─────────────────────────────────────────
 
   document.getElementById('import-btn').addEventListener('click', () => {
-    document.getElementById('import-file').click();
     menuDropdown.classList.add('hidden');
+    showPermissionModal('Import JSON? This will merge with your existing notes.', () => {
+      document.getElementById('import-file').click();
+    });
   });
 
   document.getElementById('import-file').addEventListener('change', (e) => {
@@ -92,21 +175,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Clear all ──────────────────────────────────────
 
   document.getElementById('clear-btn').addEventListener('click', () => {
-    if (confirm('Delete all notes and folders? This cannot be undone.')) {
+    menuDropdown.classList.add('hidden');
+    showPermissionModal('Delete all notes and folders? This cannot be undone.', () => {
       clearAllData();
       clearEditor();
       activeNoteId = null;
       renderRecentNotes();
       loadOrCreateBlankNote();
-    }
-    menuDropdown.classList.add('hidden');
+    });
   });
 
   // ── Init ───────────────────────────────────────────
 
   initSearch();
+  initMultiSelect();
   renderRecentNotes();
   loadOrCreateBlankNote();
   bodyEl.focus();
+
+  // Seed nav with initial note
+  setTimeout(() => {
+    if (activeNoteId) pushNav({ type: 'note', id: activeNoteId });
+    updateNavBtns();
+  }, 0);
 
 });

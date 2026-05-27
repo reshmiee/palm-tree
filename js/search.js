@@ -1,45 +1,58 @@
-// search.js — live search across all notes
+// search.js — full-screen search overlay
 
 let searchQuery = '';
 
 // ── Init ─────────────────────────────────────────────
 
 function initSearch() {
-  const input = document.getElementById('search-input');
+  const trigger   = document.getElementById('search-trigger');
+  const overlay   = document.getElementById('search-overlay');
+  const input     = document.getElementById('search-input');
+  const closeBtn  = document.getElementById('search-close-btn');
+
+  function openOverlay() {
+    overlay.classList.remove('hidden');
+    input.focus();
+  }
+
+  function closeOverlay() {
+    overlay.classList.add('hidden');
+    input.value = '';
+    searchQuery = '';
+    renderSearchResults([], '');
+  }
+
+  trigger.addEventListener('click', openOverlay);
+  closeBtn.addEventListener('click', closeOverlay);
 
   input.addEventListener('input', () => {
     searchQuery = input.value.trim().toLowerCase();
     if (searchQuery === '') {
-      clearSearch();
+      renderSearchResults([], '');
     } else {
       runSearch(searchQuery);
     }
   });
 
-  // clear search on escape
   input.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      input.value = '';
-      searchQuery = '';
-      clearSearch();
-      input.blur();
-    }
+    if (e.key === 'Escape') closeOverlay();
+  });
+
+  // click outside the bar to close
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeOverlay();
   });
 }
 
 // ── Run search ───────────────────────────────────────
 
 function runSearch(query) {
-  const allNotes = getAllNotes();
-
-  const results = allNotes.filter(note => {
+  const results = getAllNotes().filter(note => {
     const inTitle = (note.title || '').toLowerCase().includes(query);
     const inBody  = (note.body  || '').toLowerCase().includes(query);
     return inTitle || inBody;
   });
-
   renderSearchResults(results, query);
-  showSearchState();
 }
 
 // ── Render results ───────────────────────────────────
@@ -47,9 +60,14 @@ function runSearch(query) {
 function renderSearchResults(notes, query) {
   const panel = document.getElementById('panel-search');
 
+  if (!query) {
+    panel.innerHTML = `<div class="empty-state" style="margin-top:40px;">Start typing to search your notes.</div>`;
+    return;
+  }
+
   if (notes.length === 0) {
     panel.innerHTML = `
-      <div class="empty-state">
+      <div class="empty-state" style="margin-top:40px;">
         No notes found for<br>
         <span style="color: var(--black); font-weight: 600;">"${escapeHtml(query)}"</span>
       </div>`;
@@ -70,38 +88,17 @@ function renderSearchResults(notes, query) {
   panel.querySelectorAll('.note-card').forEach(card => {
     card.addEventListener('click', () => {
       openNote(card.dataset.id);
-      highlightActiveCard(card.dataset.id);
+      document.getElementById('search-overlay').classList.add('hidden');
+      document.getElementById('search-input').value = '';
+      searchQuery = '';
     });
   });
 }
 
-// ── Show/hide search state ────────────────────────────
-
-function showSearchState() {
-  // hide all tab panels, show search panel
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-  document.getElementById('panel-search').classList.remove('hidden');
-  // dim tab buttons
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-}
-
-function clearSearch() {
-  // restore active tab panel
-  document.getElementById('panel-search').classList.add('hidden');
-  const activeTab = document.querySelector('.tab-btn.active');
-  if (activeTab) {
-    const panelId = 'panel-' + activeTab.id.replace('tab-', '');
-    const panel = document.getElementById(panelId);
-    if (panel) panel.classList.remove('hidden');
-  } else {
-    // fallback to recent
-    document.getElementById('tab-recent').classList.add('active');
-    document.getElementById('panel-recent').classList.remove('hidden');
-  }
-  renderRecentNotes();
-}
-
 // ── Helpers ──────────────────────────────────────────
+
+function showSearchState() {}  // no-op: overlay handles its own visibility
+function clearSearch() {}      // no-op: kept for compatibility
 
 function getSnippet(body, query) {
   if (!body) return '';
