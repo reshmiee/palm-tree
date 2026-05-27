@@ -46,10 +46,15 @@ function initSearch() {
 
 // ── Run search ───────────────────────────────────────
 
+function stripHtml(html) {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 function runSearch(query) {
   const results = getAllNotes().filter(note => {
     const inTitle = (note.title || '').toLowerCase().includes(query);
-    const inBody  = (note.body  || '').toLowerCase().includes(query);
+    const inBody  = stripHtml(note.body || '').toLowerCase().includes(query);
     return inTitle || inBody;
   });
   renderSearchResults(results, query);
@@ -102,14 +107,15 @@ function clearSearch() {}      // no-op: kept for compatibility
 
 function getSnippet(body, query) {
   if (!body) return '';
-  const lower = body.toLowerCase();
+  const plain = stripHtml(body);
+  const lower = plain.toLowerCase();
   const idx = lower.indexOf(query);
   if (idx === -1) return '';
   const start = Math.max(0, idx - 30);
-  const end = Math.min(body.length, idx + query.length + 60);
-  let snippet = body.slice(start, end).replace(/\n/g, ' ');
+  const end = Math.min(plain.length, idx + query.length + 60);
+  let snippet = plain.slice(start, end).replace(/\n/g, ' ');
   if (start > 0) snippet = '...' + snippet;
-  if (end < body.length) snippet = snippet + '...';
+  if (end < plain.length) snippet = snippet + '...';
   return snippet;
 }
 

@@ -1490,3 +1490,140 @@ mark {
 .note-card.selectable:hover .note-select-check {
   border-color: var(--black);
 }
+/* ── Rich Text Editor Body (contenteditable) ── */
+
+.editor-body[contenteditable] {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--black);
+  line-height: 1.9;
+  width: 100%;
+  min-height: calc(100vh - 260px);
+  outline: none;
+  cursor: text;
+}
+
+.editor-body[contenteditable]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--gray-300);
+  pointer-events: none;
+}
+
+/* Rich text content styles */
+.editor-body b,
+.editor-body strong { font-weight: 700; }
+
+.editor-body i,
+.editor-body em { font-style: italic; }
+
+.editor-body u { text-decoration: underline; }
+
+.editor-body s,
+.editor-body strike { text-decoration: line-through; }
+
+/* ── Two-layer Formatting Toolbar ── */
+
+/* Bottom bar pill */
+.format-toolbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--black);
+  border-radius: 18px;
+  padding: 6px 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12);
+  z-index: 100;
+}
+
+/* Tray that slides up above the bottom bar */
+.fmt-tray {
+  position: fixed;
+  bottom: 74px;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--black);
+  border-radius: 14px;
+  padding: 6px 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.fmt-tray.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Base button */
+.fmt-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.7);
+  transition: background var(--transition), color var(--transition);
+  flex-shrink: 0;
+}
+
+.fmt-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+}
+
+.fmt-btn.active {
+  background: rgba(255,255,255,0.18);
+  color: #ffffff;
+}
+
+.fmt-btn .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.fmt-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* Heading label buttons in tray */
+.fmt-heading-btn {
+  width: 38px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.3px;
+}
+
+.fmt-heading-btn.active {
+  background: rgba(255,255,255,0.18);
+  color: #ffffff;
+}
+
+/* List styles in editor */
+.editor-body ul {
+  list-style: disc;
+  padding-left: 1.5em;
+  margin: 6px 0;
+}
+
+.editor-body ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+  margin: 6px 0;
+}

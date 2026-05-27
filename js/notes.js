@@ -177,7 +177,7 @@ function openNote(id) {
   const bodyEl = document.getElementById('editor-body');
 
   titleEl.value = note.title === 'Untitled' ? '' : note.title;
-  bodyEl.value = note.body;
+  bodyEl.innerHTML = note.body || '';
 
   autoResizeTitle();
   highlightActiveCard(id);
@@ -201,10 +201,11 @@ function persistCurrentNote() {
   const bodyEl = document.getElementById('editor-body');
 
   const titleVal = titleEl.value.trim();
-  const bodyVal = bodyEl.value.trim();
+  const bodyVal = bodyEl.innerHTML.trim();
 
   // If both empty, clean up
-  if (!titleVal && !bodyVal) {
+  const bodyText = bodyEl.innerText.trim();
+  if (!titleVal && !bodyText) {
     const existing = getNoteById(activeNoteId);
     if (!existing) {
       renderRecentNotes();
@@ -233,7 +234,7 @@ function persistCurrentNote() {
     };
     newNote.id = activeNoteId;
     newNote.title = titleVal;
-    newNote.body = bodyEl.value;
+    newNote.body = bodyEl.innerHTML;
     newNote.updatedAt = new Date().toISOString();
     if (!newNote.title && newNote.body.trim()) {
       newNote.title = newNote.body.trim().split('\n')[0].slice(0, 60);
@@ -249,11 +250,11 @@ function persistCurrentNote() {
   }
 
   note.title = titleVal;
-  note.body = bodyEl.value;
+  note.body = bodyEl.innerHTML;
 
   // auto title from first line of body if title is empty or still the placeholder
-  if ((!note.title || note.title === 'Untitled') && note.body.trim()) {
-    const firstLine = note.body.trim().split('\n')[0];
+  if ((!note.title || note.title === 'Untitled') && bodyEl.innerText.trim()) {
+    const firstLine = bodyEl.innerText.trim().split('\n')[0];
     note.title = firstLine.slice(0, 60);
     // also update the title textarea so user sees it
     const titleEl2 = document.getElementById('editor-title');
@@ -287,7 +288,7 @@ function deleteActiveNote() {
 
 function clearEditor() {
   document.getElementById('editor-title').value = '';
-  document.getElementById('editor-body').value = '';
+  document.getElementById('editor-body').innerHTML = '';
 }
 
 function autoResizeTitle() {

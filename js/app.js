@@ -67,6 +67,94 @@ document.addEventListener('DOMContentLoaded', () => {
     scheduleAutoSave();
   });
 
+    // ── Formatting toolbar (two-layer) ──────────────────────
+
+  let trayOpen = false;
+
+  function initFormatToolbar() {
+    const toolbar = document.getElementById('format-toolbar');
+    const tray = document.getElementById('fmt-tray');
+    const aBtn = document.getElementById('fmt-a-btn');
+    if (!toolbar || !tray || !aBtn) return;
+
+    // A button toggles the tray
+    aBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      trayOpen = !trayOpen;
+      tray.classList.toggle('open', trayOpen);
+      aBtn.setAttribute('aria-expanded', trayOpen ? 'true' : 'false');
+    });
+
+    // Bottom bar buttons (bullet / numbered list)
+    toolbar.addEventListener('mousedown', (e) => {
+      const btn = e.target.closest('.fmt-btn');
+      if (!btn || btn === aBtn) return;
+      e.preventDefault();
+      const cmd = btn.dataset.cmd;
+      if (cmd) {
+        document.execCommand(cmd, false, null);
+        bodyEl.focus();
+        updateToolbarState();
+      }
+    });
+
+    // Tray buttons (B/I/U/S + headings)
+    tray.addEventListener('mousedown', (e) => {
+      const btn = e.target.closest('.fmt-btn');
+      if (!btn) return;
+      e.preventDefault();
+      const cmd = btn.dataset.cmd;
+      const heading = btn.dataset.heading;
+      if (cmd) {
+        document.execCommand(cmd, false, null);
+        bodyEl.focus();
+        updateToolbarState();
+      } else if (heading) {
+        if (heading === 'p') {
+          document.execCommand('formatBlock', false, 'p');
+        } else {
+          const tag = document.queryCommandValue('formatBlock').toLowerCase();
+          if (tag === heading) {
+            document.execCommand('formatBlock', false, 'p');
+          } else {
+            document.execCommand('formatBlock', false, heading);
+          }
+        }
+        bodyEl.focus();
+        updateToolbarState();
+      }
+    });
+    document.addEventListener('selectionchange', updateToolbarState);
+  }
+
+  function updateToolbarState() {
+    // Inline format buttons in tray
+    document.querySelectorAll('.fmt-btn[data-cmd]').forEach(btn => {
+      const cmd = btn.dataset.cmd;
+      if (cmd === 'insertUnorderedList' || cmd === 'insertOrderedList') return;
+      try {
+        btn.classList.toggle('active', document.queryCommandState(cmd));
+      } catch (e) {}
+    });
+
+    // Heading buttons in tray
+    const currentBlock = document.queryCommandValue('formatBlock').toLowerCase();
+    document.querySelectorAll('.fmt-btn[data-heading]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.heading === currentBlock);
+    });
+  }
+
+  initFormatToolbar();
+
+  // ── Keyboard shortcuts for formatting ──────────────
+  bodyEl.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'b') { e.preventDefault(); document.execCommand('bold', false, null); updateToolbarState(); }
+      if (e.key === 'i') { e.preventDefault(); document.execCommand('italic', false, null); updateToolbarState(); }
+      if (e.key === 'u') { e.preventDefault(); document.execCommand('underline', false, null); updateToolbarState(); }
+    }
+  });
+
   // ── New note button ────────────────────────────────
 
   document.getElementById('new-note-btn').addEventListener('click', () => {
