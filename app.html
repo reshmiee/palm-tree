@@ -159,6 +159,22 @@
         <button class="fmt-btn fmt-heading-btn" data-heading="h2" title="Heading 2" aria-label="Heading 2">H2</button>
         <button class="fmt-btn fmt-heading-btn" data-heading="h3" title="Heading 3" aria-label="Heading 3">H3</button>
         <button class="fmt-btn fmt-heading-btn" data-heading="p" title="Normal text" aria-label="Normal text" style="font-size:18px;">¶</button>
+        <div class="fmt-divider"></div>
+        <button class="fmt-btn" id="fmt-link-btn" title="Insert link" aria-label="Insert link">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+      </div>
+
+      <!-- Link modal -->
+      <div class="link-modal-overlay hidden" id="link-modal-overlay">
+        <div class="link-modal">
+          <div class="link-modal-label">Insert link</div>
+          <input class="link-modal-input" id="link-modal-url" type="url" placeholder="https://..." />
+          <div class="link-modal-actions">
+            <button class="link-modal-cancel" id="link-modal-cancel">Cancel</button>
+            <button class="link-modal-confirm" id="link-modal-confirm">Insert</button>
+          </div>
+        </div>
       </div>
 
       <!-- Layer 2: Always-visible bottom bar -->
@@ -171,10 +187,22 @@
         <button class="fmt-btn" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><text x="1" y="8" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">1</text><text x="1" y="13.5" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">2</text><text x="1" y="19" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">3</text></svg>
         </button>
+        <!-- Indent -->
+        <button class="fmt-btn" data-cmd="indent" title="Indent" aria-label="Indent">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/><polyline points="9 8 13 12 9 16"/><line x1="3" y1="12" x2="13" y2="12"/></svg>
+        </button>
+        <!-- Outdent -->
+        <button class="fmt-btn" data-cmd="outdent" title="Outdent" aria-label="Outdent">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/><polyline points="7 8 3 12 7 16"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+        </button>
 
         <div class="fmt-divider"></div>
 
-        <!-- Text size slider -->
+        <!-- Image insert -->
+        <button class="fmt-btn" id="fmt-img-btn" title="Insert image" aria-label="Insert image">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <input type="file" id="fmt-img-input" accept="image/*" style="display:none;" />
 
         <!-- A button — opens/closes the formatting tray -->
         <button class="fmt-btn fmt-a-btn" id="fmt-a-btn" title="Formatting" aria-label="Formatting options" aria-expanded="false">
