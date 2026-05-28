@@ -817,3 +817,210 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 0);
 
 });
+
+// ── View Toggle (scroll vs pages) ──────────────────────────────────────────
+
+(function () {
+  const scrollBtn   = document.getElementById('view-scroll-btn');
+  const pagesBtn    = document.getElementById('view-pages-btn');
+  const editor      = document.querySelector('.editor');
+  const pagesContainer = document.getElementById('pages-container');
+  const sideBtns    = document.getElementById('page-side-btns');
+  const addPageBtn  = document.getElementById('add-page-btn');
+  const delPageBtn  = document.getElementById('del-page-btn');
+
+  let pages = [];
+  let activePage = null;
+
+  function trackActivePage() {
+    pages.forEach(p => {
+      p.addEventListener('focus', () => { activePage = p; }, true);
+      p.addEventListener('click', () => { activePage = p; });
+    });
+  }
+
+  function createPage(content = '') {
+    const div = document.createElement('div');
+    div.className = 'page-sheet';
+    div.setAttribute('contenteditable', 'true');
+    div.spellcheck = true;
+    div.style.cursor = 'text';
+    // Apply saved page dimensions
+    const pc = document.getElementById('pages-container');
+    if (pc && pc.dataset.pageW) div.style.width = pc.dataset.pageW + 'mm';
+    if (pc && pc.dataset.pageH) div.style.minHeight = pc.dataset.pageH + 'mm';
+    const body = document.createElement('div');
+    body.className = 'page-content';
+    if (pc && pc.dataset.pageM) body.style.padding = pc.dataset.pageM + 'mm';
+    body.innerHTML = content;
+    div.appendChild(body);
+    const num = document.createElement('span');
+    num.className = 'page-number';
+    div.appendChild(num);
+    pagesContainer.appendChild(div);
+    pages.push(div);
+    activePage = div;
+    trackActivePage();
+    updatePageNumbers();
+    setTimeout(() => { body.focus(); activePage = div; }, 50);
+    return div;
+  }
+
+  function updatePageNumbers() {
+    pages.forEach((p, i) => {
+      const num = p.querySelector('.page-number');
+      if (num) num.textContent = i + 1;
+    });
+  }
+
+  function getActivePage() {
+    return activePage || pages[pages.length - 1];
+  }
+
+  function deletePage() {
+    if (pages.length <= 1) return;
+    const target = getActivePage();
+    const idx = pages.indexOf(target);
+    pages.splice(idx, 1);
+    target.remove();
+    updatePageNumbers();
+    // Focus the page before, or first if deleted first
+    const focusIdx = Math.max(0, idx - 1);
+    const prevBody = pages[focusIdx].querySelector('.page-content');
+    if (prevBody) prevBody.focus();
+  }
+
+  function initPages() {
+    pagesContainer.innerHTML = '';
+    pages = [];
+    const titleEl = document.getElementById('editor-title');
+    const bodyEl  = document.getElementById('editor-body');
+    const titleHTML = titleEl && titleEl.value.trim() ? `<p style="font-size:11pt;font-weight:400;margin:0 0 12px 0;font-family:Arial,sans-serif">${titleEl.value.trim()}</p>` : '';
+    const bodyHTML  = bodyEl ? bodyEl.innerHTML : '';
+    createPage(titleHTML + bodyHTML);
+  }
+
+  window.refreshPageView = function() {
+    const editor = document.querySelector('.editor');
+    if (editor && editor.classList.contains('page-view')) {
+      initPages();
+    }
+  };
+
+  function setView(mode) {
+    if (mode === 'pages') {
+      editor.classList.add('page-view');
+      pagesBtn.classList.add('active');
+      scrollBtn.classList.remove('active');
+      pagesContainer.classList.remove('hidden');
+      sideBtns.classList.remove('hidden');
+      if (pages.length === 0) initPages();
+    } else {
+      editor.classList.remove('page-view');
+      scrollBtn.classList.add('active');
+      pagesBtn.classList.remove('active');
+      pagesContainer.classList.add('hidden');
+      sideBtns.classList.add('hidden');
+    }
+    localStorage.setItem('pt-view-mode', mode);
+  }
+
+  addPageBtn.addEventListener('click', () => {
+    const active = getActivePage();
+    const idx = pages.indexOf(active);
+    const div = document.createElement('div');
+    div.className = 'page-sheet';
+    div.setAttribute('contenteditable', 'true');
+    div.style.cursor = 'text';
+    const body = document.createElement('div');
+    body.className = 'page-content';
+    div.appendChild(body);
+    const num = document.createElement('span');
+    num.className = 'page-number';
+    div.appendChild(num);
+    // Insert after active page
+    const nextSibling = pages[idx + 1] || null;
+    pagesContainer.insertBefore(div, nextSibling);
+    pages.splice(idx + 1, 0, div);
+    activePage = div;
+    trackActivePage();
+    updatePageNumbers();
+    setTimeout(() => { body.focus(); activePage = div; }, 50);
+  });
+  delPageBtn.addEventListener('click', () => deletePage());
+  scrollBtn.addEventListener('click', () => setView('scroll'));
+  pagesBtn.addEventListener('click',  () => setView('pages'));
+
+  const saved = localStorage.getItem('pt-view-mode');
+  if (saved === 'pages') setView('pages');
+})();
+
+// ── Page Settings ───────────────────────────────────────────────────────────
+
+(function () {
+  const toggle  = document.getElementById('page-settings-toggle');
+  const panel   = document.getElementById('page-settings-panel');
+  const preset  = document.getElementById('ps-preset');
+  const wInput  = document.getElementById('ps-width');
+  const hInput  = document.getElementById('ps-height');
+  const mInput  = document.getElementById('ps-margin');
+  const apply   = document.getElementById('ps-apply');
+
+  if (!toggle) return;
+
+  const presets = {
+    a4:     { w: 210, h: 297 },
+    letter: { w: 216, h: 279 },
+    legal:  { w: 216, h: 356 },
+  };
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    panel.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!panel.contains(e.target) && e.target !== toggle) {
+      panel.classList.add('hidden');
+    }
+  });
+
+  preset.addEventListener('change', () => {
+    const p = presets[preset.value];
+    if (p) {
+      wInput.value = p.w;
+      hInput.value = p.h;
+    }
+  });
+
+  wInput.addEventListener('input', () => preset.value = 'custom');
+  hInput.addEventListener('input', () => preset.value = 'custom');
+
+  apply.addEventListener('click', () => {
+    const w = parseInt(wInput.value) || 210;
+    const h = parseInt(hInput.value) || 297;
+    const m = parseInt(mInput.value) || 20;
+
+    document.querySelectorAll('.page-sheet').forEach(p => {
+      p.style.width    = w + 'mm';
+      p.style.minHeight = h + 'mm';
+    });
+    document.querySelectorAll('.page-content').forEach(p => {
+      p.style.padding = m + 'mm';
+    });
+    document.querySelectorAll('.page-number').forEach(p => {
+      p.style.bottom = (m / 2) + 'mm';
+      p.style.right  = m + 'mm';
+    });
+
+    // Also apply to future pages via CSS vars stored on container
+    const container = document.getElementById('pages-container');
+    if (container) {
+      container.dataset.pageW = w;
+      container.dataset.pageH = h;
+      container.dataset.pageM = m;
+    }
+
+    panel.classList.add('hidden');
+  });
+})();

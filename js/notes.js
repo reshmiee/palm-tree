@@ -182,6 +182,9 @@ function openNote(id) {
 
   autoResizeTitle();
   highlightActiveCard(id);
+
+  // Refresh page view if active
+  if (typeof refreshPageView === 'function') refreshPageView();
 }
 
 // ── Auto save ────────────────────────────────────────

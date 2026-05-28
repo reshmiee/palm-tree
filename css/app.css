@@ -106,6 +106,7 @@ html, body {
   justify-content: center;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
+  margin-left: auto;
   transition: background var(--transition), color var(--transition);
 }
 
@@ -1699,7 +1700,7 @@ mark {
 
 /* CodeMirror overrides */
 .code-block-cm .CodeMirror {
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'Consolas', 'Roboto Mono', monospace;
   font-size: 18px;
   line-height: 1.5;
   letter-spacing: 0.03em;
@@ -1726,7 +1727,7 @@ mark {
 
 .code-block-cm .CodeMirror-linenumber {
   color: #aaa;
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'Consolas', 'Roboto Mono', monospace;
   font-size: 18px;
   line-height: 1.5;
   letter-spacing: 0;
@@ -1902,4 +1903,249 @@ mark {
   color: #1a6ef5;
   text-decoration: underline;
   cursor: pointer;
+}
+/* ── View Toggle ── */
+
+.view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 0;
+  background: var(--gray-100, #f3f3f3);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.view-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 9px;
+  border-radius: 6px;
+  color: var(--gray-400, #aaa);
+  display: flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.view-toggle-btn .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.view-toggle-btn:hover {
+  color: var(--black);
+}
+
+.view-toggle-btn.active {
+  background: var(--white);
+  color: var(--black);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* ── Page View ── */
+
+.editor.page-view {
+  background: #c7c7c7;
+  padding: 0;
+  align-items: center;
+  overflow-y: auto;
+}
+
+/* ── Pages container ── */
+
+.pages-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 20px 0 40px 0;
+}
+
+.page-sheet {
+  background: white;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  border-radius: 1px;
+  box-sizing: border-box;
+  outline: none;
+  font-size: 11pt;
+  line-height: 1.15;
+  color: #000;
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+.page-sheet:focus {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+
+.page-number {
+  position: absolute;
+  bottom: 8mm;
+  right: 25.4mm;
+  font-size: 9pt;
+  color: #999;
+  font-family: Arial, sans-serif;
+}
+
+/* ── Page side buttons ── */
+
+.page-side-btns {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 50;
+}
+
+.page-side-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--black);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  font-family: system-ui, sans-serif;
+  padding-bottom: 1px;
+}
+
+.page-side-btn:hover {
+  opacity: 0.75;
+}
+
+/* Hide normal editor elements in page view */
+.editor.page-view > .editor-meta,
+.editor.page-view > .editor-title,
+.editor.page-view > .editor-body {
+  display: none;
+}
+
+.editor.page-view > .pages-container {
+  display: flex;
+}
+
+.editor.page-view > .page-side-btns {
+  display: flex;
+}
+
+.page-content {
+  outline: none;
+  min-height: 257mm;
+  width: 100%;
+  cursor: text;
+  font-size: 11pt;
+  line-height: 1.15;
+  font-family: Arial, sans-serif;
+  color: #000;
+  padding: 25.4mm 25.4mm 25.4mm 25.4mm;
+  box-sizing: border-box;
+}
+
+/* ── Page Settings Panel ── */
+
+.page-settings {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.page-settings-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--gray-200);
+  color: var(--gray-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.page-settings-toggle:hover {
+  background: var(--gray-300);
+}
+
+.page-settings-panel {
+  position: absolute;
+  right: 44px;
+  top: 0;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 14px;
+  width: 160px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 200;
+}
+
+.ps-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+.ps-label:first-child {
+  margin-top: 0;
+}
+
+.ps-select,
+.ps-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--font-main);
+  color: var(--black);
+  background: var(--gray-100);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.ps-select:focus,
+.ps-input:focus {
+  border-color: var(--gray-400);
+}
+
+.ps-apply {
+  margin-top: 6px;
+  padding: 7px;
+  background: var(--black);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--font-main);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ps-apply:hover {
+  opacity: 0.75;
 }

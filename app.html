@@ -86,6 +86,16 @@
         <button class="folder-nav-btn" id="folder-nav-btn" aria-label="Folders" title="Folders">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>
         </button>
+        <!-- View toggle -->
+        <div class="view-toggle" id="view-toggle">
+          <button class="view-toggle-btn active" id="view-scroll-btn" title="Continuous scroll" aria-label="Continuous scroll">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <button class="view-toggle-btn" id="view-pages-btn" title="Page view" aria-label="Page view">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg>
+          </button>
+        </div>
+
         <div class="menu-wrap">
           <button class="menu-btn" id="menu-btn" aria-label="Menu">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
@@ -165,6 +175,43 @@
         spellcheck="true"
         data-placeholder="Start writing..."
       ></div>
+
+      <!-- ── Pages container (page view only) ── -->
+      <div class="pages-container hidden" id="pages-container"></div>
+
+      <!-- ── Page side buttons ── -->
+      <div class="page-side-btns hidden" id="page-side-btns">
+
+        <!-- Page settings panel -->
+        <div class="page-settings" id="page-settings">
+          <button class="page-settings-toggle" id="page-settings-toggle" title="Page settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+          <div class="page-settings-panel hidden" id="page-settings-panel">
+            <div class="ps-label">Preset</div>
+            <select class="ps-select" id="ps-preset">
+              <option value="a4">A4</option>
+              <option value="letter">Letter</option>
+              <option value="legal">Legal</option>
+              <option value="custom">Custom</option>
+            </select>
+
+            <div class="ps-label">Width (mm)</div>
+            <input class="ps-input" type="number" id="ps-width" value="210" min="50" max="500">
+
+            <div class="ps-label">Height (mm)</div>
+            <input class="ps-input" type="number" id="ps-height" value="297" min="50" max="800">
+
+            <div class="ps-label">Margin (mm)</div>
+            <input class="ps-input" type="number" id="ps-margin" value="20" min="0" max="60">
+
+            <button class="ps-apply" id="ps-apply">Apply</button>
+          </div>
+        </div>
+
+        <button class="page-side-btn" id="add-page-btn" title="Add page" aria-label="Add page">+</button>
+        <button class="page-side-btn" id="del-page-btn" title="Delete page" aria-label="Delete page">−</button>
+      </div>
 
       <!-- ── Formatting Toolbar (two-layer) ── -->
 
