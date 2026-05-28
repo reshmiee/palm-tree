@@ -186,6 +186,19 @@
         data-placeholder="Start writing..."
       ></div>
 
+      <!-- ── Ruler (page view only) ── -->
+      <div class="page-ruler hidden" id="page-ruler">
+        <div class="ruler-track" id="ruler-track">
+          <div class="ruler-ticks" id="ruler-ticks"></div>
+          <div class="ruler-margin-left" id="ruler-margin-left"></div>
+          <div class="ruler-margin-right" id="ruler-margin-right"></div>
+          <div class="ruler-indent-first" id="ruler-indent-first">
+            <div class="ruler-indent-top"></div>
+            <div class="ruler-indent-bottom"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── Pages container (page view only) ── -->
       <div class="pages-container hidden" id="pages-container"></div>
 
@@ -221,6 +234,24 @@
 
         <button class="page-side-btn" id="add-page-btn" title="Add page" aria-label="Add page">+</button>
         <button class="page-side-btn" id="del-page-btn" title="Delete page" aria-label="Delete page">−</button>
+        <div class="page-side-divider"></div>
+        <!-- Zoom control -->
+        <div class="page-zoom-wrap" id="page-zoom-wrap">
+          <button class="page-side-btn page-zoom-btn" id="zoom-out-btn" title="Zoom out" aria-label="Zoom out">−</button>
+          <span class="page-zoom-label" id="zoom-label">85%</span>
+          <button class="page-side-btn page-zoom-btn" id="zoom-in-btn" title="Zoom in" aria-label="Zoom in">+</button>
+        </div>
+        <div class="page-side-divider"></div>
+        <!-- Line spacing -->
+        <div class="page-linespacing-wrap" id="page-linespacing-wrap">
+          <select class="page-side-select" id="line-spacing-select" title="Line spacing" aria-label="Line spacing">
+            <option value="1">1×</option>
+            <option value="1.15">1.15×</option>
+            <option value="1.5" selected>1.5×</option>
+            <option value="2">2×</option>
+            <option value="2.5">2.5×</option>
+          </select>
+        </div>
         <div class="page-side-divider"></div>
         <button class="page-side-btn" id="print-page-btn" title="Print / Export PDF" aria-label="Print or export PDF">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>

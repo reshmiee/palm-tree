@@ -2391,3 +2391,219 @@ mark {
   background: rgba(255,255,255,0.2);
   margin: 2px 8px;
 }
+
+/* ══════════════════════════════════════════════
+   LEVEL 4 — Polish / Google Docs feel
+   ══════════════════════════════════════════════ */
+
+/* ── Ruler ── */
+
+.page-ruler {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+  background: #d8d8d8;
+  border-bottom: 1px solid #bbb;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ruler-track {
+  position: relative;
+  /* width set by JS to match scaled page width */
+  height: 28px;
+  background: white;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.ruler-ticks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ruler-margin-left,
+.ruler-margin-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.06);
+  cursor: ew-resize;
+  z-index: 2;
+}
+
+.ruler-margin-left  { left: 0; }
+.ruler-margin-right { right: 0; }
+
+.ruler-margin-left::after,
+.ruler-margin-right::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 3px;
+  background: rgba(0,0,0,0.25);
+  cursor: ew-resize;
+}
+.ruler-margin-left::after  { right: 0; }
+.ruler-margin-right::after { left: 0; }
+
+/* First-line indent handle */
+.ruler-indent-first {
+  position: absolute;
+  top: 0;
+  width: 14px;
+  z-index: 3;
+  cursor: ew-resize;
+}
+
+.ruler-indent-top {
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid rgba(0,0,0,0.45);
+  margin: 0 auto;
+}
+
+.ruler-indent-bottom {
+  width: 14px;
+  height: 6px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 1px;
+}
+
+/* Ruler tick labels */
+.ruler-tick-label {
+  position: absolute;
+  bottom: 2px;
+  font-size: 8px;
+  color: #888;
+  font-family: system-ui, sans-serif;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ruler-tick-major {
+  position: absolute;
+  top: 14px;
+  width: 1px;
+  height: 8px;
+  background: #aaa;
+  pointer-events: none;
+}
+
+.ruler-tick-minor {
+  position: absolute;
+  top: 20px;
+  width: 1px;
+  height: 4px;
+  background: #ccc;
+  pointer-events: none;
+}
+
+/* ── Zoom control ── */
+
+.page-zoom-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.page-zoom-btn {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 16px !important;
+}
+
+.page-zoom-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.8);
+  font-family: var(--font-main, system-ui, sans-serif);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1;
+  min-width: 32px;
+}
+
+/* ── Line spacing select ── */
+
+.page-linespacing-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-side-select {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: var(--font-main, system-ui, sans-serif);
+  font-weight: 600;
+  padding: 4px 4px;
+  cursor: pointer;
+  outline: none;
+  width: 52px;
+  text-align: center;
+}
+
+.page-side-select option {
+  background: #222;
+  color: white;
+}
+
+.page-side-select:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* ── Per-page active focus highlight ── */
+
+.page-sheet.page-active {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18), 0 0 0 2px rgba(66,133,244,0.6);
+}
+
+/* ── Styled page numbers ── */
+
+.page-footer-right {
+  font-size: 9pt;
+  color: #aaa;
+  font-family: var(--font-main, system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  margin-left: 12px;
+  min-width: 20px;
+  text-align: right;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Add "Page X of Y" format — set via JS data attrs */
+.page-footer-right[data-total]::before {
+  content: attr(data-page) ' / ' attr(data-total);
+}
+
+/* Hide raw text when data attrs are set */
+.page-footer-right[data-total] {
+  font-size: 0;
+}
+.page-footer-right[data-total]::before {
+  font-size: 9pt;
+}
+
+/* ── Page view ruler visibility ── */
+.editor.page-view ~ * .page-ruler,
+.page-ruler.visible {
+  display: flex;
+}

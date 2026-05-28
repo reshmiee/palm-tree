@@ -1096,6 +1096,24 @@ document.addEventListener('DOMContentLoaded', () => {
   let pages      = [];
   let activePage = null;
   let pagesSaveTimer = null;
+  let currentZoom = parseFloat(localStorage.getItem('pt-zoom')) || 0.85;
+  let currentLineSpacing = localStorage.getItem('pt-line-spacing') || '1.5';
+
+  function applyZoom(z) {
+    currentZoom = Math.max(0.4, Math.min(2.0, z));
+    localStorage.setItem('pt-zoom', currentZoom);
+    document.querySelectorAll('.page-sheet').forEach(sheet => {
+      sheet.style.transform = `scale(${currentZoom})`;
+      // margin-bottom compensation: negative margin = -(pageH * (1 - zoom))
+      const dims = getPageDims();
+      const pxPerMm = 96 / 25.4;
+      const pageHpx = dims.h * pxPerMm;
+      sheet.style.marginBottom = `calc(-${pageHpx * (1 - currentZoom)}px)`;
+    });
+    const label = document.getElementById('zoom-label');
+    if (label) label.textContent = Math.round(currentZoom * 100) + '%';
+    updateRuler();
+  }
 
   // ── Page dimensions (stored on container dataset) ──
   function getPageDims() {
@@ -1262,8 +1280,22 @@ document.addEventListener('DOMContentLoaded', () => {
     sheet.addEventListener('click', (e) => {
       if (e.target === sheet) body.focus();
       activePage = sheet;
+      if (window._pageViewMarkActive) window._pageViewMarkActive(sheet);
     });
-    body.addEventListener('focus', () => { activePage = sheet; });
+    body.addEventListener('focus', () => {
+      activePage = sheet;
+      if (window._pageViewMarkActive) window._pageViewMarkActive(sheet);
+    });
+    const headerEl = sheet.querySelector('.page-header-editable');
+    const footerEl = sheet.querySelector('.page-footer-editable');
+    if (headerEl) headerEl.addEventListener('focus', () => {
+      activePage = sheet;
+      if (window._pageViewMarkActive) window._pageViewMarkActive(sheet);
+    });
+    if (footerEl) footerEl.addEventListener('focus', () => {
+      activePage = sheet;
+      if (window._pageViewMarkActive) window._pageViewMarkActive(sheet);
+    });
 
     // Save + overflow check on input
     body.addEventListener('input', () => {
@@ -1306,10 +1338,64 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updatePageNumbers() {
+    updateAllPageNumbers();
+  }
+
+  function updateAllPageNumbers() {
+    const total = pages.length;
     pages.forEach((p, i) => {
       const num = p.querySelector('.page-footer-right');
-      if (num) num.textContent = i + 1;
+      if (!num) return;
+      num.dataset.page = i + 1;
+      num.dataset.total = total;
+      num.textContent = i + 1; // fallback text (hidden by CSS when data attrs present)
     });
+  }
+
+  // ── Ruler ────────────────────────────────────────────
+  function updateRuler() {
+    const ruler = document.getElementById('page-ruler');
+    const track = document.getElementById('ruler-track');
+    const ticks = document.getElementById('ruler-ticks');
+    const marginL = document.getElementById('ruler-margin-left');
+    const marginR = document.getElementById('ruler-margin-right');
+    if (!ruler || !track || !ticks) return;
+
+    const dims = getPageDims();
+    const pxPerMm = 96 / 25.4;
+    const pageWpx = dims.w * pxPerMm * currentZoom;
+    const marginPx = dims.m * pxPerMm * currentZoom;
+
+    track.style.width = pageWpx + 'px';
+
+    // Margin shading
+    if (marginL) { marginL.style.width = marginPx + 'px'; }
+    if (marginR) { marginR.style.width = marginPx + 'px'; }
+
+    // Indent handle position (left margin edge)
+    const indentHandle = document.getElementById('ruler-indent-first');
+    if (indentHandle) {
+      indentHandle.style.left = (marginPx - 7) + 'px';
+    }
+
+    // Build tick marks (every 5mm minor, every 10mm major, label every 20mm)
+    ticks.innerHTML = '';
+    const totalMm = dims.w;
+    for (let mm = 0; mm <= totalMm; mm += 5) {
+      const x = mm * pxPerMm * currentZoom;
+      const isMajor = mm % 10 === 0;
+      const tick = document.createElement('div');
+      tick.className = isMajor ? 'ruler-tick-major' : 'ruler-tick-minor';
+      tick.style.left = x + 'px';
+      ticks.appendChild(tick);
+      if (isMajor && mm % 20 === 0 && mm > 0 && mm < totalMm) {
+        const lbl = document.createElement('span');
+        lbl.className = 'ruler-tick-label';
+        lbl.style.left = x + 'px';
+        lbl.textContent = mm;
+        ticks.appendChild(lbl);
+      }
+    }
   }
 
   function getActivePage() {
@@ -1362,6 +1448,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Focus first page
     const firstBody = pages[0] && pages[0].querySelector('.page-content');
     if (firstBody) setTimeout(() => { firstBody.focus(); activePage = pages[0]; }, 50);
+
+    // Apply saved zoom and line spacing
+    setTimeout(() => {
+      applyZoom(currentZoom);
+      if (currentLineSpacing !== '1.5') {
+        document.querySelectorAll('.page-content').forEach(el => {
+          el.style.lineHeight = currentLineSpacing;
+        });
+      }
+      updateRuler();
+      updateAllPageNumbers();
+    }, 60);
   }
 
   // ── Fix toolbar position for page view ──
@@ -1408,6 +1506,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editor && editor.classList.contains('page-view')) {
       initPages();
     }
+  };
+
+  // ── Expose zoom level so Level4 can drive it ──
+  window._pageViewGetZoom = () => currentZoom;
+  window._pageViewSetZoom = (z) => applyZoom(z);
+  window._pageViewGetPageCount = () => pages.length;
+  window._pageViewGetDims = () => getPageDims();
+  window._pageViewSetLineSpacing = (val) => {
+    document.querySelectorAll('.page-content').forEach(el => {
+      el.style.lineHeight = val;
+    });
+    currentLineSpacing = val;
+    localStorage.setItem('pt-line-spacing', val);
+  };
+  window._pageViewMarkActive = (sheet) => {
+    pages.forEach(p => p.classList.remove('page-active'));
+    if (sheet) sheet.classList.add('page-active');
   };
 
   // ── Sync dims UI helper ──
@@ -1518,4 +1633,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
     panel.classList.add('hidden');
   });
+})();
+// ── Level 4: Zoom, Line Spacing, Ruler drag ─────────────────────────────────
+
+(function () {
+
+  // ── Zoom buttons ──
+  const zoomIn  = document.getElementById('zoom-in-btn');
+  const zoomOut = document.getElementById('zoom-out-btn');
+  const ZOOM_STEPS = [0.40, 0.50, 0.60, 0.70, 0.75, 0.80, 0.85, 0.90, 1.00, 1.10, 1.20, 1.50, 2.00];
+
+  function stepZoom(dir) {
+    if (!window._pageViewGetZoom) return;
+    const cur = window._pageViewGetZoom();
+    const idx = ZOOM_STEPS.findIndex(z => Math.abs(z - cur) < 0.01);
+    let next;
+    if (idx === -1) {
+      next = dir > 0 ? 0.90 : 0.80;
+    } else {
+      next = ZOOM_STEPS[Math.max(0, Math.min(ZOOM_STEPS.length - 1, idx + dir))];
+    }
+    if (window._pageViewSetZoom) window._pageViewSetZoom(next);
+  }
+
+  if (zoomIn)  zoomIn.addEventListener('click',  () => stepZoom(+1));
+  if (zoomOut) zoomOut.addEventListener('click', () => stepZoom(-1));
+
+  // ── Line spacing ──
+  const lsSelect = document.getElementById('line-spacing-select');
+  if (lsSelect) {
+    // Restore saved value
+    const saved = localStorage.getItem('pt-line-spacing');
+    if (saved) lsSelect.value = saved;
+
+    lsSelect.addEventListener('change', () => {
+      if (window._pageViewSetLineSpacing) {
+        window._pageViewSetLineSpacing(lsSelect.value);
+      }
+    });
+  }
+
+  // ── Show/hide ruler and side panel when view changes ──
+  const scrollBtn = document.getElementById('view-scroll-btn');
+  const pagesBtn  = document.getElementById('view-pages-btn');
+  const ruler     = document.getElementById('page-ruler');
+
+  function setRulerVisible(show) {
+    if (!ruler) return;
+    ruler.classList.toggle('hidden', !show);
+  }
+
+  if (scrollBtn) scrollBtn.addEventListener('click', () => setRulerVisible(false));
+  if (pagesBtn)  pagesBtn.addEventListener('click',  () => {
+    setRulerVisible(true);
+    setTimeout(() => { if (window._pageViewGetZoom) updateRulerExternal(); }, 80);
+  });
+
+  function updateRulerExternal() {
+    // Trigger ruler update by calling the internal updater exposed on window
+    if (window._pageViewSetZoom && window._pageViewGetZoom) {
+      window._pageViewSetZoom(window._pageViewGetZoom());
+    }
+  }
+
+  // Show ruler if page view is already active on load
+  if (ruler) {
+    const saved = localStorage.getItem('pt-view-mode');
+    if (saved === 'pages') setRulerVisible(true);
+  }
+
+  // ── Ruler margin drag ──
+  // Dragging the margin handles updates page padding live
+  let dragging = null; // 'left' | 'right' | 'indent'
+  let dragStart = 0;
+  let dragStartVal = 0;
+
+  function getRulerMmPerPx() {
+    // mm per screen px, accounting for zoom
+    const zoom = window._pageViewGetZoom ? window._pageViewGetZoom() : 0.85;
+    return 25.4 / (96 * zoom);
+  }
+
+  function startDrag(which, e) {
+    dragging = which;
+    dragStart = e.clientX;
+    const dims = window._pageViewGetDims ? window._pageViewGetDims() : { m: 20 };
+    dragStartVal = dims.m;
+    e.preventDefault();
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+  }
+
+  function onDrag(e) {
+    if (!dragging) return;
+    const dx = e.clientX - dragStart;
+    const mmPerPx = getRulerMmPerPx();
+    const delta = dx * mmPerPx;
+    const mInput = document.getElementById('ps-margin');
+    if (!mInput) return;
+
+    let newM = Math.max(5, Math.min(60, Math.round(dragStartVal + (dragging === 'right' ? -delta : delta))));
+    mInput.value = newM;
+
+    // Apply live
+    document.querySelectorAll('.page-content').forEach(el => {
+      el.style.padding = newM + 'mm';
+      el.style.paddingTop = '12px';
+      el.style.paddingBottom = '12px';
+    });
+    document.querySelectorAll('.page-header-zone, .page-footer-zone').forEach(el => {
+      el.style.paddingLeft  = newM + 'mm';
+      el.style.paddingRight = newM + 'mm';
+    });
+
+    const container = document.getElementById('pages-container');
+    if (container) container.dataset.pageM = newM;
+
+    if (window._pageViewSetZoom && window._pageViewGetZoom) {
+      window._pageViewSetZoom(window._pageViewGetZoom()); // re-render ruler
+    }
+  }
+
+  function stopDrag() {
+    dragging = null;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+  }
+
+  const mLeft  = document.getElementById('ruler-margin-left');
+  const mRight = document.getElementById('ruler-margin-right');
+  if (mLeft)  mLeft.addEventListener('mousedown',  (e) => startDrag('left', e));
+  if (mRight) mRight.addEventListener('mousedown', (e) => startDrag('right', e));
+
 })();
