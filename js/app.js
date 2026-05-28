@@ -71,67 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let trayOpen = false;
 
-  // ── Font size state ──────────────────────────────────
-  let currentFontSize = 16;
-  const FONT_SIZES = [10, 11, 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64];
-
-  // Find the index in FONT_SIZES closest to the given px value
-  function nearestFontSizeIdx(px) {
-    let best = 0;
-    let bestDiff = Math.abs(FONT_SIZES[0] - px);
-    for (let i = 1; i < FONT_SIZES.length; i++) {
-      const diff = Math.abs(FONT_SIZES[i] - px);
-      if (diff < bestDiff) { bestDiff = diff; best = i; }
-    }
-    return best;
-  }
-
-  function applyFontSize(px) {
-    currentFontSize = px;
-    const label = document.getElementById('fmt-fontsize-label');
-    if (label) label.textContent = px;
-    // Use a span with inline style — execCommand fontSize only supports 1-7
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
-    const activeEl = getActiveEditableEl() || bodyEl;
-    if (range.collapsed) {
-      // No selection — set a data attr so next typed chars get the size
-      activeEl.dataset.nextFontSize = px;
-      return;
-    }
-    const span = document.createElement('span');
-    span.style.fontSize = px + 'px';
-    try {
-      range.surroundContents(span);
-    } catch (e) {
-      // surroundContents fails on partial selections — use execCommand fallback
-      document.execCommand('fontSize', false, '7');
-      activeEl.querySelectorAll('font[size="7"]').forEach(el => {
-        el.style.fontSize = px + 'px';
-        el.removeAttribute('size');
-        el.outerHTML = el.outerHTML.replace(/^<font/, '<span').replace(/font>$/, 'span>');
-      });
-    }
-    scheduleAutoSave();
-  }
-
-  function detectFontSize() {
-    const sel = window.getSelection();
-    if (!sel || !sel.anchorNode) return;
-    const node = sel.anchorNode.nodeType === Node.TEXT_NODE
-      ? sel.anchorNode.parentElement
-      : sel.anchorNode;
-    if (!node) return;
-    const computed = window.getComputedStyle(node).fontSize;
-    if (computed) {
-      const px = Math.round(parseFloat(computed));
-      currentFontSize = px;
-      const label = document.getElementById('fmt-fontsize-label');
-      if (label) label.textContent = px;
-    }
-  }
-
   function initFormatToolbar() {
     const toolbar = document.getElementById('format-toolbar');
     const tray = document.getElementById('fmt-tray');
@@ -163,8 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     tray.addEventListener('mousedown', (e) => {
       const btn = e.target.closest('.fmt-btn');
       if (!btn) return;
-      // Don't intercept font size buttons here — handled below
-      if (btn.id === 'fmt-fontsize-dec' || btn.id === 'fmt-fontsize-inc') return;
       e.preventDefault();
       const cmd = btn.dataset.cmd;
       const heading = btn.dataset.heading;
@@ -188,35 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Font size buttons
-    const decBtn = document.getElementById('fmt-fontsize-dec');
-    const incBtn = document.getElementById('fmt-fontsize-inc');
-    if (decBtn) {
-      decBtn.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        const idx = nearestFontSizeIdx(currentFontSize);
-        const next = idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0];
-        applyFontSize(next);
-        (getActiveEditableEl() || bodyEl).focus();
-      });
-    }
-    if (incBtn) {
-      incBtn.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        const idx = nearestFontSizeIdx(currentFontSize);
-        const next = idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1];
-        applyFontSize(next);
-        (getActiveEditableEl() || bodyEl).focus();
-      });
-    }
-
     document.addEventListener('selectionchange', () => {
       updateToolbarState();
-      detectFontSize();
     });
-
-    // Also sync font size label on keyup so it stays current while typing
-    bodyEl.addEventListener('keyup', () => detectFontSize());
   }
 
   function updateToolbarState() {
@@ -393,8 +304,159 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === overlay) closePicker();
     });
 
+    // ── Table features: col resize + row/col add/delete ──
+    function initTableFeatures(wrapper) {
+      const table = wrapper.querySelector('table');
+      if (!table) return;
+
+      table.style.width = 'auto';
+      table.style.minWidth = '120px';
+
+      function attachColResizers() {
+        wrapper.querySelectorAll('.col-resizer').forEach(r => r.remove());
+        const rows = table.rows;
+        if (!rows.length) return;
+        const firstRow = rows[0];
+        Array.from(firstRow.cells).forEach((cell, i) => {
+          if (i === firstRow.cells.length - 1) return;
+          const resizer = document.createElement('div');
+          resizer.className = 'col-resizer';
+          resizer.contentEditable = 'false';
+          cell.style.position = 'relative';
+          cell.appendChild(resizer);
+          let startX, startW, nextStartW, nextCell;
+          resizer.addEventListener('mousedown', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            startX = e.clientX;
+            startW = cell.offsetWidth;
+            nextCell = firstRow.cells[i + 1];
+            nextStartW = nextCell ? nextCell.offsetWidth : 0;
+            const onMove = (e) => {
+              const dx = e.clientX - startX;
+              const newW = Math.max(40, startW + dx);
+              const newNext = Math.max(40, nextStartW - dx);
+              Array.from(table.rows).forEach(row => {
+                if (row.cells[i]) row.cells[i].style.width = newW + 'px';
+                if (row.cells[i + 1]) row.cells[i + 1].style.width = newNext + 'px';
+              });
+              table.style.width = 'auto';
+            };
+            const onUp = () => {
+              document.removeEventListener('mousemove', onMove);
+              document.removeEventListener('mouseup', onUp);
+              scheduleAutoSave();
+            };
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+          });
+        });
+      }
+      attachColResizers();
+
+      function buildTableToolbar() {
+        let tb = wrapper.querySelector('.table-toolbar');
+        if (tb) tb.remove();
+        tb = document.createElement('div');
+        tb.className = 'table-toolbar';
+        tb.contentEditable = 'false';
+        const mkBtn = (label, title, fn) => {
+          const b = document.createElement('button');
+          b.className = 'table-tb-btn';
+          b.title = title;
+          b.textContent = label;
+          b.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); fn(); });
+          return b;
+        };
+        // Track last focused cell — button clicks blur the cell before the handler runs,
+        // so reading window.getSelection() inside the handler is too late.
+        let _lastFocusedCell = { rowIndex: -1, colIndex: -1 };
+        function _updateFocusedCell(node) {
+          while (node && node !== table) {
+            if (node.nodeName === 'TD' || node.nodeName === 'TH') {
+              const row = node.parentElement;
+              _lastFocusedCell = {
+                rowIndex: Array.from(table.rows).indexOf(row),
+                colIndex: Array.from(row.cells).indexOf(node),
+              };
+              return;
+            }
+            node = node.parentElement;
+          }
+        }
+        table.addEventListener('mousedown', (e) => _updateFocusedCell(e.target));
+        table.addEventListener('keyup', () => {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) _updateFocusedCell(sel.getRangeAt(0).startContainer);
+        });
+        function getFocusedCell() {
+          return _lastFocusedCell;
+        }
+
+        tb.appendChild(mkBtn('+ Row', 'Add row below cursor', () => {
+          const tbody = table.querySelector('tbody') || table;
+          const cols = table.rows[0] ? table.rows[0].cells.length : 1;
+          const tr = document.createElement('tr');
+          for (let c = 0; c < cols; c++) {
+            const td = document.createElement('td');
+            td.innerHTML = '<p><br></p>';
+            const refCell = table.rows[0] && table.rows[0].cells[c];
+            if (refCell && refCell.style.width) td.style.width = refCell.style.width;
+            tr.appendChild(td);
+          }
+          const { rowIndex } = getFocusedCell();
+          if (rowIndex >= 0 && rowIndex < table.rows.length - 1) {
+            table.rows[rowIndex].insertAdjacentElement('afterend', tr);
+          } else {
+            tbody.appendChild(tr);
+          }
+          attachColResizers();
+          scheduleAutoSave();
+        }));
+        tb.appendChild(mkBtn('− Row', 'Delete row at cursor', () => {
+          const { rowIndex } = getFocusedCell();
+          const tbody = table.querySelector('tbody') || table;
+          if (rowIndex >= 0 && tbody.rows.length > 0) {
+            table.rows[rowIndex].remove();
+          } else if (tbody.rows.length > 0) {
+            tbody.deleteRow(tbody.rows.length - 1);
+          }
+          scheduleAutoSave();
+        }));
+        tb.appendChild(mkBtn('+ Col', 'Add column after cursor', () => {
+          const { colIndex } = getFocusedCell();
+          Array.from(table.rows).forEach((row, ri) => {
+            const cell = ri === 0 ? document.createElement('th') : document.createElement('td');
+            cell.innerHTML = '<p><br></p>';
+            if (colIndex >= 0 && colIndex < row.cells.length - 1) {
+              row.cells[colIndex].insertAdjacentElement('afterend', cell);
+            } else {
+              row.appendChild(cell);
+            }
+          });
+          attachColResizers();
+          scheduleAutoSave();
+        }));
+        tb.appendChild(mkBtn('− Col', 'Delete column at cursor', () => {
+          const { colIndex } = getFocusedCell();
+          const targetCol = colIndex >= 0 ? colIndex : -1;
+          Array.from(table.rows).forEach(row => {
+            if (row.cells.length > 1) {
+              if (targetCol >= 0 && targetCol < row.cells.length) {
+                row.deleteCell(targetCol);
+              } else {
+                row.deleteCell(row.cells.length - 1);
+              }
+            }
+          });
+          attachColResizers();
+          scheduleAutoSave();
+        }));
+        wrapper.appendChild(tb);
+      }
+      buildTableToolbar();
+    }
+
     function insertTable(rows, cols) {
-      // Build table wrapped in a container that holds a delete button
       const tableWrapper = document.createElement('div');
       tableWrapper.className = 'table-block-wrapper';
       // NOTE: do NOT set contentEditable=false on wrapper — it prevents
@@ -431,6 +493,8 @@ document.addEventListener('DOMContentLoaded', () => {
       tableHtml += '</tbody></table>';
       tableWrapper.innerHTML = tableHtml;
       tableWrapper.appendChild(tableDeleteBtn);
+
+      initTableFeatures(tableWrapper);
 
       // Insert wrapper into editor
       const activeEl = getActiveEditableEl();
@@ -607,7 +671,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function reinitTableDeleteBtns() {
     bodyEl.querySelectorAll('.table-block-wrapper').forEach(wrapper => {
-      // Remove any stale button (has no live listener after innerHTML reload)
       const old = wrapper.querySelector('.table-delete-btn');
       if (old) old.remove();
       const btn = document.createElement('button');
@@ -625,6 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
       wrapper.appendChild(btn);
+      initTableFeatures(wrapper);
     });
   }
 
@@ -950,6 +1014,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initLinkInsertion();
 
+  // ── Link hover tooltip ───────────────────────────────
+
+  (function initLinkTooltip() {
+    const tooltip = document.createElement('div');
+    tooltip.id = 'link-hover-tooltip';
+    tooltip.innerHTML = `
+      <span class="link-tooltip-url"></span>
+      <button class="link-tooltip-open" title="Open link">Open ↗</button>
+    `;
+    document.body.appendChild(tooltip);
+
+    let hideTimer = null;
+
+    function showTooltip(anchor) {
+      clearTimeout(hideTimer);
+      const url = anchor.href;
+      tooltip.querySelector('.link-tooltip-url').textContent = url.length > 50 ? url.slice(0, 50) + '…' : url;
+      tooltip.querySelector('.link-tooltip-open').onclick = () => window.open(url, '_blank', 'noopener');
+
+      const rect = anchor.getBoundingClientRect();
+      tooltip.style.display = 'flex';
+      // Position below the link; clamp to viewport right edge
+      let left = rect.left + window.scrollX;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+
+      // After paint, clamp if overflowing
+      requestAnimationFrame(() => {
+        const tw = tooltip.offsetWidth;
+        const vw = window.innerWidth;
+        if (left + tw > vw - 12) {
+          tooltip.style.left = Math.max(8, vw - tw - 12) + 'px';
+        }
+      });
+    }
+
+    function scheduleHide() {
+      hideTimer = setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+    }
+
+    bodyEl.addEventListener('mouseover', (e) => {
+      const a = e.target.closest('a[href]');
+      if (a) showTooltip(a);
+    });
+
+    bodyEl.addEventListener('mouseout', (e) => {
+      const a = e.target.closest('a[href]');
+      if (a) scheduleHide();
+    });
+
+    tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+    tooltip.addEventListener('mouseleave', () => scheduleHide());
+  })();
+
   // ── Auto-linkify on paste and on spacebar/enter ──────
 
   function linkifyText(node) {
@@ -1043,7 +1161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (folderViewOpen) closeFolderView();
 
     const hasTitle = titleEl.value.trim().length > 0;
-    const hasBody = bodyEl.value.trim().length > 0;
+    const hasBody = bodyEl.innerText.trim().length > 0;
 
     if (!hasTitle && !hasBody) {
       showToast('Oops, write something first.', true);
@@ -1154,6 +1272,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initSearch();
   initMultiSelect();
+  initDownloadButton();
   renderRecentNotes();
   loadOrCreateBlankNote();
   bodyEl.focus();
@@ -2108,16 +2227,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!sel || sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0);
     if (range.collapsed) return;
-    const span = document.createElement('span');
-    span.style.fontSize = px + 'px';
-    try { range.surroundContents(span); }
-    catch(e) {
-      document.execCommand('fontSize', false, '7');
-      document.querySelectorAll('.page-content font[size="7"]').forEach(el => {
-        el.style.fontSize = px + 'px';
-        el.removeAttribute('size');
-      });
-    }
+    document.execCommand('fontSize', false, '7');
+    document.querySelectorAll('.page-content font[size="7"]').forEach(el => {
+      const span = document.createElement('span');
+      span.style.fontSize = px + 'px';
+      while (el.firstChild) span.appendChild(el.firstChild);
+      el.replaceWith(span);
+    });
     scheduleAutoSave();
   }
 

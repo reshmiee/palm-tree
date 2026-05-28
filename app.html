@@ -171,13 +171,27 @@
       <div class="editor-meta">
         <span class="unsaved-dot" id="unsaved-dot"></span>
       </div>
-      <textarea
-        class="editor-title"
-        id="editor-title"
-        placeholder="Title"
-        rows="1"
-        spellcheck="false"
-      ></textarea>
+
+      <!-- Title row: title + download button side by side -->
+      <div class="editor-title-row">
+        <textarea
+          class="editor-title"
+          id="editor-title"
+          placeholder="Title"
+          rows="1"
+          spellcheck="false"
+        ></textarea>
+        <div class="download-wrap" id="download-wrap">
+          <button class="download-btn" id="download-btn" title="Download note" aria-label="Download note" aria-haspopup="true" aria-expanded="false">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+          <div class="download-dropdown hidden" id="download-dropdown">
+            <button class="download-item" id="dl-pdf">Download as PDF</button>
+            <button class="download-item" id="dl-docx">Download as DOCX</button>
+            <button class="download-item" id="dl-txt">Download as TXT</button>
+          </div>
+        </div>
+      </div>
       <div
         class="editor-body"
         id="editor-body"
@@ -454,17 +468,6 @@
         <button class="fmt-btn" data-cmd="justifyFull" title="Justify" aria-label="Justify">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div class="fmt-divider"></div>
-        <!-- Font size -->
-        <div class="fmt-fontsize-wrap" id="fmt-fontsize-wrap">
-          <button class="fmt-btn fmt-fontsize-dec" id="fmt-fontsize-dec" title="Decrease font size" aria-label="Decrease font size">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <span class="fmt-fontsize-label" id="fmt-fontsize-label">16</span>
-          <button class="fmt-btn fmt-fontsize-inc" id="fmt-fontsize-inc" title="Increase font size" aria-label="Increase font size">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-        </div>
         <div class="fmt-divider"></div>
         <button class="fmt-btn" id="fmt-link-btn" title="Insert link" aria-label="Insert link">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>

@@ -1348,6 +1348,77 @@ mark {
   margin-bottom: var(--space-sm);
 }
 
+/* ── Title row (title + download button) ── */
+
+.editor-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.editor-title-row .editor-title {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Download button ── */
+
+.download-wrap {
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  color: var(--gray-500);
+  transition: background var(--transition), color var(--transition);
+  flex-shrink: 0;
+}
+
+.download-btn:hover {
+  background: var(--gray-100);
+  color: var(--black);
+}
+
+.download-btn .icon {
+  width: 26px;
+  height: 26px;
+}
+
+.download-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--white);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  min-width: 220px;
+  z-index: 200;
+  padding: 6px 0;
+}
+
+.download-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 22px;
+  font-size: 15px;
+  color: var(--gray-700);
+  transition: background var(--transition), color var(--transition);
+}
+
+.download-item:hover {
+  background: var(--gray-100);
+  color: var(--black);
+}
+
 /* ── Back button ── */
 
 .back-btn {
@@ -1650,34 +1721,6 @@ mark {
 
 /* ── Font size picker in tray ── */
 
-.fmt-fontsize-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-
-.fmt-fontsize-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gray-500);
-  min-width: 26px;
-  text-align: center;
-  line-height: 1;
-  user-select: none;
-}
-
-.fmt-fontsize-dec,
-.fmt-fontsize-inc {
-  width: 36px;
-  height: 36px;
-}
-
-.fmt-fontsize-dec .icon,
-.fmt-fontsize-inc .icon {
-  width: 16px;
-  height: 16px;
-}
-
 /* ── Code block ── */
 .code-block-wrapper {
   position: relative;
@@ -1870,6 +1913,50 @@ mark {
 
 .img-resize-wrapper:hover .img-delete-btn {
   opacity: 1;
+}
+
+/* ── Link hover tooltip ── */
+
+#link-hover-tooltip {
+  display: none;
+  position: absolute;
+  align-items: center;
+  gap: 8px;
+  background: var(--gray-900, #1a1a1a);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  max-width: 360px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  z-index: 9999;
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.link-tooltip-url {
+  color: #a8c8ff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.link-tooltip-open {
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #fff;
+  border-radius: 5px;
+  padding: 3px 9px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.link-tooltip-open:hover {
+  background: rgba(255,255,255,0.22);
 }
 
 /* ── Link modal ── */
@@ -2087,6 +2174,7 @@ mark {
 /* Hide normal editor elements in page view */
 .editor.page-view > .editor-meta,
 .editor.page-view > .editor-title,
+.editor.page-view > .editor-title-row,
 .editor.page-view > .editor-body {
   display: none;
 }
@@ -2300,10 +2388,10 @@ mark {
 .editor-body table,
 .page-content table {
   border-collapse: collapse;
-  width: 100%;
+  width: auto;
   margin: 12px 0;
-  font-size: inherit;
-  table-layout: fixed;
+  font-size: 20px;
+  table-layout: auto;
 }
 
 .editor-body table td,
@@ -2384,12 +2472,76 @@ mark {
   display: block;
   margin: 12px 0;
   overflow: visible;
-  /* prevent the delete button (absolutely positioned) from causing reflow */
-  contain: layout;
 }
 .table-block-wrapper table {
   margin: 0;
-  width: 100%;
+  width: auto;
+}
+
+/* ── Column resize handle ── */
+.col-resizer {
+  position: absolute;
+  top: 0; right: -4px;
+  width: 8px; height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  background: transparent;
+  transition: background 0.15s;
+}
+.col-resizer:hover,
+.col-resizer:active {
+  background: rgba(0,0,0,0.18);
+  border-radius: 2px;
+}
+
+/* ── Table toolbar (add/delete row/col) ── */
+.table-toolbar {
+  display: none;
+  gap: 4px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+.table-block-wrapper:hover .table-toolbar,
+.table-block-wrapper:focus-within .table-toolbar {
+  display: flex;
+}
+.table-tb-btn {
+  font-size: 15px;
+  padding: 7px 16px;
+  border-radius: 7px;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s, border-color 0.13s;
+  line-height: 1.4;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.table-tb-btn:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+/* + buttons → black */
+.table-tb-btn:first-child,
+.table-tb-btn:nth-child(3) {
+  color: #111;
+  border-color: var(--gray-300);
+}
+.table-tb-btn:first-child:hover,
+.table-tb-btn:nth-child(3):hover {
+  background: var(--gray-100);
+}
+/* − buttons → red */
+.table-tb-btn:nth-child(2),
+.table-tb-btn:nth-child(4) {
+  color: #c0392b;
+  border-color: #f5c6cb;
+}
+.table-tb-btn:nth-child(2):hover,
+.table-tb-btn:nth-child(4):hover {
+  background: #fde8e8;
+  border-color: #e0a0a0;
 }
 .table-delete-btn {
   position: absolute;
