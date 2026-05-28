@@ -229,6 +229,191 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initFormatToolbar();
+  initFontFamilyPicker();
+  initTableInsertion();
+
+  // ── Font Family Picker ─────────────────────────────────
+
+  function initFontFamilyPicker() {
+    const select = document.getElementById('fmt-fontfamily-select');
+    if (!select) return;
+
+    select.addEventListener('change', () => {
+      const val = select.value;
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (range.collapsed) {
+        bodyEl.dataset.nextFontFamily = val;
+        bodyEl.focus();
+        return;
+      }
+      const span = document.createElement('span');
+      span.style.fontFamily = val || 'inherit';
+      try {
+        range.surroundContents(span);
+      } catch(e) {
+        document.execCommand('insertHTML', false,
+          `<span style="font-family:${val || 'inherit'}">${range.toString()}</span>`);
+      }
+      bodyEl.focus();
+      scheduleAutoSave();
+    });
+
+    // Detect font family at cursor
+    document.addEventListener('selectionchange', () => {
+      const sel = window.getSelection();
+      if (!sel || !sel.anchorNode) return;
+      const node = sel.anchorNode.nodeType === Node.TEXT_NODE
+        ? sel.anchorNode.parentElement
+        : sel.anchorNode;
+      if (!node) return;
+      const ff = window.getComputedStyle(node).fontFamily;
+      // Try to find a matching option
+      const opts = Array.from(select.options);
+      const match = opts.find(o => o.value && ff.toLowerCase().includes(
+        o.value.toLowerCase().replace(/'/g,'').split(',')[0].trim()
+      ));
+      select.value = match ? match.value : '';
+    });
+  }
+
+  // ── Table Insertion ──────────────────────────────────
+
+  function initTableInsertion() {
+    const tableBtn = document.getElementById('fmt-table-btn');
+    const overlay = document.getElementById('table-picker-overlay');
+    const picker = document.getElementById('table-picker');
+    const grid = document.getElementById('table-picker-grid');
+    const label = document.getElementById('table-picker-label');
+    if (!tableBtn || !overlay || !picker || !grid) return;
+
+    const COLS = 8, ROWS = 8;
+    let cells = [];
+    let hoverCol = 0, hoverRow = 0;
+    let savedRange = null;
+
+    // Build grid cells
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'table-picker-cell';
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        grid.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    function updateHighlight(row, col) {
+      hoverRow = row;
+      hoverCol = col;
+      cells.forEach(cell => {
+        const r = +cell.dataset.row;
+        const c = +cell.dataset.col;
+        cell.classList.toggle('hovered', r <= row && c <= col);
+      });
+      label.textContent = `${col + 1} × ${row + 1} table`;
+    }
+
+    function clearHighlight() {
+      cells.forEach(c => c.classList.remove('hovered', 'selected'));
+      label.textContent = 'Insert table';
+    }
+
+    grid.addEventListener('mousemove', (e) => {
+      const cell = e.target.closest('.table-picker-cell');
+      if (!cell) return;
+      updateHighlight(+cell.dataset.row, +cell.dataset.col);
+    });
+
+    grid.addEventListener('mouseleave', () => {
+      clearHighlight();
+    });
+
+    grid.addEventListener('click', (e) => {
+      const cell = e.target.closest('.table-picker-cell');
+      if (!cell) return;
+      insertTable(+cell.dataset.row + 1, +cell.dataset.col + 1);
+      closePicker();
+    });
+
+    function openPicker() {
+      // Save selection
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
+
+      const rect = tableBtn.getBoundingClientRect();
+      overlay.classList.remove('hidden');
+      // Position picker above toolbar
+      const pickerH = ROWS * 24 + 40;
+      const pickerW = COLS * 24 + 20;
+      let top = rect.top - pickerH - 8;
+      let left = rect.left;
+      if (top < 8) top = rect.bottom + 8;
+      if (left + pickerW > window.innerWidth - 8) left = window.innerWidth - pickerW - 8;
+      picker.style.top = top + 'px';
+      picker.style.left = left + 'px';
+    }
+
+    function closePicker() {
+      overlay.classList.add('hidden');
+      clearHighlight();
+      savedRange = null;
+    }
+
+    tableBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      if (overlay.classList.contains('hidden')) {
+        openPicker();
+      } else {
+        closePicker();
+      }
+    });
+
+    overlay.addEventListener('mousedown', (e) => {
+      if (e.target === overlay) closePicker();
+    });
+
+    function insertTable(rows, cols) {
+      // Restore selection
+      if (savedRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
+      const activeEl = getActiveEditableEl();
+      if (activeEl) activeEl.focus();
+
+      let html = '<table><thead><tr>';
+      for (let c = 0; c < cols; c++) {
+        html += '<th><p><br></p></th>';
+      }
+      html += '</tr></thead><tbody>';
+      for (let r = 1; r < rows; r++) {
+        html += '<tr>';
+        for (let c = 0; c < cols; c++) {
+          html += '<td><p><br></p></td>';
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table><p><br></p>';
+      document.execCommand('insertHTML', false, html);
+      scheduleAutoSave();
+    }
+  }
+
+  // Helper: return the active contenteditable element (scroll editor or page content)
+  function getActiveEditableEl() {
+    const active = document.activeElement;
+    if (active && active.isContentEditable) return active;
+    const editor = document.querySelector('.editor');
+    if (editor && editor.classList.contains('page-view')) {
+      const pages = document.querySelectorAll('.page-content');
+      return pages[pages.length - 1] || null;
+    }
+    return document.getElementById('editor-body');
+  }
 
   // ── Image insertion ──────────────────────────────────
 
@@ -927,7 +1112,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function serialisePages() {
     return pages.map(p => {
       const content = p.querySelector('.page-content');
-      return content ? content.innerHTML : '';
+      const header = p.querySelector('.page-header-editable');
+      const footer = p.querySelector('.page-footer-editable');
+      return {
+        body: content ? content.innerHTML : '',
+        header: header ? header.innerHTML : '',
+        footer: footer ? footer.innerHTML : '',
+      };
     });
   }
 
@@ -935,7 +1126,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeNoteId) return;
     const note = getNoteById(activeNoteId);
     if (!note) return;
-    const data = { __palmtree_pages__: true, pages: serialisePages(), dims: getPageDims() };
+    const pageData = serialisePages();
+    const data = { __palmtree_pages__: true, pages: pageData.map(p => typeof p === 'string' ? p : p.body), headers: pageData.map(p => typeof p === 'string' ? '' : p.header), footers: pageData.map(p => typeof p === 'string' ? '' : p.footer), dims: getPageDims() };
     note.body = '<!--PAGES:' + JSON.stringify(data) + '-->';
     note.updatedAt = new Date().toISOString();
     saveNote(note);
@@ -1013,23 +1205,58 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Create a single page sheet ──
-  function createPage(content = '', insertAfterIdx = null) {
+  function createPage(content = '', insertAfterIdx = null, headerHtml = '', footerHtml = '') {
     const dims = getPageDims();
     const sheet = document.createElement('div');
     sheet.className = 'page-sheet';
 
+    // ── Header zone ──
+    const headerZone = document.createElement('div');
+    headerZone.className = 'page-header-zone';
+    headerZone.style.paddingLeft = dims.m + 'mm';
+    headerZone.style.paddingRight = dims.m + 'mm';
+    const headerEditable = document.createElement('div');
+    headerEditable.className = 'page-header-editable';
+    headerEditable.setAttribute('contenteditable', 'true');
+    headerEditable.spellcheck = false;
+    headerEditable.dataset.placeholder = 'Header';
+    headerEditable.innerHTML = headerHtml;
+    headerEditable.addEventListener('input', () => schedulePageSave());
+    headerZone.appendChild(headerEditable);
+
+    // ── Body ──
     const body = document.createElement('div');
     body.className = 'page-content';
     body.setAttribute('contenteditable', 'true');
     body.spellcheck = true;
     body.style.padding = dims.m + 'mm';
+    body.style.paddingTop = '12px';
+    body.style.paddingBottom = '12px';
     body.innerHTML = content;
 
-    const num = document.createElement('span');
-    num.className = 'page-number';
+    // ── Footer zone ──
+    const footerZone = document.createElement('div');
+    footerZone.className = 'page-footer-zone';
+    footerZone.style.paddingLeft = dims.m + 'mm';
+    footerZone.style.paddingRight = dims.m + 'mm';
+    const footerLeft = document.createElement('div');
+    footerLeft.className = 'page-footer-left';
+    const footerEditable = document.createElement('div');
+    footerEditable.className = 'page-footer-editable';
+    footerEditable.setAttribute('contenteditable', 'true');
+    footerEditable.spellcheck = false;
+    footerEditable.dataset.placeholder = 'Footer';
+    footerEditable.innerHTML = footerHtml;
+    footerEditable.addEventListener('input', () => schedulePageSave());
+    footerLeft.appendChild(footerEditable);
+    const footerRight = document.createElement('div');
+    footerRight.className = 'page-footer-right page-number';
+    footerZone.appendChild(footerLeft);
+    footerZone.appendChild(footerRight);
 
+    sheet.appendChild(headerZone);
     sheet.appendChild(body);
-    sheet.appendChild(num);
+    sheet.appendChild(footerZone);
 
     // Click on sheet margins focuses the body
     sheet.addEventListener('click', (e) => {
@@ -1080,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updatePageNumbers() {
     pages.forEach((p, i) => {
-      const num = p.querySelector('.page-number');
+      const num = p.querySelector('.page-footer-right');
       if (num) num.textContent = i + 1;
     });
   }
@@ -1119,14 +1346,14 @@ document.addEventListener('DOMContentLoaded', () => {
         pagesContainer.dataset.pageM = parsed.dims.m;
         syncDimsUI(parsed.dims);
       }
-      parsed.pages.forEach(html => createPage(html));
+      parsed.pages.forEach((html, i) => createPage(html, null, parsed.headers ? (parsed.headers[i] || '') : '', parsed.footers ? (parsed.footers[i] || '') : ''));
     } else {
       // Convert scroll-view content into the first page
       const titleEl = document.getElementById('editor-title');
       const bodyEl  = document.getElementById('editor-body');
       let html = '';
       if (titleEl && titleEl.value.trim()) {
-        html += `<h1 style="font-size:18pt;font-weight:700;margin:0 0 14px 0;">${titleEl.value.trim()}</h1>`;
+        html += `<h1 class="page-doc-title">${titleEl.value.trim()}</h1>`;
       }
       if (bodyEl) html += bodyEl.innerHTML;
       createPage(html);
@@ -1209,6 +1436,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const saved = localStorage.getItem('pt-view-mode');
   if (saved === 'pages') setView('pages');
+
+  // ── Print / PDF export ──
+  const printBtn = document.getElementById('print-page-btn');
+  if (printBtn) {
+    printBtn.addEventListener('click', () => {
+      // Save first
+      clearTimeout(pagesSaveTimer);
+      savePageContent();
+      // Temporarily make pages-container full-size for print
+      document.body.classList.add('printing');
+      window.print();
+      document.body.classList.remove('printing');
+    });
+  }
 })();
 
 // ── Page Settings ───────────────────────────────────────────────────────────
@@ -1260,10 +1501,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.querySelectorAll('.page-content').forEach(p => {
       p.style.padding = m + 'mm';
+      p.style.paddingTop = '12px';
+      p.style.paddingBottom = '12px';
     });
-    document.querySelectorAll('.page-number').forEach(p => {
-      p.style.bottom = (m / 2) + 'mm';
-      p.style.right  = m + 'mm';
+    document.querySelectorAll('.page-header-zone, .page-footer-zone').forEach(p => {
+      p.style.paddingLeft = m + 'mm';
+      p.style.paddingRight = m + 'mm';
     });
 
     const container = document.getElementById('pages-container');

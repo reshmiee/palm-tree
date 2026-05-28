@@ -2014,6 +2014,8 @@ mark {
   transform: scale(0.85);
   transform-origin: top center;
   margin-bottom: calc(-297mm * 0.15); /* compensate for scale shrink */
+  display: flex;
+  flex-direction: column;
 }
 
 .page-sheet:focus-within {
@@ -2085,15 +2087,16 @@ mark {
 
 .page-content {
   outline: none;
-  min-height: 257mm;
+  min-height: 240mm;
   width: 100%;
   cursor: text;
   font-size: 12pt;
   line-height: 1.6;
   font-family: var(--font-main, system-ui, sans-serif);
   color: #000;
-  padding: 25.4mm 25.4mm 25.4mm 25.4mm;
+  padding: 12px 25.4mm;
   box-sizing: border-box;
+  flex: 1;
 }
 
 /* ── Toolbar centering override in page view ── */
@@ -2194,4 +2197,197 @@ mark {
 
 .ps-apply:hover {
   opacity: 0.75;
+}
+/* ── Level 3: Font Family Picker ── */
+
+.fmt-fontfamily-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.fmt-fontfamily-select {
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--font-main);
+  color: var(--black);
+  background: var(--gray-100);
+  outline: none;
+  cursor: pointer;
+  max-width: 120px;
+  transition: border-color 0.15s;
+}
+
+.fmt-fontfamily-select:focus,
+.fmt-fontfamily-select:hover {
+  border-color: var(--gray-400);
+}
+
+/* ── Level 3: Table Insertion ── */
+
+.table-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: transparent;
+}
+
+.table-picker {
+  position: fixed;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  padding: 10px;
+  z-index: 201;
+  user-select: none;
+}
+
+.table-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 22px);
+  grid-template-rows: repeat(8, 22px);
+  gap: 2px;
+}
+
+.table-picker-cell {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--gray-200);
+  border-radius: 3px;
+  cursor: pointer;
+  background: white;
+  transition: background 0.08s, border-color 0.08s;
+}
+
+.table-picker-cell.hovered {
+  background: var(--gray-100);
+  border-color: var(--black);
+}
+
+.table-picker-cell.selected {
+  background: rgba(0,0,0,0.08);
+  border-color: var(--black);
+}
+
+.table-picker-label {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--gray-500);
+  text-align: center;
+  font-family: var(--font-main);
+  min-height: 16px;
+}
+
+/* ── Level 3: Table Styles in Editor ── */
+
+.editor-body table,
+.page-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  font-size: inherit;
+}
+
+.editor-body table td,
+.editor-body table th,
+.page-content table td,
+.page-content table th {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  min-width: 40px;
+  vertical-align: top;
+  position: relative;
+}
+
+.editor-body table th,
+.page-content table th {
+  background: var(--gray-100);
+  font-weight: 600;
+}
+
+.editor-body table tr:hover td,
+.page-content table tr:hover td {
+  background: rgba(0,0,0,0.02);
+}
+
+/* ── Level 3: Page Header & Footer ── */
+
+.page-header-editable,
+.page-footer-editable {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  font-size: 9pt;
+  color: #888;
+  font-family: var(--font-main, system-ui, sans-serif);
+  line-height: 1.4;
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  transition: border-color 0.15s, color 0.15s;
+  padding: 4px 0;
+}
+
+.page-header-editable:focus,
+.page-footer-editable:focus {
+  border-bottom-color: var(--gray-200);
+  border-top-color: var(--gray-200);
+  color: #333;
+}
+
+.page-header-editable:empty::before {
+  content: attr(data-placeholder);
+  color: #ccc;
+  pointer-events: none;
+}
+
+.page-footer-editable:empty::before {
+  content: attr(data-placeholder);
+  color: #ccc;
+  pointer-events: none;
+}
+
+.page-header-zone {
+  padding: 8px 25.4mm 0 25.4mm;
+  box-sizing: border-box;
+}
+
+.page-footer-zone {
+  padding: 0 25.4mm 8px 25.4mm;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-footer-left { flex: 1; }
+.page-footer-right {
+  font-size: 9pt;
+  color: #aaa;
+  font-family: var(--font-main, system-ui, sans-serif);
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+/* ── Level 3: Document title treatment ── */
+
+.page-doc-title {
+  font-size: 22pt;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+  font-family: var(--font-main, system-ui, sans-serif);
+}
+
+/* ── Level 3: Print page-side button divider ── */
+
+.page-side-divider {
+  width: 20px;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+  margin: 2px 8px;
 }
