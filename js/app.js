@@ -650,8 +650,21 @@ document.addEventListener('DOMContentLoaded', () => {
     cmContainer.className = 'code-block-cm';
     wrapper.appendChild(cmContainer);
 
-    // Insert into editor
-    const range = window.getSelection().getRangeAt(0);
+    // Insert into editor — ensure there is a valid selection/range first
+    let insertSel = window.getSelection();
+    if (!insertSel || insertSel.rangeCount === 0) {
+      bodyEl.focus();
+      insertSel = window.getSelection();
+      if (insertSel && insertSel.rangeCount === 0) {
+        const newRange = document.createRange();
+        newRange.selectNodeContents(bodyEl);
+        newRange.collapse(false);
+        insertSel.removeAllRanges();
+        insertSel.addRange(newRange);
+      }
+    }
+    if (!insertSel || insertSel.rangeCount === 0) return; // still no range, bail
+    const range = insertSel.getRangeAt(0);
     range.deleteContents();
     range.insertNode(wrapper);
     const p = document.createElement('p');
@@ -957,7 +970,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (folderViewOpen) closeFolderView();
 
     const hasTitle = titleEl.value.trim().length > 0;
-    const hasBody = bodyEl.value.trim().length > 0;
+    const hasBody = bodyEl.innerText.trim().length > 0;
 
     if (!hasTitle && !hasBody) {
       showToast('Oops, write something first.', true);
