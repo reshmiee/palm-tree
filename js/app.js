@@ -1098,6 +1098,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let pagesSaveTimer = null;
   let currentZoom = parseFloat(localStorage.getItem('pt-zoom')) || 0.85;
   let currentLineSpacing = localStorage.getItem('pt-line-spacing') || '1.5';
+  // Sync toolbar select to saved value
+  (function() {
+    // Sync line spacing label on page view init
+    const lsLabelEl = document.getElementById('doc-tb-ls-label');
+    const LS_LABEL_MAP = { '1': '1×', '1.15': '1.15×', '1.5': '1.5×', '2': '2×', '2.5': '2.5×' };
+    if (lsLabelEl) lsLabelEl.textContent = LS_LABEL_MAP[currentLineSpacing] || currentLineSpacing + '×';
+    const lsPanel2 = document.getElementById('doc-tb-ls-panel');
+    if (lsPanel2) lsPanel2.querySelectorAll('.doc-tb-dropdown-item').forEach(i => {
+      i.classList.toggle('doc-tb-dropdown-item--selected', i.dataset.value === currentLineSpacing);
+    });
+  })();
 
   function applyZoom(z) {
     currentZoom = Math.max(0.4, Math.min(2.0, z));
@@ -1112,6 +1123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const label = document.getElementById('zoom-label');
     if (label) label.textContent = Math.round(currentZoom * 100) + '%';
+    const zInput = document.getElementById('doc-tb-zoom-input');
+    if (zInput && document.activeElement !== zInput) zInput.value = Math.round(currentZoom * 100) + '%';
     updateRuler();
   }
 
@@ -1563,7 +1576,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (saved === 'pages') setView('pages');
 
   // ── Print / PDF export ──
-  const printBtn = document.getElementById('print-page-btn');
+  const printBtn = document.getElementById('doc-tb-print');
   if (printBtn) {
     printBtn.addEventListener('click', () => {
       // Save first
@@ -1649,8 +1662,8 @@ document.addEventListener('DOMContentLoaded', () => {
 (function () {
 
   // ── Zoom buttons ──
-  const zoomIn  = document.getElementById('zoom-in-btn');
-  const zoomOut = document.getElementById('zoom-out-btn');
+  const zoomIn  = document.getElementById('doc-tb-zoom-in');
+  const zoomOut = document.getElementById('doc-tb-zoom-out');
   const ZOOM_STEPS = [0.40, 0.50, 0.60, 0.70, 0.75, 0.80, 0.85, 0.90, 1.00, 1.10, 1.20, 1.50, 2.00];
 
   function stepZoom(dir) {
@@ -1669,19 +1682,102 @@ document.addEventListener('DOMContentLoaded', () => {
   if (zoomIn)  zoomIn.addEventListener('click',  () => stepZoom(+1));
   if (zoomOut) zoomOut.addEventListener('click', () => stepZoom(-1));
 
-  // ── Line spacing ──
-  const lsSelect = document.getElementById('line-spacing-select');
-  if (lsSelect) {
-    // Restore saved value
-    const saved = localStorage.getItem('pt-line-spacing');
-    if (saved) lsSelect.value = saved;
-
-    lsSelect.addEventListener('change', () => {
-      if (window._pageViewSetLineSpacing) {
-        window._pageViewSetLineSpacing(lsSelect.value);
+  // ── Zoom input (typeable %) ──
+  const zoomInput = document.getElementById('doc-tb-zoom-input');
+  function syncZoomInput() {
+    if (!zoomInput || !window._pageViewGetZoom) return;
+    zoomInput.value = Math.round(window._pageViewGetZoom() * 100) + '%';
+  }
+  // Patch applyZoom to also update input
+  const _origSetZoom = window._pageViewSetZoom;
+  window._pageViewSetZoom = function(z) {
+    if (_origSetZoom) _origSetZoom(z);
+    syncZoomInput();
+  };
+  if (zoomInput) {
+    zoomInput.addEventListener('focus', () => {
+      zoomInput.select();
+    });
+    zoomInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+        e.preventDefault();
+        let raw = zoomInput.value.replace('%', '').trim();
+        let pct = parseFloat(raw);
+        if (!isNaN(pct) && pct >= 10 && pct <= 300) {
+          const z = pct / 100;
+          if (window._pageViewSetZoom) window._pageViewSetZoom(z);
+        } else {
+          syncZoomInput(); // reset
+        }
+        zoomInput.blur();
+      }
+    });
+    zoomInput.addEventListener('blur', () => {
+      let raw = zoomInput.value.replace('%', '').trim();
+      let pct = parseFloat(raw);
+      if (!isNaN(pct) && pct >= 10 && pct <= 300) {
+        const z = pct / 100;
+        if (window._pageViewSetZoom) window._pageViewSetZoom(z);
+      } else {
+        syncZoomInput();
       }
     });
   }
+  // Sync on page view enter
+  setTimeout(syncZoomInput, 100);
+
+  // ── Line spacing custom dropdown ──
+  (function() {
+    const LS_LABELS = { '1': '1×', '1.15': '1.15×', '1.5': '1.5×', '2': '2×', '2.5': '2.5×' };
+    const lsBtn   = document.getElementById('doc-tb-ls-btn');
+    const lsPanel = document.getElementById('doc-tb-ls-panel');
+    if (!lsBtn || !lsPanel) return;
+
+    // Restore saved value
+    const saved = localStorage.getItem('pt-line-spacing') || '1.5';
+    const lsLabel = document.getElementById('doc-tb-ls-label');
+    if (lsLabel) lsLabel.textContent = LS_LABELS[saved] || saved + '×';
+    lsPanel.querySelectorAll('.doc-tb-dropdown-item').forEach(i => {
+      i.classList.toggle('doc-tb-dropdown-item--selected', i.dataset.value === saved);
+    });
+
+    lsBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      document.querySelectorAll('.doc-tb-dropdown-panel:not(.hidden)').forEach(p => {
+        if (p !== lsPanel) {
+          p.classList.add('hidden');
+          const b = p.previousElementSibling;
+          if (b) b.setAttribute('aria-expanded', 'false');
+        }
+      });
+      const wasHidden = lsPanel.classList.contains('hidden');
+      lsPanel.classList.toggle('hidden');
+      lsBtn.setAttribute('aria-expanded', wasHidden ? 'true' : 'false');
+    });
+
+    lsPanel.querySelectorAll('.doc-tb-dropdown-item').forEach(item => {
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const val = item.dataset.value;
+        lsPanel.querySelectorAll('.doc-tb-dropdown-item').forEach(i => i.classList.remove('doc-tb-dropdown-item--selected'));
+        item.classList.add('doc-tb-dropdown-item--selected');
+        lsPanel.classList.add('hidden');
+        lsBtn.setAttribute('aria-expanded', 'false');
+        if (lsLabel) lsLabel.textContent = LS_LABELS[val] || val + '×';
+        if (window._pageViewSetLineSpacing) window._pageViewSetLineSpacing(val);
+      });
+    });
+
+    document.addEventListener('mousedown', (e) => {
+      const wrap = lsBtn.closest('.doc-tb-dropdown');
+      if (wrap && !wrap.contains(e.target)) {
+        lsPanel.classList.add('hidden');
+        lsBtn.setAttribute('aria-expanded', 'false');
+      }
+    }, true);
+  })();
 
   // ── Show/hide ruler and side panel when view changes ──
   const scrollBtn = document.getElementById('view-scroll-btn');
@@ -1781,6 +1877,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 (function () {
   const FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64];
+
+  function rgbToHex(rgb) {
+    const m = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (!m) return rgb;
+    return '#' + [m[1],m[2],m[3]].map(n => parseInt(n).toString(16).padStart(2,'0')).join('');
+  }
   let dtFontSize = 12;
 
   function getActiveBody() {
@@ -1797,32 +1899,96 @@ document.addEventListener('DOMContentLoaded', () => {
     document.execCommand(cmd, false, val || null);
   }
 
-  // ── Paragraph style ──
-  const paraSelect = document.getElementById('doc-tb-para');
-  if (paraSelect) {
-    paraSelect.addEventListener('mousedown', (e) => e.stopPropagation());
-    paraSelect.addEventListener('change', () => {
-      const val = paraSelect.value;
-      const body = getActiveBody();
-      if (body) body.focus();
-      document.execCommand('formatBlock', false, val === 'p' ? 'p' : val);
+  // ── Custom dropdown helper ──
+  function makeDropdown(btnId, panelId, onSelect) {
+    const btn = document.getElementById(btnId);
+    const panel = document.getElementById(panelId);
+    if (!btn || !panel) return { setLabel: () => {}, setValue: () => {} };
+
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Close all other open panels
+      document.querySelectorAll('.doc-tb-dropdown-panel:not(.hidden)').forEach(p => {
+        if (p !== panel) {
+          p.classList.add('hidden');
+          const b = p.previousElementSibling;
+          if (b) b.setAttribute('aria-expanded', 'false');
+        }
+      });
+      const wasHidden = panel.classList.contains('hidden');
+      panel.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', wasHidden ? 'true' : 'false');
     });
+
+    panel.querySelectorAll('.doc-tb-dropdown-item').forEach(item => {
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        panel.querySelectorAll('.doc-tb-dropdown-item').forEach(i => i.classList.remove('doc-tb-dropdown-item--selected'));
+        item.classList.add('doc-tb-dropdown-item--selected');
+        panel.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+        onSelect(item.dataset.value, item);
+      });
+    });
+
+    document.addEventListener('mousedown', (e) => {
+      const wrap = btn.closest('.doc-tb-dropdown');
+      if (wrap && !wrap.contains(e.target)) {
+        panel.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    }, true);
+
+    return {
+      setLabel(text) {
+        const label = btn.querySelector('.doc-tb-dropdown-label');
+        if (label) label.textContent = text;
+      },
+      setValue(val) {
+        panel.querySelectorAll('.doc-tb-dropdown-item').forEach(i => {
+          i.classList.toggle('doc-tb-dropdown-item--selected', i.dataset.value === val);
+        });
+        const active = panel.querySelector(`[data-value="${val}"]`);
+        if (active) {
+          const label = btn.querySelector('.doc-tb-dropdown-label');
+          if (label) label.textContent = active.textContent.trim();
+        }
+      }
+    };
   }
 
-  // ── Font family ──
-  const fontSelect = document.getElementById('doc-tb-font');
-  if (fontSelect) {
-    fontSelect.addEventListener('mousedown', (e) => e.stopPropagation());
-    fontSelect.addEventListener('change', () => {
-      const val = fontSelect.value;
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return;
-      const range = sel.getRangeAt(0);
-      if (range.collapsed) {
-        const body = getActiveBody();
-        if (body) body.dataset.nextFontFamily = val;
-        return;
-      }
+  // ── Paragraph style dropdown ──
+  const PARA_LABELS = { p: 'Normal text', h1: 'Heading 1', h2: 'Heading 2', h3: 'Heading 3', h4: 'Heading 4' };
+  const paraDropdown = makeDropdown('doc-tb-para-btn', 'doc-tb-para-panel', (val) => {
+    const body = getActiveBody();
+    if (body) body.focus();
+    document.execCommand('formatBlock', false, val);
+    paraDropdown.setLabel(PARA_LABELS[val] || 'Normal text');
+    if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+  });
+
+  // ── Font family dropdown ──
+  const FONT_LABELS = {
+    '': 'Default',
+    "'Georgia', serif": 'Georgia',
+    "'Times New Roman', Times, serif": 'Times New Roman',
+    "'Palatino Linotype', Palatino, serif": 'Palatino',
+    "'Arial', sans-serif": 'Arial',
+    "'Helvetica Neue', Helvetica, sans-serif": 'Helvetica',
+    "'Trebuchet MS', sans-serif": 'Trebuchet',
+    "'Verdana', sans-serif": 'Verdana',
+    "'Courier New', Courier, monospace": 'Courier New',
+  };
+  const fontDropdown = makeDropdown('doc-tb-font-btn', 'doc-tb-font-panel', (val) => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) {
+      const body = getActiveBody();
+      if (body) body.dataset.nextFontFamily = val;
+    } else {
       const span = document.createElement('span');
       span.style.fontFamily = val || 'inherit';
       try { range.surroundContents(span); }
@@ -1830,9 +1996,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.execCommand('insertHTML', false,
           `<span style="font-family:${val || 'inherit'}">${range.toString()}</span>`);
       }
-      scheduleAutoSave();
-    });
-  }
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    }
+    fontDropdown.setLabel(FONT_LABELS[val] || 'Default');
+  });
 
   // ── Font size ──
   const fsLabel = document.getElementById('doc-tb-fs-label');
@@ -1889,31 +2056,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Paragraph style
-    if (paraSelect) {
-      const block = document.queryCommandValue('formatBlock').toLowerCase();
-      paraSelect.value = block || 'p';
+    const block = document.queryCommandValue('formatBlock').toLowerCase();
+    const blockVal = block || 'p';
+    if (typeof paraDropdown !== 'undefined') {
+      paraDropdown.setValue(blockVal);
     }
 
-    // Font size at cursor
+    // Font size + family at cursor
     const sel = window.getSelection();
     if (sel && sel.anchorNode) {
       const node = sel.anchorNode.nodeType === Node.TEXT_NODE
         ? sel.anchorNode.parentElement : sel.anchorNode;
       if (node) {
-        const fs = window.getComputedStyle(node).fontSize;
+        const cs = window.getComputedStyle(node);
+        // Font size
+        const fs = cs.fontSize;
         if (fs) {
           const px = Math.round(parseFloat(fs));
           dtFontSize = px;
           if (fsLabel) fsLabel.textContent = px;
         }
-        // Font family
-        if (fontSelect) {
-          const ff = window.getComputedStyle(node).fontFamily;
-          const match = Array.from(fontSelect.options).find(o =>
-            o.value && ff.toLowerCase().includes(o.value.toLowerCase().replace(/'/g,'').split(',')[0].trim())
-          );
-          fontSelect.value = match ? match.value : '';
+        // Font family — find closest match in our list
+        if (typeof fontDropdown !== 'undefined') {
+          const ff = cs.fontFamily.toLowerCase();
+          const FONT_VALS = ['', "'Georgia', serif", "'Times New Roman', Times, serif",
+            "'Palatino Linotype', Palatino, serif", "'Arial', sans-serif",
+            "'Helvetica Neue', Helvetica, sans-serif", "'Trebuchet MS', sans-serif",
+            "'Verdana', sans-serif", "'Courier New', Courier, monospace"];
+          const match = FONT_VALS.find(v => v && ff.includes(v.toLowerCase().replace(/'/g,'').split(',')[0].trim()));
+          fontDropdown.setValue(match !== undefined ? match : '');
         }
+        // Text colour
+        try {
+          const colour = document.queryCommandValue('foreColor');
+          if (colour && colour !== 'false') {
+            const bar = document.getElementById('doc-tb-textcolour-bar');
+            const input = document.getElementById('doc-tb-textcolour-input');
+            if (bar) bar.style.background = colour;
+            if (input) { try { input.value = rgbToHex(colour); } catch(e) {} }
+          }
+        } catch(e) {}
       }
     }
   }
@@ -2065,6 +2247,32 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('selectionchange', () => {
     if (document.body.classList.contains('page-view-active')) {
       updateAlignState();
+    }
+  });
+
+  // ── Undo / Redo ──
+  const undoBtn = document.getElementById('doc-tb-undo');
+  const redoBtn = document.getElementById('doc-tb-redo');
+  function docExec(cmd) {
+    const body = getActiveBody();
+    if (body) body.focus();
+    document.execCommand(cmd, false, null);
+  }
+  if (undoBtn) undoBtn.addEventListener('mousedown', (e) => { e.preventDefault(); docExec('undo'); });
+  if (redoBtn) redoBtn.addEventListener('mousedown', (e) => { e.preventDefault(); docExec('redo'); });
+
+  // Keyboard undo/redo when in page view
+  document.addEventListener('keydown', (e) => {
+    if (!document.body.classList.contains('page-view-active')) return;
+    const focused = document.activeElement;
+    const inPage = focused && focused.classList.contains('page-content');
+    if (!inPage) return;
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
+      // Let browser handle native undo in contenteditable
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+      e.preventDefault();
+      docExec('redo');
     }
   });
 

@@ -202,29 +202,41 @@
       <!-- ── Doc toolbar (page view only) ── -->
       <div class="doc-toolbar hidden" id="doc-toolbar">
 
-        <!-- Paragraph style -->
-        <select class="doc-tb-select doc-tb-para" id="doc-tb-para" title="Paragraph style" aria-label="Paragraph style">
-          <option value="p">Normal text</option>
-          <option value="h1">Heading 1</option>
-          <option value="h2">Heading 2</option>
-          <option value="h3">Heading 3</option>
-          <option value="h4">Heading 4</option>
-        </select>
+        <!-- Paragraph style custom dropdown -->
+        <div class="doc-tb-dropdown" id="doc-tb-para-wrap">
+          <button class="doc-tb-dropdown-btn doc-tb-para-btn" id="doc-tb-para-btn" aria-haspopup="listbox" aria-expanded="false" title="Paragraph style">
+            <span class="doc-tb-dropdown-label" id="doc-tb-para-label">Normal text</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="10" height="10" class="doc-tb-dropdown-arrow"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="doc-tb-dropdown-panel hidden" id="doc-tb-para-panel" role="listbox">
+            <div class="doc-tb-dropdown-item" data-value="p" role="option"><span style="font-size:13px">Normal text</span></div>
+            <div class="doc-tb-dropdown-item" data-value="h1" role="option"><span style="font-size:20px;font-weight:700;line-height:1.2">Heading 1</span></div>
+            <div class="doc-tb-dropdown-item" data-value="h2" role="option"><span style="font-size:16px;font-weight:700;line-height:1.2">Heading 2</span></div>
+            <div class="doc-tb-dropdown-item" data-value="h3" role="option"><span style="font-size:13px;font-weight:700;line-height:1.2">Heading 3</span></div>
+            <div class="doc-tb-dropdown-item" data-value="h4" role="option"><span style="font-size:12px;font-weight:600;color:#555;line-height:1.2">Heading 4</span></div>
+          </div>
+        </div>
 
         <div class="doc-tb-divider"></div>
 
-        <!-- Font family -->
-        <select class="doc-tb-select doc-tb-font" id="doc-tb-font" title="Font family" aria-label="Font family">
-          <option value="">Default</option>
-          <option value="'Georgia', serif">Georgia</option>
-          <option value="'Times New Roman', Times, serif">Times New Roman</option>
-          <option value="'Palatino Linotype', Palatino, serif">Palatino</option>
-          <option value="'Arial', sans-serif">Arial</option>
-          <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
-          <option value="'Trebuchet MS', sans-serif">Trebuchet</option>
-          <option value="'Verdana', sans-serif">Verdana</option>
-          <option value="'Courier New', Courier, monospace">Courier New</option>
-        </select>
+        <!-- Font family custom dropdown -->
+        <div class="doc-tb-dropdown" id="doc-tb-font-wrap">
+          <button class="doc-tb-dropdown-btn doc-tb-font-btn" id="doc-tb-font-btn" aria-haspopup="listbox" aria-expanded="false" title="Font family">
+            <span class="doc-tb-dropdown-label" id="doc-tb-font-label">Default</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="10" height="10" class="doc-tb-dropdown-arrow"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="doc-tb-dropdown-panel hidden" id="doc-tb-font-panel" role="listbox">
+            <div class="doc-tb-dropdown-item" data-value="" role="option"><span style="font-family:system-ui,sans-serif">Default</span></div>
+            <div class="doc-tb-dropdown-item" data-value="'Georgia', serif" role="option"><span style="font-family:Georgia,serif">Georgia</span></div>
+            <div class="doc-tb-dropdown-item" data-value="'Times New Roman', Times, serif" role="option"><span style="font-family:'Times New Roman',Times,serif">Times New Roman</span></div>
+            <div class="doc-tb-dropdown-item" data-value="'Palatino Linotype', Palatino, serif" role="option"><span style="font-family:Palatino,serif">Palatino</span></div>
+            <div class="doc-tb-dropdown-item" data-value="'Arial', sans-serif" role="option"><span style="font-family:Arial,sans-serif">Arial</span></div>
+            <div class="doc-tb-dropdown-item" data-value="'Helvetica Neue', Helvetica, sans-serif" role="option"><span style="font-family:Helvetica,sans-serif">Helvetica</span></div>
+            <div class="doc-tb-dropdown-item" data-value="'Trebuchet MS', sans-serif" role="option"><span style="font-family:'Trebuchet MS',sans-serif">Trebuchet</span></div>
+            <div class="doc-tb-dropdown-item" data-value="'Verdana', sans-serif" role="option"><span style="font-family:Verdana,sans-serif">Verdana</span></div>
+            <div class="doc-tb-dropdown-item" data-value="'Courier New', Courier, monospace" role="option"><span style="font-family:'Courier New',monospace">Courier New</span></div>
+          </div>
+        </div>
 
         <div class="doc-tb-divider"></div>
 
@@ -322,6 +334,56 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M17 3l4 4-9.5 9.5-4-4L17 3z"/><path d="M3 21l4-4"/><line x1="2" y1="22" x2="22" y2="2" stroke-width="1.5" stroke-dasharray="2 2"/></svg>
         </button>
 
+        <div class="doc-tb-divider"></div>
+
+        <!-- Undo -->
+        <button class="doc-tb-btn" id="doc-tb-undo" title="Undo (Ctrl+Z)" aria-label="Undo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1 0 5.87 5.93"/></svg>
+        </button>
+
+        <!-- Redo -->
+        <button class="doc-tb-btn" id="doc-tb-redo" title="Redo (Ctrl+Y)" aria-label="Redo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M21 7v6h-6"/><path d="M21 13A9 9 0 1 1 18.13 5.93"/></svg>
+        </button>
+
+        <div class="doc-tb-divider"></div>
+
+        <!-- Line spacing custom dropdown -->
+        <div class="doc-tb-dropdown" id="doc-tb-ls-wrap" title="Line spacing">
+          <button class="doc-tb-dropdown-btn doc-tb-ls-btn" id="doc-tb-ls-btn" aria-haspopup="listbox" aria-expanded="false" title="Line spacing">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="flex-shrink:0;opacity:0.7"><line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/><polyline points="20 3 23 5 20 7" fill="currentColor" stroke="none"/><polyline points="20 13 23 15 20 17" fill="currentColor" stroke="none"/></svg>
+            <span class="doc-tb-dropdown-label" id="doc-tb-ls-label">1.5×</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="10" height="10" class="doc-tb-dropdown-arrow"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="doc-tb-dropdown-panel hidden" id="doc-tb-ls-panel" role="listbox">
+            <div class="doc-tb-dropdown-item" data-value="1" role="option">1×</div>
+            <div class="doc-tb-dropdown-item" data-value="1.15" role="option">1.15×</div>
+            <div class="doc-tb-dropdown-item doc-tb-dropdown-item--selected" data-value="1.5" role="option">1.5×</div>
+            <div class="doc-tb-dropdown-item" data-value="2" role="option">2×</div>
+            <div class="doc-tb-dropdown-item" data-value="2.5" role="option">2.5×</div>
+          </div>
+        </div>
+
+        <div class="doc-tb-divider"></div>
+
+        <!-- Zoom control -->
+        <div class="doc-tb-zoom-wrap" id="doc-tb-zoom-wrap">
+          <button class="doc-tb-btn" id="doc-tb-zoom-out" title="Zoom out" aria-label="Zoom out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="13" height="13"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <input class="doc-tb-zoom-input" id="doc-tb-zoom-input" type="text" value="85%" aria-label="Zoom level" title="Click to type a zoom %" />
+          <button class="doc-tb-btn" id="doc-tb-zoom-in" title="Zoom in" aria-label="Zoom in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+
+        <div class="doc-tb-divider"></div>
+
+        <!-- Print -->
+        <button class="doc-tb-btn" id="doc-tb-print" title="Print / Export PDF" aria-label="Print">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        </button>
+
       </div>
 
       <!-- ── Pages container (page view only) ── -->
@@ -359,28 +421,6 @@
 
         <button class="page-side-btn" id="add-page-btn" title="Add page" aria-label="Add page">+</button>
         <button class="page-side-btn" id="del-page-btn" title="Delete page" aria-label="Delete page">−</button>
-        <div class="page-side-divider"></div>
-        <!-- Zoom control -->
-        <div class="page-zoom-wrap" id="page-zoom-wrap">
-          <button class="page-side-btn page-zoom-btn" id="zoom-out-btn" title="Zoom out" aria-label="Zoom out">−</button>
-          <span class="page-zoom-label" id="zoom-label">85%</span>
-          <button class="page-side-btn page-zoom-btn" id="zoom-in-btn" title="Zoom in" aria-label="Zoom in">+</button>
-        </div>
-        <div class="page-side-divider"></div>
-        <!-- Line spacing -->
-        <div class="page-linespacing-wrap" id="page-linespacing-wrap">
-          <select class="page-side-select" id="line-spacing-select" title="Line spacing" aria-label="Line spacing">
-            <option value="1">1×</option>
-            <option value="1.15">1.15×</option>
-            <option value="1.5" selected>1.5×</option>
-            <option value="2">2×</option>
-            <option value="2.5">2.5×</option>
-          </select>
-        </div>
-        <div class="page-side-divider"></div>
-        <button class="page-side-btn" id="print-page-btn" title="Print / Export PDF" aria-label="Print or export PDF">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        </button>
       </div>
 
       <!-- ── Formatting Toolbar (two-layer) ── -->
