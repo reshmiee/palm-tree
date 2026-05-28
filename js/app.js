@@ -96,9 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // surroundContents fails on partial selections — use execCommand fallback
       document.execCommand('fontSize', false, '7');
       bodyEl.querySelectorAll('font[size="7"]').forEach(el => {
-        el.style.fontSize = px + 'px';
-        el.removeAttribute('size');
-        el.outerHTML = el.outerHTML.replace(/^<font/, '<span').replace(/font>$/, 'span>');
+        const span = document.createElement('span');
+        span.style.fontSize = px + 'px';
+        while (el.firstChild) span.appendChild(el.firstChild);
+        el.parentNode.replaceChild(span, el);
       });
     }
     scheduleAutoSave();
@@ -179,10 +180,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Font size buttons
     const decBtn = document.getElementById('fmt-fontsize-dec');
     const incBtn = document.getElementById('fmt-fontsize-inc');
+  function nearestFontSizeIdx(px) {
+    const exact = FONT_SIZES.indexOf(px);
+    if (exact !== -1) return exact;
+    // Find the closest preset index
+    let closest = 0;
+    let minDiff = Infinity;
+    FONT_SIZES.forEach((s, i) => {
+      const diff = Math.abs(s - px);
+      if (diff < minDiff) { minDiff = diff; closest = i; }
+    });
+    return closest;
+  }
+
     if (decBtn) {
       decBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        const idx = FONT_SIZES.indexOf(currentFontSize);
+        const idx = nearestFontSizeIdx(currentFontSize);
         const next = idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0];
         applyFontSize(next);
         bodyEl.focus();
@@ -191,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (incBtn) {
       incBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        const idx = FONT_SIZES.indexOf(currentFontSize);
+        const idx = nearestFontSizeIdx(currentFontSize);
         const next = idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1];
         applyFontSize(next);
         bodyEl.focus();
@@ -650,21 +664,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cmContainer.className = 'code-block-cm';
     wrapper.appendChild(cmContainer);
 
-    // Insert into editor — ensure there is a valid selection/range first
-    let insertSel = window.getSelection();
-    if (!insertSel || insertSel.rangeCount === 0) {
-      bodyEl.focus();
-      insertSel = window.getSelection();
-      if (insertSel && insertSel.rangeCount === 0) {
-        const newRange = document.createRange();
-        newRange.selectNodeContents(bodyEl);
-        newRange.collapse(false);
-        insertSel.removeAllRanges();
-        insertSel.addRange(newRange);
-      }
-    }
-    if (!insertSel || insertSel.rangeCount === 0) return; // still no range, bail
-    const range = insertSel.getRangeAt(0);
+    // Insert into editor
+    const range = window.getSelection().getRangeAt(0);
     range.deleteContents();
     range.insertNode(wrapper);
     const p = document.createElement('p');
@@ -970,7 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (folderViewOpen) closeFolderView();
 
     const hasTitle = titleEl.value.trim().length > 0;
-    const hasBody = bodyEl.innerText.trim().length > 0;
+    const hasBody = bodyEl.value.trim().length > 0;
 
     if (!hasTitle && !hasBody) {
       showToast('Oops, write something first.', true);
@@ -2039,15 +2040,23 @@ document.addEventListener('DOMContentLoaded', () => {
     scheduleAutoSave();
   }
 
+  function nearestDocFontSizeIdx(px) {
+    const exact = FONT_SIZES.indexOf(px);
+    if (exact !== -1) return exact;
+    let closest = 0, minDiff = Infinity;
+    FONT_SIZES.forEach((s, i) => { const d = Math.abs(s - px); if (d < minDiff) { minDiff = d; closest = i; } });
+    return closest;
+  }
+
   if (fsDecBtn) fsDecBtn.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    const idx = FONT_SIZES.indexOf(dtFontSize);
+    const idx = nearestDocFontSizeIdx(dtFontSize);
     applyDocFontSize(idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0]);
   });
 
   if (fsIncBtn) fsIncBtn.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    const idx = FONT_SIZES.indexOf(dtFontSize);
+    const idx = nearestDocFontSizeIdx(dtFontSize);
     applyDocFontSize(idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1]);
   });
 

@@ -78,8 +78,31 @@ function exportAllData() {
   };
 }
 function importAllData(data) {
-  if (data.notes) saveAllNotes(data.notes);
-  if (data.folders) saveAllFolders(data.folders);
+  if (data.notes) {
+    const existing = getAllNotes();
+    const existingIds = new Set(existing.map(n => n.id));
+    const merged = [...existing];
+    data.notes.forEach(n => {
+      if (existingIds.has(n.id)) {
+        const idx = merged.findIndex(e => e.id === n.id);
+        if (new Date(n.updatedAt) >= new Date(merged[idx].updatedAt)) {
+          merged[idx] = n;
+        }
+      } else {
+        merged.unshift(n);
+      }
+    });
+    saveAllNotes(merged);
+  }
+  if (data.folders) {
+    const existing = getAllFolders();
+    const existingIds = new Set(existing.map(f => f.id));
+    const merged = [...existing];
+    data.folders.forEach(f => {
+      if (!existingIds.has(f.id)) merged.push(f);
+    });
+    saveAllFolders(merged);
+  }
 }
 
 function clearAllData() {
