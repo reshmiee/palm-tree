@@ -1478,6 +1478,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Switch views ──
   function setView(mode) {
+    const docToolbar = document.getElementById('doc-toolbar');
+    const ruler = document.getElementById('page-ruler');
     if (mode === 'pages') {
       editor.classList.add('page-view');
       pagesBtn.classList.add('active');
@@ -1485,6 +1487,10 @@ document.addEventListener('DOMContentLoaded', () => {
       pagesContainer.classList.remove('hidden');
       sideBtns.classList.remove('hidden');
       updateToolbarPosition(true);
+      // Show doc toolbar + ruler, hide floating toolbar
+      if (docToolbar) docToolbar.classList.remove('hidden');
+      if (ruler) ruler.classList.remove('hidden');
+      document.body.classList.add('page-view-active');
       if (pages.length === 0) initPages();
     } else {
       // Flush any pending page save before switching back
@@ -1497,6 +1503,10 @@ document.addEventListener('DOMContentLoaded', () => {
       pagesContainer.classList.add('hidden');
       sideBtns.classList.add('hidden');
       updateToolbarPosition(false);
+      // Hide doc toolbar + ruler, restore floating toolbar
+      if (docToolbar) docToolbar.classList.add('hidden');
+      if (ruler) ruler.classList.add('hidden');
+      document.body.classList.remove('page-view-active');
     }
     localStorage.setItem('pt-view-mode', mode);
   }
@@ -1764,5 +1774,298 @@ document.addEventListener('DOMContentLoaded', () => {
   const mRight = document.getElementById('ruler-margin-right');
   if (mLeft)  mLeft.addEventListener('mousedown',  (e) => startDrag('left', e));
   if (mRight) mRight.addEventListener('mousedown', (e) => startDrag('right', e));
+
+})();
+
+// ── Doc Toolbar (Level 1) ────────────────────────────────────────────────────
+
+(function () {
+  const FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64];
+  let dtFontSize = 12;
+
+  function getActiveBody() {
+    const a = document.activeElement;
+    if (a && a.isContentEditable) return a;
+    // Fall back to last focused page-content
+    const pages = document.querySelectorAll('.page-content');
+    return pages[pages.length - 1] || null;
+  }
+
+  function dtExec(cmd, val) {
+    const body = getActiveBody();
+    if (body) body.focus();
+    document.execCommand(cmd, false, val || null);
+  }
+
+  // ── Paragraph style ──
+  const paraSelect = document.getElementById('doc-tb-para');
+  if (paraSelect) {
+    paraSelect.addEventListener('mousedown', (e) => e.stopPropagation());
+    paraSelect.addEventListener('change', () => {
+      const val = paraSelect.value;
+      const body = getActiveBody();
+      if (body) body.focus();
+      document.execCommand('formatBlock', false, val === 'p' ? 'p' : val);
+    });
+  }
+
+  // ── Font family ──
+  const fontSelect = document.getElementById('doc-tb-font');
+  if (fontSelect) {
+    fontSelect.addEventListener('mousedown', (e) => e.stopPropagation());
+    fontSelect.addEventListener('change', () => {
+      const val = fontSelect.value;
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (range.collapsed) {
+        const body = getActiveBody();
+        if (body) body.dataset.nextFontFamily = val;
+        return;
+      }
+      const span = document.createElement('span');
+      span.style.fontFamily = val || 'inherit';
+      try { range.surroundContents(span); }
+      catch(e) {
+        document.execCommand('insertHTML', false,
+          `<span style="font-family:${val || 'inherit'}">${range.toString()}</span>`);
+      }
+      scheduleAutoSave();
+    });
+  }
+
+  // ── Font size ──
+  const fsLabel = document.getElementById('doc-tb-fs-label');
+  const fsDecBtn = document.getElementById('doc-tb-fs-dec');
+  const fsIncBtn = document.getElementById('doc-tb-fs-inc');
+
+  function applyDocFontSize(px) {
+    dtFontSize = px;
+    if (fsLabel) fsLabel.textContent = px;
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+    const span = document.createElement('span');
+    span.style.fontSize = px + 'px';
+    try { range.surroundContents(span); }
+    catch(e) {
+      document.execCommand('fontSize', false, '7');
+      document.querySelectorAll('.page-content font[size="7"]').forEach(el => {
+        el.style.fontSize = px + 'px';
+        el.removeAttribute('size');
+      });
+    }
+    scheduleAutoSave();
+  }
+
+  if (fsDecBtn) fsDecBtn.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    const idx = FONT_SIZES.indexOf(dtFontSize);
+    applyDocFontSize(idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0]);
+  });
+
+  if (fsIncBtn) fsIncBtn.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    const idx = FONT_SIZES.indexOf(dtFontSize);
+    applyDocFontSize(idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1]);
+  });
+
+  // ── B / I / U ──
+  document.querySelectorAll('.doc-tb-btn[data-cmd]').forEach(btn => {
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      dtExec(btn.dataset.cmd);
+      updateDocToolbarState();
+    });
+  });
+
+  // ── Reflect cursor state ──
+  function updateDocToolbarState() {
+    // B / I / U active states
+    document.querySelectorAll('.doc-tb-btn[data-cmd]').forEach(btn => {
+      try { btn.classList.toggle('active', document.queryCommandState(btn.dataset.cmd)); }
+      catch(e) {}
+    });
+
+    // Paragraph style
+    if (paraSelect) {
+      const block = document.queryCommandValue('formatBlock').toLowerCase();
+      paraSelect.value = block || 'p';
+    }
+
+    // Font size at cursor
+    const sel = window.getSelection();
+    if (sel && sel.anchorNode) {
+      const node = sel.anchorNode.nodeType === Node.TEXT_NODE
+        ? sel.anchorNode.parentElement : sel.anchorNode;
+      if (node) {
+        const fs = window.getComputedStyle(node).fontSize;
+        if (fs) {
+          const px = Math.round(parseFloat(fs));
+          dtFontSize = px;
+          if (fsLabel) fsLabel.textContent = px;
+        }
+        // Font family
+        if (fontSelect) {
+          const ff = window.getComputedStyle(node).fontFamily;
+          const match = Array.from(fontSelect.options).find(o =>
+            o.value && ff.toLowerCase().includes(o.value.toLowerCase().replace(/'/g,'').split(',')[0].trim())
+          );
+          fontSelect.value = match ? match.value : '';
+        }
+      }
+    }
+  }
+
+  document.addEventListener('selectionchange', () => {
+    if (document.body.classList.contains('page-view-active')) {
+      updateDocToolbarState();
+    }
+  });
+
+  // Init state if already in page view on load
+  if (document.body.classList.contains('page-view-active')) {
+    updateDocToolbarState();
+  }
+})();
+
+// ── Doc Toolbar Level 2 ──────────────────────────────────────────────────────
+
+(function () {
+
+  function getActiveBody() {
+    const a = document.activeElement;
+    if (a && a.isContentEditable) return a;
+    const pages = document.querySelectorAll('.page-content');
+    return pages[pages.length - 1] || null;
+  }
+
+  function dtExec(cmd, val) {
+    const body = getActiveBody();
+    if (body) body.focus();
+    document.execCommand(cmd, false, val || null);
+  }
+
+  // ── Text colour ──
+  const textColourBtn   = document.getElementById('doc-tb-textcolour-btn');
+  const textColourInput = document.getElementById('doc-tb-textcolour-input');
+  const textColourBar   = document.getElementById('doc-tb-textcolour-bar');
+  let lastTextColour = '#000000';
+
+  if (textColourBtn && textColourInput) {
+    // Click the button area (not the hidden input) reapplies last colour
+    textColourBtn.addEventListener('mousedown', (e) => {
+      // If click is on the svg/span part, reapply last colour
+      if (e.target === textColourBtn || e.target.closest('svg') || e.target === textColourBar) {
+        e.preventDefault();
+        const body = getActiveBody();
+        if (body) body.focus();
+        document.execCommand('foreColor', false, lastTextColour);
+      }
+      // Otherwise let the hidden input open (it sits on top via opacity:0)
+    });
+
+    textColourInput.addEventListener('input', () => {
+      lastTextColour = textColourInput.value;
+      if (textColourBar) textColourBar.style.background = lastTextColour;
+      const body = getActiveBody();
+      if (body) body.focus();
+      document.execCommand('foreColor', false, lastTextColour);
+    });
+  }
+
+  // ── Highlight colour ──
+  const hlBtn   = document.getElementById('doc-tb-highlight-btn');
+  const hlInput = document.getElementById('doc-tb-highlight-input');
+  const hlBar   = document.getElementById('doc-tb-highlight-bar');
+  let lastHlColour = '#FFFF00';
+
+  if (hlBtn && hlInput) {
+    hlBtn.addEventListener('mousedown', (e) => {
+      if (e.target === hlBtn || e.target.closest('svg') || e.target === hlBar) {
+        e.preventDefault();
+        const body = getActiveBody();
+        if (body) body.focus();
+        document.execCommand('hiliteColor', false, lastHlColour);
+      }
+    });
+
+    hlInput.addEventListener('input', () => {
+      lastHlColour = hlInput.value;
+      if (hlBar) hlBar.style.background = lastHlColour;
+      const body = getActiveBody();
+      if (body) body.focus();
+      document.execCommand('hiliteColor', false, lastHlColour);
+    });
+  }
+
+  // ── Alignment, lists, indent/outdent — all data-cmd, same pattern as B/I/U ──
+  const level2Cmds = [
+    'doc-tb-alignleft', 'doc-tb-aligncenter', 'doc-tb-alignright', 'doc-tb-alignjustify',
+    'doc-tb-ul', 'doc-tb-ol', 'doc-tb-indent', 'doc-tb-outdent'
+  ];
+
+  level2Cmds.forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      dtExec(btn.dataset.cmd);
+      // Reflect alignment active state immediately
+      updateAlignState();
+    });
+  });
+
+  function updateAlignState() {
+    ['justifyLeft','justifyCenter','justifyRight','justifyFull'].forEach(cmd => {
+      const map = {
+        justifyLeft:    'doc-tb-alignleft',
+        justifyCenter:  'doc-tb-aligncenter',
+        justifyRight:   'doc-tb-alignright',
+        justifyFull:    'doc-tb-alignjustify',
+      };
+      const btn = document.getElementById(map[cmd]);
+      if (btn) {
+        try { btn.classList.toggle('active', document.queryCommandState(cmd)); } catch(e) {}
+      }
+    });
+    ['insertUnorderedList','insertOrderedList'].forEach(cmd => {
+      const map = { insertUnorderedList: 'doc-tb-ul', insertOrderedList: 'doc-tb-ol' };
+      const btn = document.getElementById(map[cmd]);
+      if (btn) {
+        try { btn.classList.toggle('active', document.queryCommandState(cmd)); } catch(e) {}
+      }
+    });
+  }
+
+  // ── Link button — reuses existing link modal ──
+  const docLinkBtn = document.getElementById('doc-tb-link');
+  if (docLinkBtn) {
+    docLinkBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      // Delegate to the existing link button in the tray
+      const existing = document.getElementById('fmt-link-btn');
+      if (existing) existing.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    });
+  }
+
+  // ── Clear formatting ──
+  const clearBtn = document.getElementById('doc-tb-clear');
+  if (clearBtn) {
+    clearBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const body = getActiveBody();
+      if (body) body.focus();
+      document.execCommand('removeFormat', false, null);
+    });
+  }
+
+  // ── Extend selectionchange to also update Level 2 state ──
+  document.addEventListener('selectionchange', () => {
+    if (document.body.classList.contains('page-view-active')) {
+      updateAlignState();
+    }
+  });
 
 })();

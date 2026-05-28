@@ -2607,3 +2607,155 @@ mark {
 .page-ruler.visible {
   display: flex;
 }
+
+/* ══════════════════════════════════════════════
+   DOC TOOLBAR (page view top bar)
+   ══════════════════════════════════════════════ */
+
+.doc-toolbar {
+  position: sticky;
+  top: 28px; /* sits just below the ruler */
+  z-index: 39;
+  width: 100%;
+  background: #f8f8f8;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 12px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  min-height: 40px;
+}
+
+.doc-toolbar::-webkit-scrollbar { display: none; }
+
+/* Hide in scroll view — shown only when page-view is active */
+.doc-toolbar.hidden { display: none; }
+
+/* ── Buttons ── */
+
+.doc-tb-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #333;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s;
+  padding: 0;
+}
+
+.doc-tb-btn:hover {
+  background: #e4e4e4;
+}
+
+.doc-tb-btn.active {
+  background: #d0d8ff;
+  color: #1a1a8c;
+}
+
+/* ── Divider ── */
+
+.doc-tb-divider {
+  width: 1px;
+  height: 20px;
+  background: #ddd;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ── Selects ── */
+
+.doc-tb-select {
+  height: 28px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 12px;
+  font-family: var(--font-main, system-ui, sans-serif);
+  color: #333;
+  padding: 0 6px;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+  transition: border-color 0.12s;
+}
+
+.doc-tb-select:hover,
+.doc-tb-select:focus {
+  border-color: #aaa;
+}
+
+.doc-tb-para { width: 120px; }
+.doc-tb-font { width: 110px; }
+
+/* ── Font size control ── */
+
+.doc-tb-fontsize {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.doc-tb-fs-label {
+  font-size: 12px;
+  font-family: var(--font-main, system-ui, sans-serif);
+  color: #333;
+  min-width: 26px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+/* ── Hide the floating bottom toolbar + tray in page view ── */
+.page-view-active .format-toolbar,
+.page-view-active .fmt-tray {
+  display: none !important;
+}
+
+/* ── Doc Toolbar Level 2: Colour buttons ── */
+
+.doc-tb-colour-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.doc-tb-colour-btn {
+  flex-direction: column;
+  gap: 1px;
+  height: 30px;
+  width: 26px;
+  padding-bottom: 3px;
+}
+
+.doc-tb-colour-bar {
+  display: block;
+  width: 14px;
+  height: 3px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.doc-tb-colour-input {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  padding: 0;
+  border: none;
+}
