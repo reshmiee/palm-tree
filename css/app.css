@@ -1344,8 +1344,8 @@ mark {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  height: 20px;
-  margin-bottom: var(--space-sm);
+  height: 5px;
+  margin-bottom: 1px;
 }
 
 /* ── Title row (title + download button) ── */

@@ -1775,10 +1775,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   delPageBtn.addEventListener('click', () => deletePage());
   scrollBtn.addEventListener('click', () => setView('scroll'));
-  pagesBtn.addEventListener('click',  () => setView('pages'));
+  pagesBtn.addEventListener('click',  () => {
+    showToast('🚧 Page view is coming soon — stay tuned!');
+    return;
+    setView('pages'); // eslint-disable-line no-unreachable
+  });
 
   const saved = localStorage.getItem('pt-view-mode');
-  if (saved === 'pages') setView('pages');
+  // Page view temporarily disabled — clear any saved state and stay in scroll mode
+  if (saved === 'pages') localStorage.removeItem('pt-view-mode');
 
   // ── Print / PDF export ──
   const printBtn = document.getElementById('doc-tb-print');
@@ -1995,10 +2000,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (scrollBtn) scrollBtn.addEventListener('click', () => setRulerVisible(false));
-  if (pagesBtn)  pagesBtn.addEventListener('click',  () => {
-    setRulerVisible(true);
-    setTimeout(() => { if (window._pageViewGetZoom) updateRulerExternal(); }, 80);
-  });
+  // Page view disabled — ruler listener intentionally skipped
 
   function updateRulerExternal() {
     // Trigger ruler update by calling the internal updater exposed on window
