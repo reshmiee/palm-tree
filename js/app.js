@@ -298,6 +298,235 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initImageInsertion();
 
+  // ── Code block insertion ──────────────────────────────
+  function initCodeBlock() {
+    const codeBtn = document.getElementById('fmt-code-btn');
+    if (!codeBtn) return;
+
+    codeBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      bodyEl.focus();
+
+      const sel = window.getSelection();
+      const selectedText = sel ? sel.toString() : '';
+      const anchor = sel && sel.anchorNode;
+      const existingBlock = anchor && anchor.parentElement && anchor.parentElement.closest('.code-block-wrapper');
+
+      if (existingBlock) {
+        const p = document.createElement('p');
+        const cmEl = existingBlock.querySelector('.CodeMirror');
+        p.textContent = cmEl && cmEl.CodeMirror ? cmEl.CodeMirror.getValue() : '';
+        existingBlock.replaceWith(p);
+        codeBtn.classList.remove('active');
+      } else {
+        insertCodeBlock(selectedText);
+        codeBtn.classList.add('active');
+      }
+      scheduleAutoSave();
+    });
+
+    document.addEventListener('selectionchange', () => {
+      const sel = window.getSelection();
+      const anchor = sel && sel.anchorNode;
+      const inside = anchor && anchor.parentElement && anchor.parentElement.closest('.code-block-wrapper');
+      codeBtn.classList.toggle('active', !!inside);
+    });
+  }
+
+  function insertCodeBlock(initialCode = '') {
+    const LANGUAGES = [
+      { value: 'plaintext',   label: 'Plain Text',  mode: null },
+      { value: 'javascript',  label: 'JavaScript',  mode: 'javascript' },
+      { value: 'typescript',  label: 'TypeScript',  mode: { name: 'javascript', typescript: true } },
+      { value: 'python',      label: 'Python',      mode: 'python' },
+      { value: 'html',        label: 'HTML',        mode: 'htmlmixed' },
+      { value: 'css',         label: 'CSS',         mode: 'css' },
+      { value: 'java',        label: 'Java',        mode: 'text/x-java' },
+      { value: 'cpp',         label: 'C++',         mode: 'text/x-c++src' },
+      { value: 'c',           label: 'C',           mode: 'text/x-csrc' },
+      { value: 'csharp',      label: 'C#',          mode: 'text/x-csharp' },
+      { value: 'php',         label: 'PHP',         mode: 'php' },
+      { value: 'ruby',        label: 'Ruby',        mode: 'ruby' },
+      { value: 'go',          label: 'Go',          mode: 'go' },
+      { value: 'rust',        label: 'Rust',        mode: 'rust' },
+      { value: 'swift',       label: 'Swift',       mode: 'swift' },
+      { value: 'kotlin',      label: 'Kotlin',      mode: 'text/x-kotlin' },
+      { value: 'sql',         label: 'SQL',         mode: 'sql' },
+      { value: 'bash',        label: 'Bash',        mode: 'shell' },
+      { value: 'yaml',        label: 'YAML',        mode: 'yaml' },
+      { value: 'xml',         label: 'XML',         mode: 'xml' },
+      { value: 'markdown',    label: 'Markdown',    mode: 'markdown' },
+    ];
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block-wrapper';
+    wrapper.contentEditable = 'false';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'code-block-header';
+
+    const dots = document.createElement('div');
+    dots.className = 'code-block-dots';
+    dots.innerHTML = `<span></span><span></span><span></span>`;
+
+    const select = document.createElement('select');
+    select.className = 'code-block-lang-select';
+    LANGUAGES.forEach(({ value, label }) => {
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = label;
+      select.appendChild(opt);
+    });
+
+    header.appendChild(dots);
+    header.appendChild(select);
+    wrapper.appendChild(header);
+
+    // CodeMirror container
+    const cmContainer = document.createElement('div');
+    cmContainer.className = 'code-block-cm';
+    wrapper.appendChild(cmContainer);
+
+    // Insert into editor
+    const range = window.getSelection().getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(wrapper);
+    const p = document.createElement('p');
+    p.innerHTML = '<br>';
+    wrapper.after(p);
+
+    // Init CodeMirror
+    const cm = CodeMirror(cmContainer, {
+      value: initialCode,
+      mode: null,
+      theme: 'default',
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      indentUnit: 2,
+      tabSize: 2,
+      indentWithTabs: false,
+      lineWrapping: false,
+      extraKeys: { Tab: (cm) => cm.execCommand('indentMore') },
+      lint: false,
+    });
+
+    cm.on('change', () => {
+      scheduleAutoSave();
+      runLint();
+    });
+
+    function universalLint(code) {
+      const errors = [];
+      const stack = [];
+      const pairs = { ')': '(', '}': '{', ']': '[' };
+      const openers = new Set(['(', '{', '[']);
+      const closers = new Set([')', '}', ']']);
+      let inString = null;
+      let escaped = false;
+      let line = 0, col = 0;
+
+      for (let i = 0; i < code.length; i++) {
+        const ch = code[i];
+
+        if (ch === '\n') { line++; col = 0; continue; }
+        col++;
+
+        if (escaped) { escaped = false; continue; }
+        if (ch === '\\' && inString) { escaped = true; continue; }
+
+        if (inString) {
+          if (ch === inString) inString = null;
+          continue;
+        }
+
+        if (ch === '"' || ch === "'" || ch === '`') {
+          inString = ch;
+          continue;
+        }
+
+        if (openers.has(ch)) {
+          stack.push({ ch, line, col });
+        } else if (closers.has(ch)) {
+          if (stack.length === 0) {
+            errors.push({ message: `Unexpected '${ch}' — no matching opening bracket`, severity: 'error', from: { line, ch: col - 1 }, to: { line, ch: col } });
+          } else {
+            const top = stack[stack.length - 1];
+            if (top.ch !== pairs[ch]) {
+              errors.push({ message: `Mismatched bracket: expected closing for '${top.ch}' but got '${ch}'`, severity: 'error', from: { line, ch: col - 1 }, to: { line, ch: col } });
+              stack.pop();
+            } else {
+              stack.pop();
+            }
+          }
+        }
+      }
+
+      // Unclosed strings
+      if (inString) {
+        errors.push({ message: `Unclosed string — missing closing ${inString}`, severity: 'error', from: { line, ch: col }, to: { line, ch: col + 1 } });
+      }
+
+      // Unclosed brackets
+      stack.forEach(({ ch, line, col }) => {
+        errors.push({ message: `Unclosed '${ch}' — missing closing bracket`, severity: 'error', from: { line, ch: col - 1 }, to: { line, ch: col } });
+      });
+
+      return errors;
+    }
+
+    function runLint() {
+      // Clear existing marks
+      cm.getAllMarks().forEach(m => m.clear());
+      const langVal = select.value;
+      const code = cm.getValue();
+
+      if (langVal === 'javascript') {
+        // Real JSHint linting
+        if (typeof JSHINT !== 'undefined') {
+          JSHINT(code, { esversion: 11, undef: false, unused: false });
+          (JSHINT.errors || []).forEach(err => {
+            if (!err) return;
+            const line = (err.line || 1) - 1;
+            const col = (err.character || 1) - 1;
+            cm.markText({ line, ch: col }, { line, ch: col + 10 }, {
+              className: 'cm-lint-error',
+              title: err.reason
+            });
+          });
+        }
+      }
+
+      // Universal bracket/string checks for all languages
+      universalLint(code).forEach(err => {
+        cm.markText(err.from, err.to, {
+          className: 'cm-lint-error',
+          title: err.message
+        });
+      });
+    }
+
+    function applyLanguage(langVal) {
+      const lang = LANGUAGES.find(l => l.value === langVal);
+      if (!lang) return;
+      cm.setOption('mode', lang.mode);
+      cm.setOption('gutters', []);
+      cm.setOption('lint', false);
+      cm.refresh();
+      runLint();
+    }
+
+    select.addEventListener('change', () => applyLanguage(select.value));
+    select.addEventListener('mousedown', (e) => e.stopPropagation());
+    select.addEventListener('click', (e) => e.stopPropagation());
+    select.addEventListener('pointerdown', (e) => e.stopPropagation());
+
+    setTimeout(() => { cm.refresh(); cm.focus(); }, 50);
+  }
+
+  initCodeBlock();
+
   // ── Link insertion ───────────────────────────────────
 
   function initLinkInsertion() {
@@ -448,42 +677,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ── Show/hide toolbar based on editor focus ──────────
-  function showToolbars(show) {
-    const toolbar = document.getElementById('format-toolbar');
-    const tray = document.getElementById('fmt-tray');
-    if (!toolbar) return;
-    toolbar.style.opacity = show ? '1' : '0';
-    toolbar.style.pointerEvents = show ? 'auto' : 'none';
-    if (!show && tray) {
-      tray.classList.remove('open');
-      trayOpen = false;
-      const aBtn = document.getElementById('fmt-a-btn');
-      if (aBtn) aBtn.setAttribute('aria-expanded', 'false');
-    }
+  // ── Toolbar always visible ──────────────────────────
+  const _toolbar = document.getElementById('format-toolbar');
+  if (_toolbar) {
+    _toolbar.style.opacity = '1';
+    _toolbar.style.pointerEvents = 'auto';
   }
-
-  bodyEl.addEventListener('focus', () => showToolbars(true));
-  bodyEl.addEventListener('blur', (e) => {
-    // Don't hide if focus moved to the toolbar or tray itself
-    setTimeout(() => {
-      const active = document.activeElement;
-      const toolbar = document.getElementById('format-toolbar');
-      const tray = document.getElementById('fmt-tray');
-      const modal = document.getElementById('link-modal-overlay');
-      const imgInput = document.getElementById('fmt-img-input');
-      if (
-        (toolbar && toolbar.contains(active)) ||
-        (tray && tray.contains(active)) ||
-        (modal && !modal.classList.contains('hidden')) ||
-        active === imgInput
-      ) return;
-      showToolbars(false);
-    }, 150);
-  });
-
-  // Start hidden until editor is focused
-  showToolbars(false);
 
   // ── New note button ────────────────────────────────
 
