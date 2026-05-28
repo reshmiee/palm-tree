@@ -102,8 +102,8 @@ function openFolderView() {
   document.getElementById('folder-view').classList.remove('hidden');
   document.getElementById('editor-title').style.display = 'none';
   document.getElementById('editor-body').style.display = 'none';
-  document.getElementById('editor-meta') && (document.getElementById('editor-meta').style.display = 'none');
-  document.querySelector('.editor-meta').style.display = 'none';
+  const editorMeta = document.querySelector('.editor-meta');
+  if (editorMeta) editorMeta.style.display = 'none';
   document.getElementById('folder-nav-btn').classList.add('active');
   renderFolderView();
 }
@@ -113,7 +113,7 @@ function closeFolderView() {
   document.getElementById('folder-view').classList.add('hidden');
   document.getElementById('editor-title').style.display = '';
   document.getElementById('editor-body').style.display = '';
-  document.querySelector('.editor-meta').style.display = '';
+  const _em = document.querySelector('.editor-meta'); if (_em) _em.style.display = '';
   document.getElementById('folder-nav-btn').classList.remove('active');
   const sidePanel = document.getElementById('folder-side-panel');
   if (sidePanel) sidePanel.remove();
@@ -234,7 +234,7 @@ function renderFolderSidePanel() {
       document.getElementById('folder-view').classList.add('hidden');
       document.getElementById('editor-title').style.display = '';
       document.getElementById('editor-body').style.display = '';
-      document.querySelector('.editor-meta').style.display = '';
+      const _em = document.querySelector('.editor-meta'); if (_em) _em.style.display = '';
       document.getElementById('folder-nav-btn').classList.remove('active');
       openNote(card.dataset.id);
     });
@@ -265,7 +265,7 @@ function renderFolderSidePanel() {
     document.getElementById('folder-view').classList.add('hidden');
     document.getElementById('editor-title').style.display = '';
     document.getElementById('editor-body').style.display = '';
-    document.querySelector('.editor-meta').style.display = '';
+    const _em = document.querySelector('.editor-meta'); if (_em) _em.style.display = '';
     document.getElementById('folder-nav-btn').classList.remove('active');
     clearEditor();
     highlightActiveCard(note.id);
@@ -458,24 +458,6 @@ function showNameModal(onConfirm) {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 }
 
-function showDeleteConfirmModal(message, onConfirm) {
-  const overlay = document.createElement('div');
-  overlay.className = 'name-modal-overlay';
-  overlay.innerHTML = `
-    <div class="name-modal">
-      <div class="name-modal-label">${message}</div>
-      <div class="name-modal-actions">
-        <button class="name-modal-cancel">Cancel</button>
-        <button class="name-modal-confirm" style="background:#c0392b;">Delete</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-  function close() { overlay.remove(); }
-  overlay.querySelector('.name-modal-cancel').addEventListener('click', close);
-  overlay.querySelector('.name-modal-confirm').addEventListener('click', () => { onConfirm(); close(); });
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-}
 
 function showAddNoteModal(folderId) {
   const allNotes = getAllNotes().filter(n => !n.folderId);
@@ -526,7 +508,7 @@ function showAddNoteModal(folderId) {
     document.getElementById('folder-view').classList.add('hidden');
     document.getElementById('editor-title').style.display = '';
     document.getElementById('editor-body').style.display = '';
-    document.querySelector('.editor-meta').style.display = '';
+    const _em = document.querySelector('.editor-meta'); if (_em) _em.style.display = '';
     document.getElementById('folder-nav-btn').classList.remove('active');
     activeNoteId = note.id;
     clearEditor();

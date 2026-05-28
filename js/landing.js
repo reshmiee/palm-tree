@@ -1,4 +1,4 @@
-// landing.js — nothing needed on this page// landing.js — info carousel
+// landing.js — info carousel
 
 const slides = [
   "Palm Tree is a private writing space that lives entirely in your browser. No accounts, no servers — just open and write.",

@@ -78,34 +78,33 @@ function exportAllData() {
   };
 }
 function importAllData(data) {
-  if (data.notes) {
-    const existing = getAllNotes();
-    const existingIds = new Set(existing.map(n => n.id));
-    const merged = [...existing];
-    data.notes.forEach(n => {
-      if (existingIds.has(n.id)) {
-        const idx = merged.findIndex(e => e.id === n.id);
-        if (new Date(n.updatedAt) >= new Date(merged[idx].updatedAt)) {
-          merged[idx] = n;
-        }
-      } else {
-        merged.unshift(n);
-      }
-    });
-    saveAllNotes(merged);
-  }
-  if (data.folders) {
-    const existing = getAllFolders();
-    const existingIds = new Set(existing.map(f => f.id));
-    const merged = [...existing];
-    data.folders.forEach(f => {
-      if (!existingIds.has(f.id)) merged.push(f);
-    });
-    saveAllFolders(merged);
-  }
+  if (data.notes) saveAllNotes(data.notes);
+  if (data.folders) saveAllFolders(data.folders);
 }
 
 function clearAllData() {
   localStorage.removeItem(KEYS.NOTES);
   localStorage.removeItem(KEYS.FOLDERS);
+}
+// ─── Shared modal helpers ────────────────────────────
+// Defined here (loaded first) so notes.js, folders.js, and app.js can all call it
+// without depending on script load order.
+
+function showDeleteConfirmModal(message, onConfirm) {
+  const overlay = document.createElement('div');
+  overlay.className = 'name-modal-overlay';
+  overlay.innerHTML = `
+    <div class="name-modal">
+      <div class="name-modal-label">${message}</div>
+      <div class="name-modal-actions">
+        <button class="name-modal-cancel">Cancel</button>
+        <button class="name-modal-confirm" style="background:#c0392b;">Delete</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  function close() { overlay.remove(); }
+  overlay.querySelector('.name-modal-cancel').addEventListener('click', close);
+  overlay.querySelector('.name-modal-confirm').addEventListener('click', () => { onConfirm(); close(); });
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 }
