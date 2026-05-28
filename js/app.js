@@ -96,10 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // surroundContents fails on partial selections — use execCommand fallback
       document.execCommand('fontSize', false, '7');
       bodyEl.querySelectorAll('font[size="7"]').forEach(el => {
-        const span = document.createElement('span');
-        span.style.fontSize = px + 'px';
-        while (el.firstChild) span.appendChild(el.firstChild);
-        el.parentNode.replaceChild(span, el);
+        el.style.fontSize = px + 'px';
+        el.removeAttribute('size');
+        el.outerHTML = el.outerHTML.replace(/^<font/, '<span').replace(/font>$/, 'span>');
       });
     }
     scheduleAutoSave();
@@ -180,23 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Font size buttons
     const decBtn = document.getElementById('fmt-fontsize-dec');
     const incBtn = document.getElementById('fmt-fontsize-inc');
-  function nearestFontSizeIdx(px) {
-    const exact = FONT_SIZES.indexOf(px);
-    if (exact !== -1) return exact;
-    // Find the closest preset index
-    let closest = 0;
-    let minDiff = Infinity;
-    FONT_SIZES.forEach((s, i) => {
-      const diff = Math.abs(s - px);
-      if (diff < minDiff) { minDiff = diff; closest = i; }
-    });
-    return closest;
-  }
-
     if (decBtn) {
       decBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        const idx = nearestFontSizeIdx(currentFontSize);
+        const idx = FONT_SIZES.indexOf(currentFontSize);
         const next = idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0];
         applyFontSize(next);
         bodyEl.focus();
@@ -205,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (incBtn) {
       incBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        const idx = nearestFontSizeIdx(currentFontSize);
+        const idx = FONT_SIZES.indexOf(currentFontSize);
         const next = idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1];
         applyFontSize(next);
         bodyEl.focus();
@@ -1127,13 +1113,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyZoom(z) {
     currentZoom = Math.max(0.4, Math.min(2.0, z));
     localStorage.setItem('pt-zoom', currentZoom);
+    const dims = getPageDims();
+    const pxPerMm = 96 / 25.4;
+    const pageHpx = dims.h * pxPerMm;
+    // CSS scale() keeps the layout box at original size.
+    // Visual height shrinks by pageHpx*(1-zoom), pull up by that minus a fixed gap.
+    const gap = 16;
+    const pullUp = pageHpx * (1 - currentZoom) - gap;
     document.querySelectorAll('.page-sheet').forEach(sheet => {
       sheet.style.transform = `scale(${currentZoom})`;
-      // margin-bottom compensation: negative margin = -(pageH * (1 - zoom))
-      const dims = getPageDims();
-      const pxPerMm = 96 / 25.4;
-      const pageHpx = dims.h * pxPerMm;
-      sheet.style.marginBottom = `calc(-${pageHpx * (1 - currentZoom)}px)`;
+      sheet.style.transformOrigin = 'top center';
+      sheet.style.marginBottom = pullUp > 0 ? `-${pullUp}px` : `${gap}px`;
     });
     const label = document.getElementById('zoom-label');
     if (label) label.textContent = Math.round(currentZoom * 100) + '%';
@@ -1202,7 +1192,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!content) continue;
 
       const dims = getPageDims();
-      // usable height in px: page height minus top+bottom margins
       const pxPerMm = 96 / 25.4;
       const pageHeightPx = dims.h * pxPerMm;
       const marginPx = dims.m * pxPerMm;
@@ -1210,18 +1199,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (content.scrollHeight <= usableH + 4) continue;
 
-      // Find the last child node that still fits
+      // Use getBoundingClientRect for accurate rendered heights instead of
+      // offsetHeight, which returns 0 for elements not yet laid out.
       const children = Array.from(content.childNodes);
+      const contentTop = content.getBoundingClientRect().top;
       let splitIdx = children.length;
-      let cumH = 0;
 
       for (let j = 0; j < children.length; j++) {
         const child = children[j];
-        const childH = child.nodeType === Node.ELEMENT_NODE
-          ? child.offsetHeight
-          : (child.textContent.trim() ? 20 : 0);
-        if (cumH + childH > usableH) { splitIdx = j; break; }
-        cumH += childH;
+        let childBottom;
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          const rect = child.getBoundingClientRect();
+          childBottom = rect.bottom - contentTop;
+        } else {
+          // Text node: skip whitespace-only, estimate others as 1 line
+          if (!child.textContent.trim()) continue;
+          // Wrap in a temporary range to measure
+          const range = document.createRange();
+          range.selectNode(child);
+          const rect = range.getBoundingClientRect();
+          childBottom = rect.bottom - contentTop;
+        }
+        if (childBottom > usableH) { splitIdx = j; break; }
       }
 
       if (splitIdx >= children.length) continue; // nothing to move
@@ -1669,6 +1668,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     panel.classList.add('hidden');
+
+    // Re-sync zoom spacing and ruler after dimension change
+    if (window._pageViewSetZoom && window._pageViewGetZoom) {
+      window._pageViewSetZoom(window._pageViewGetZoom());
+    }
   });
 })();
 // ── Level 4: Zoom, Line Spacing, Ruler drag ─────────────────────────────────
@@ -2040,23 +2044,15 @@ document.addEventListener('DOMContentLoaded', () => {
     scheduleAutoSave();
   }
 
-  function nearestDocFontSizeIdx(px) {
-    const exact = FONT_SIZES.indexOf(px);
-    if (exact !== -1) return exact;
-    let closest = 0, minDiff = Infinity;
-    FONT_SIZES.forEach((s, i) => { const d = Math.abs(s - px); if (d < minDiff) { minDiff = d; closest = i; } });
-    return closest;
-  }
-
   if (fsDecBtn) fsDecBtn.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    const idx = nearestDocFontSizeIdx(dtFontSize);
+    const idx = FONT_SIZES.indexOf(dtFontSize);
     applyDocFontSize(idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0]);
   });
 
   if (fsIncBtn) fsIncBtn.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    const idx = nearestDocFontSizeIdx(dtFontSize);
+    const idx = FONT_SIZES.indexOf(dtFontSize);
     applyDocFontSize(idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1]);
   });
 
