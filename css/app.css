@@ -1538,6 +1538,7 @@ mark {
   bottom: 24px;
   left: calc(460px + 100px + (100vw - 460px - 200px) / 2);
   transform: translateX(-50%);
+  transition: left 0.2s ease;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -1556,6 +1557,7 @@ mark {
   bottom: 96px;
   left: calc(460px + 100px + (100vw - 460px - 200px) / 2);
   transform: translateX(-50%) translateY(6px);
+  transition: left 0.2s ease, opacity 0.18s ease, transform 0.18s ease;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -1972,11 +1974,11 @@ mark {
   border-radius: 1px;
   box-sizing: border-box;
   outline: none;
-  font-size: 11pt;
-  line-height: 1.15;
+  font-size: 12pt;
+  line-height: 1.6;
   color: #000;
   position: relative;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-main, system-ui, sans-serif);
 }
 
 .page-sheet:focus {
@@ -1989,7 +1991,7 @@ mark {
   right: 25.4mm;
   font-size: 9pt;
   color: #999;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-main, system-ui, sans-serif);
 }
 
 /* ── Page side buttons ── */
@@ -2048,12 +2050,18 @@ mark {
   min-height: 257mm;
   width: 100%;
   cursor: text;
-  font-size: 11pt;
-  line-height: 1.15;
-  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  line-height: 1.6;
+  font-family: var(--font-main, system-ui, sans-serif);
   color: #000;
   padding: 25.4mm 25.4mm 25.4mm 25.4mm;
   box-sizing: border-box;
+}
+
+/* ── Toolbar centering override in page view ── */
+.editor.page-view ~ .format-toolbar,
+.editor.page-view ~ .fmt-tray {
+  left: 50%;
 }
 
 /* ── Page Settings Panel ── */

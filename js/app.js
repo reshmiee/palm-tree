@@ -821,49 +821,184 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── View Toggle (scroll vs pages) ──────────────────────────────────────────
 
 (function () {
-  const scrollBtn   = document.getElementById('view-scroll-btn');
-  const pagesBtn    = document.getElementById('view-pages-btn');
-  const editor      = document.querySelector('.editor');
+  const scrollBtn      = document.getElementById('view-scroll-btn');
+  const pagesBtn       = document.getElementById('view-pages-btn');
+  const editor         = document.querySelector('.editor');
   const pagesContainer = document.getElementById('pages-container');
-  const sideBtns    = document.getElementById('page-side-btns');
-  const addPageBtn  = document.getElementById('add-page-btn');
-  const delPageBtn  = document.getElementById('del-page-btn');
+  const sideBtns       = document.getElementById('page-side-btns');
+  const addPageBtn     = document.getElementById('add-page-btn');
+  const delPageBtn     = document.getElementById('del-page-btn');
+  const formatToolbar  = document.getElementById('format-toolbar');
+  const fmtTray        = document.getElementById('fmt-tray');
 
-  let pages = [];
+  let pages      = [];
   let activePage = null;
+  let pagesSaveTimer = null;
 
-  function trackActivePage() {
-    pages.forEach(p => {
-      p.addEventListener('focus', () => { activePage = p; }, true);
-      p.addEventListener('click', () => { activePage = p; });
+  // ── Page dimensions (stored on container dataset) ──
+  function getPageDims() {
+    return {
+      w: parseFloat(pagesContainer.dataset.pageW) || 210,
+      h: parseFloat(pagesContainer.dataset.pageH) || 297,
+      m: parseFloat(pagesContainer.dataset.pageM) || 20,
+    };
+  }
+
+  // ── Serialise all pages into the note's body field ──
+  // We store pages as a JSON blob wrapped in a sentinel comment so the
+  // scroll view doesn't try to render it as rich text.
+  function serialisePages() {
+    return pages.map(p => {
+      const content = p.querySelector('.page-content');
+      return content ? content.innerHTML : '';
     });
   }
 
-  function createPage(content = '') {
-    const div = document.createElement('div');
-    div.className = 'page-sheet';
-    div.setAttribute('contenteditable', 'true');
-    div.spellcheck = true;
-    div.style.cursor = 'text';
-    // Apply saved page dimensions
-    const pc = document.getElementById('pages-container');
-    if (pc && pc.dataset.pageW) div.style.width = pc.dataset.pageW + 'mm';
-    if (pc && pc.dataset.pageH) div.style.minHeight = pc.dataset.pageH + 'mm';
+  function savePageContent() {
+    if (!activeNoteId) return;
+    const note = getNoteById(activeNoteId);
+    if (!note) return;
+    const data = { __palmtree_pages__: true, pages: serialisePages(), dims: getPageDims() };
+    note.body = '<!--PAGES:' + JSON.stringify(data) + '-->';
+    note.updatedAt = new Date().toISOString();
+    saveNote(note);
+    renderRecentNotes();
+    showUnsavedDot(false);
+  }
+
+  function schedulePageSave() {
+    showUnsavedDot(true);
+    clearTimeout(pagesSaveTimer);
+    pagesSaveTimer = setTimeout(savePageContent, 600);
+  }
+
+  // ── Try to parse a page-view body string ──
+  function parsePageBody(body) {
+    if (!body) return null;
+    const match = body.match(/^<!--PAGES:([\s\S]+)-->$/);
+    if (!match) return null;
+    try { return JSON.parse(match[1]); } catch (e) { return null; }
+  }
+
+  // ── Overflow detection: split overflowing content into next page ──
+  function checkOverflow() {
+    for (let i = 0; i < pages.length; i++) {
+      const sheet = pages[i];
+      const content = sheet.querySelector('.page-content');
+      if (!content) continue;
+
+      const dims = getPageDims();
+      // usable height in px: page height minus top+bottom margins
+      const pxPerMm = 96 / 25.4;
+      const pageHeightPx = dims.h * pxPerMm;
+      const marginPx = dims.m * pxPerMm;
+      const usableH = pageHeightPx - marginPx * 2;
+
+      if (content.scrollHeight <= usableH + 4) continue;
+
+      // Find the last child node that still fits
+      const children = Array.from(content.childNodes);
+      let splitIdx = children.length;
+      let cumH = 0;
+
+      for (let j = 0; j < children.length; j++) {
+        const child = children[j];
+        const childH = child.nodeType === Node.ELEMENT_NODE
+          ? child.offsetHeight
+          : (child.textContent.trim() ? 20 : 0);
+        if (cumH + childH > usableH) { splitIdx = j; break; }
+        cumH += childH;
+      }
+
+      if (splitIdx >= children.length) continue; // nothing to move
+
+      // Collect nodes to move
+      const overflow = document.createDocumentFragment();
+      for (let j = splitIdx; j < children.length; j++) {
+        overflow.appendChild(children[j].cloneNode(true));
+      }
+      for (let j = children.length - 1; j >= splitIdx; j--) {
+        content.removeChild(children[j]);
+      }
+
+      // Insert a new page after this one, or reuse existing next page
+      let nextPage = pages[i + 1];
+      if (!nextPage) {
+        nextPage = createPage('', i + 1);
+      }
+      const nextContent = nextPage.querySelector('.page-content');
+      if (nextContent) {
+        nextContent.insertBefore(overflow, nextContent.firstChild);
+      }
+    }
+    updatePageNumbers();
+    schedulePageSave();
+  }
+
+  // ── Create a single page sheet ──
+  function createPage(content = '', insertAfterIdx = null) {
+    const dims = getPageDims();
+    const sheet = document.createElement('div');
+    sheet.className = 'page-sheet';
+
     const body = document.createElement('div');
     body.className = 'page-content';
-    if (pc && pc.dataset.pageM) body.style.padding = pc.dataset.pageM + 'mm';
+    body.setAttribute('contenteditable', 'true');
+    body.spellcheck = true;
+    body.style.padding = dims.m + 'mm';
     body.innerHTML = content;
-    div.appendChild(body);
+
     const num = document.createElement('span');
     num.className = 'page-number';
-    div.appendChild(num);
-    pagesContainer.appendChild(div);
-    pages.push(div);
-    activePage = div;
-    trackActivePage();
+
+    sheet.appendChild(body);
+    sheet.appendChild(num);
+
+    // Click on sheet margins focuses the body
+    sheet.addEventListener('click', (e) => {
+      if (e.target === sheet) body.focus();
+      activePage = sheet;
+    });
+    body.addEventListener('focus', () => { activePage = sheet; });
+
+    // Save + overflow check on input
+    body.addEventListener('input', () => {
+      schedulePageSave();
+      clearTimeout(body._overflowTimer);
+      body._overflowTimer = setTimeout(checkOverflow, 400);
+    });
+
+    // Keyboard: pressing Enter at end of last page creates a new page
+    body.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const idx = pages.indexOf(sheet);
+        if (idx === pages.length - 1) {
+          const sel = window.getSelection();
+          if (sel && sel.anchorNode) {
+            const range = sel.getRangeAt(0);
+            const tempRange = document.createRange();
+            tempRange.selectNodeContents(body);
+            tempRange.setStart(range.endContainer, range.endOffset);
+            if (tempRange.toString().trim() === '') {
+              // cursor is at/near end — let overflow handling create the page naturally
+            }
+          }
+        }
+      }
+    });
+
+    if (insertAfterIdx !== null && insertAfterIdx < pages.length) {
+      const refPage = pages[insertAfterIdx];
+      pagesContainer.insertBefore(sheet, refPage);
+      pages.splice(insertAfterIdx, 0, sheet);
+    } else {
+      pagesContainer.appendChild(sheet);
+      pages.push(sheet);
+    }
+
+    activePage = sheet;
     updatePageNumbers();
-    setTimeout(() => { body.focus(); activePage = div; }, 50);
-    return div;
+    return sheet;
   }
 
   function updatePageNumbers() {
@@ -884,29 +1019,62 @@ document.addEventListener('DOMContentLoaded', () => {
     pages.splice(idx, 1);
     target.remove();
     updatePageNumbers();
-    // Focus the page before, or first if deleted first
     const focusIdx = Math.max(0, idx - 1);
-    const prevBody = pages[focusIdx].querySelector('.page-content');
-    if (prevBody) prevBody.focus();
+    const prevBody = pages[focusIdx] && pages[focusIdx].querySelector('.page-content');
+    if (prevBody) { prevBody.focus(); activePage = pages[focusIdx]; }
+    schedulePageSave();
   }
 
+  // ── Build pages from a note ──
   function initPages() {
     pagesContainer.innerHTML = '';
     pages = [];
-    const titleEl = document.getElementById('editor-title');
-    const bodyEl  = document.getElementById('editor-body');
-    const titleHTML = titleEl && titleEl.value.trim() ? `<p style="font-size:11pt;font-weight:400;margin:0 0 12px 0;font-family:Arial,sans-serif">${titleEl.value.trim()}</p>` : '';
-    const bodyHTML  = bodyEl ? bodyEl.innerHTML : '';
-    createPage(titleHTML + bodyHTML);
+    activePage = null;
+
+    const note = activeNoteId ? getNoteById(activeNoteId) : null;
+    const parsed = note ? parsePageBody(note.body) : null;
+
+    if (parsed && parsed.pages && parsed.pages.length > 0) {
+      // Restore saved dims
+      if (parsed.dims) {
+        pagesContainer.dataset.pageW = parsed.dims.w;
+        pagesContainer.dataset.pageH = parsed.dims.h;
+        pagesContainer.dataset.pageM = parsed.dims.m;
+        syncDimsUI(parsed.dims);
+      }
+      parsed.pages.forEach(html => createPage(html));
+    } else {
+      // Convert scroll-view content into the first page
+      const titleEl = document.getElementById('editor-title');
+      const bodyEl  = document.getElementById('editor-body');
+      let html = '';
+      if (titleEl && titleEl.value.trim()) {
+        html += `<h1 style="font-size:18pt;font-weight:700;margin:0 0 14px 0;">${titleEl.value.trim()}</h1>`;
+      }
+      if (bodyEl) html += bodyEl.innerHTML;
+      createPage(html);
+    }
+
+    // Focus first page
+    const firstBody = pages[0] && pages[0].querySelector('.page-content');
+    if (firstBody) setTimeout(() => { firstBody.focus(); activePage = pages[0]; }, 50);
   }
 
-  window.refreshPageView = function() {
-    const editor = document.querySelector('.editor');
-    if (editor && editor.classList.contains('page-view')) {
-      initPages();
+  // ── Fix toolbar position for page view ──
+  function updateToolbarPosition(isPageView) {
+    if (!formatToolbar || !fmtTray) return;
+    if (isPageView) {
+      // Center toolbar in the full viewport (no sidebar offset needed — page view is full-width scroll)
+      formatToolbar.style.left = '50%';
+      fmtTray.style.left = '50%';
+    } else {
+      // Restore scroll-view formula
+      formatToolbar.style.left = '';
+      fmtTray.style.left = '';
     }
-  };
+  }
 
+  // ── Switch views ──
   function setView(mode) {
     if (mode === 'pages') {
       editor.classList.add('page-view');
@@ -914,39 +1082,50 @@ document.addEventListener('DOMContentLoaded', () => {
       scrollBtn.classList.remove('active');
       pagesContainer.classList.remove('hidden');
       sideBtns.classList.remove('hidden');
+      updateToolbarPosition(true);
       if (pages.length === 0) initPages();
     } else {
+      // Flush any pending page save before switching back
+      clearTimeout(pagesSaveTimer);
+      if (pages.length > 0) savePageContent();
+
       editor.classList.remove('page-view');
       scrollBtn.classList.add('active');
       pagesBtn.classList.remove('active');
       pagesContainer.classList.add('hidden');
       sideBtns.classList.add('hidden');
+      updateToolbarPosition(false);
     }
     localStorage.setItem('pt-view-mode', mode);
   }
 
+  // ── Expose refresh hook for openNote() ──
+  window.refreshPageView = function () {
+    if (editor && editor.classList.contains('page-view')) {
+      initPages();
+    }
+  };
+
+  // ── Sync dims UI helper ──
+  function syncDimsUI(dims) {
+    const wp = document.getElementById('ps-width');
+    const hp = document.getElementById('ps-height');
+    const mp = document.getElementById('ps-margin');
+    if (wp) wp.value = dims.w;
+    if (hp) hp.value = dims.h;
+    if (mp) mp.value = dims.m;
+  }
+
+  // ── Wire buttons ──
   addPageBtn.addEventListener('click', () => {
     const active = getActivePage();
     const idx = pages.indexOf(active);
-    const div = document.createElement('div');
-    div.className = 'page-sheet';
-    div.setAttribute('contenteditable', 'true');
-    div.style.cursor = 'text';
-    const body = document.createElement('div');
-    body.className = 'page-content';
-    div.appendChild(body);
-    const num = document.createElement('span');
-    num.className = 'page-number';
-    div.appendChild(num);
-    // Insert after active page
-    const nextSibling = pages[idx + 1] || null;
-    pagesContainer.insertBefore(div, nextSibling);
-    pages.splice(idx + 1, 0, div);
-    activePage = div;
-    trackActivePage();
-    updatePageNumbers();
-    setTimeout(() => { body.focus(); activePage = div; }, 50);
+    const newPage = createPage('', idx + 1 < pages.length ? idx + 1 : null);
+    const nb = newPage.querySelector('.page-content');
+    if (nb) setTimeout(() => { nb.focus(); activePage = newPage; }, 50);
+    schedulePageSave();
   });
+
   delPageBtn.addEventListener('click', () => deletePage());
   scrollBtn.addEventListener('click', () => setView('scroll'));
   pagesBtn.addEventListener('click',  () => setView('pages'));
@@ -987,10 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   preset.addEventListener('change', () => {
     const p = presets[preset.value];
-    if (p) {
-      wInput.value = p.w;
-      hInput.value = p.h;
-    }
+    if (p) { wInput.value = p.w; hInput.value = p.h; }
   });
 
   wInput.addEventListener('input', () => preset.value = 'custom');
@@ -1002,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const m = parseInt(mInput.value) || 20;
 
     document.querySelectorAll('.page-sheet').forEach(p => {
-      p.style.width    = w + 'mm';
+      p.style.width     = w + 'mm';
       p.style.minHeight = h + 'mm';
     });
     document.querySelectorAll('.page-content').forEach(p => {
@@ -1013,7 +1189,6 @@ document.addEventListener('DOMContentLoaded', () => {
       p.style.right  = m + 'mm';
     });
 
-    // Also apply to future pages via CSS vars stored on container
     const container = document.getElementById('pages-container');
     if (container) {
       container.dataset.pageW = w;
