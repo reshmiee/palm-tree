@@ -1628,6 +1628,19 @@ mark {
   color: var(--white);
 }
 
+.fmt-a-btn {
+  color: var(--gray-500) !important;
+}
+
+.fmt-a-btn:hover {
+  color: var(--gray-700) !important;
+}
+
+.fmt-a-btn[aria-expanded="true"] {
+  background: var(--black) !important;
+  color: var(--white) !important;
+}
+
 .fmt-a-btn span {
   font-size: 22px;
   font-weight: 700;
@@ -1698,11 +1711,12 @@ mark {
   border-radius: 50%;
 }
 
-.code-block-dots span:nth-child(1) { background: #ff5f57; }
-.code-block-dots span:nth-child(2) { background: #febc2e; }
-.code-block-dots span:nth-child(3) { background: #28c840; }
+.code-block-dots span:nth-child(1) { background: #2a2a2a; }
+.code-block-dots span:nth-child(2) { background: #666666; }
+.code-block-dots span:nth-child(3) { background: #aaaaaa; }
 
 .code-block-lang-select {
+  margin-left: 20px;
   font-family: 'Roboto Mono', monospace;
   font-size: 14px;
   color: #555;
@@ -2289,22 +2303,48 @@ mark {
   width: 100%;
   margin: 12px 0;
   font-size: inherit;
+  table-layout: fixed;
 }
 
 .editor-body table td,
 .editor-body table th,
 .page-content table td,
 .page-content table th {
-  border: 1px solid #ccc;
+  border: none;
+  border-right: 1px solid #000;
+  border-top: 1px solid #000;
   padding: 6px 10px;
   min-width: 40px;
+  width: auto;
   vertical-align: top;
   position: relative;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Remove right border on last column cells */
+.editor-body table td:last-child,
+.editor-body table th:last-child,
+.page-content table td:last-child,
+.page-content table th:last-child {
+  border-right: none;
+}
+
+/* Remove top border on the very first row (header) only */
+.editor-body table thead tr:first-child td,
+.editor-body table thead tr:first-child th,
+.editor-body table tbody:first-child tr:first-child td,
+.editor-body table tbody:first-child tr:first-child th,
+.page-content table thead tr:first-child td,
+.page-content table thead tr:first-child th,
+.page-content table tbody:first-child tr:first-child td,
+.page-content table tbody:first-child tr:first-child th {
+  border-top: none;
 }
 
 .editor-body table th,
 .page-content table th {
-  background: var(--gray-100);
+  background: transparent;
   font-weight: 600;
 }
 
@@ -2343,6 +2383,9 @@ mark {
   position: relative;
   display: block;
   margin: 12px 0;
+  overflow: visible;
+  /* prevent the delete button (absolutely positioned) from causing reflow */
+  contain: layout;
 }
 .table-block-wrapper table {
   margin: 0;

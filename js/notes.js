@@ -179,6 +179,7 @@ function openNote(id) {
   titleEl.value = note.title === 'Untitled' ? '' : note.title;
   bodyEl.innerHTML = note.body || '';
   if (typeof initExistingImages === 'function') initExistingImages();
+  if (typeof reinitTableDeleteBtns === 'function') reinitTableDeleteBtns();
 
   autoResizeTitle();
   highlightActiveCard(id);

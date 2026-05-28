@@ -75,6 +75,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentFontSize = 16;
   const FONT_SIZES = [10, 11, 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64];
 
+  // Find the index in FONT_SIZES closest to the given px value
+  function nearestFontSizeIdx(px) {
+    let best = 0;
+    let bestDiff = Math.abs(FONT_SIZES[0] - px);
+    for (let i = 1; i < FONT_SIZES.length; i++) {
+      const diff = Math.abs(FONT_SIZES[i] - px);
+      if (diff < bestDiff) { bestDiff = diff; best = i; }
+    }
+    return best;
+  }
+
   function applyFontSize(px) {
     currentFontSize = px;
     const label = document.getElementById('fmt-fontsize-label');
@@ -83,9 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0);
+    const activeEl = getActiveEditableEl() || bodyEl;
     if (range.collapsed) {
       // No selection — set a data attr so next typed chars get the size
-      bodyEl.dataset.nextFontSize = px;
+      activeEl.dataset.nextFontSize = px;
       return;
     }
     const span = document.createElement('span');
@@ -95,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       // surroundContents fails on partial selections — use execCommand fallback
       document.execCommand('fontSize', false, '7');
-      bodyEl.querySelectorAll('font[size="7"]').forEach(el => {
+      activeEl.querySelectorAll('font[size="7"]').forEach(el => {
         el.style.fontSize = px + 'px';
         el.removeAttribute('size');
         el.outerHTML = el.outerHTML.replace(/^<font/, '<span').replace(/font>$/, 'span>');
@@ -182,19 +194,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (decBtn) {
       decBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        const idx = FONT_SIZES.indexOf(currentFontSize);
+        const idx = nearestFontSizeIdx(currentFontSize);
         const next = idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0];
         applyFontSize(next);
-        bodyEl.focus();
+        (getActiveEditableEl() || bodyEl).focus();
       });
     }
     if (incBtn) {
       incBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        const idx = FONT_SIZES.indexOf(currentFontSize);
+        const idx = nearestFontSizeIdx(currentFontSize);
         const next = idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1];
         applyFontSize(next);
-        bodyEl.focus();
+        (getActiveEditableEl() || bodyEl).focus();
       });
     }
 
@@ -382,19 +394,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function insertTable(rows, cols) {
-      // Restore selection
-      if (savedRange) {
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(savedRange);
-      }
-      const activeEl = getActiveEditableEl();
-      if (activeEl) activeEl.focus();
-
       // Build table wrapped in a container that holds a delete button
       const tableWrapper = document.createElement('div');
       tableWrapper.className = 'table-block-wrapper';
-      tableWrapper.contentEditable = 'false';
+      // NOTE: do NOT set contentEditable=false on wrapper — it prevents
+      // cell editing on reload since browser ignores inner contenteditable=true
+      // when parent is explicitly false inside a contenteditable parent.
 
       const tableDeleteBtn = document.createElement('button');
       tableDeleteBtn.className = 'table-delete-btn';
@@ -416,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tableHtml += '<th><p><br></p></th>';
       }
       tableHtml += '</tr></thead><tbody>';
-      for (let r = 1; r < rows; r++) {
+      for (let r = 0; r < rows - 1; r++) {
         tableHtml += '<tr>';
         for (let c = 0; c < cols; c++) {
           tableHtml += '<td><p><br></p></td>';
@@ -597,6 +602,29 @@ document.addEventListener('DOMContentLoaded', () => {
   function initExistingImages() {
     bodyEl.querySelectorAll('.img-resize-wrapper').forEach(wrapper => {
       initImageResize(wrapper);
+    });
+  }
+
+  function reinitTableDeleteBtns() {
+    bodyEl.querySelectorAll('.table-block-wrapper').forEach(wrapper => {
+      // Remove any stale button (has no live listener after innerHTML reload)
+      const old = wrapper.querySelector('.table-delete-btn');
+      if (old) old.remove();
+      const btn = document.createElement('button');
+      btn.className = 'table-delete-btn';
+      btn.title = 'Delete table';
+      btn.setAttribute('aria-label', 'Delete table');
+      btn.setAttribute('contenteditable', 'false');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="13" height="13"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+      btn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showDeleteConfirmModal('Delete this table?', () => {
+          wrapper.remove();
+          scheduleAutoSave();
+        });
+      });
+      wrapper.appendChild(btn);
     });
   }
 
@@ -1936,6 +1964,15 @@ document.addEventListener('DOMContentLoaded', () => {
 (function () {
   const FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64];
 
+  function nearestIdx(px) {
+    let best = 0, bestDiff = Math.abs(FONT_SIZES[0] - px);
+    for (let i = 1; i < FONT_SIZES.length; i++) {
+      const d = Math.abs(FONT_SIZES[i] - px);
+      if (d < bestDiff) { bestDiff = d; best = i; }
+    }
+    return best;
+  }
+
   function rgbToHex(rgb) {
     const m = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
     if (!m) return rgb;
@@ -2086,13 +2123,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (fsDecBtn) fsDecBtn.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    const idx = FONT_SIZES.indexOf(dtFontSize);
+    const idx = nearestIdx(dtFontSize);
     applyDocFontSize(idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0]);
   });
 
   if (fsIncBtn) fsIncBtn.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    const idx = FONT_SIZES.indexOf(dtFontSize);
+    const idx = nearestIdx(dtFontSize);
     applyDocFontSize(idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1]);
   });
 
