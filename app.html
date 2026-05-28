@@ -215,7 +215,7 @@
 
       <!-- ── Formatting Toolbar (two-layer) ── -->
 
-      <!-- Layer 1: Inline tray (B/I/U/S + H1/H2/H3) — slides up when A is tapped -->
+      <!-- Layer 1: Inline tray — slides up when A is tapped -->
       <div class="fmt-tray" id="fmt-tray">
         <button class="fmt-btn" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold">
           <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
@@ -230,7 +230,31 @@
         <button class="fmt-btn fmt-heading-btn" data-heading="h1" title="Heading 1" aria-label="Heading 1">H1</button>
         <button class="fmt-btn fmt-heading-btn" data-heading="h2" title="Heading 2" aria-label="Heading 2">H2</button>
         <button class="fmt-btn fmt-heading-btn" data-heading="h3" title="Heading 3" aria-label="Heading 3">H3</button>
-
+        <div class="fmt-divider"></div>
+        <!-- Alignment -->
+        <button class="fmt-btn" data-cmd="justifyLeft" title="Align left" aria-label="Align left">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+        </button>
+        <button class="fmt-btn" data-cmd="justifyCenter" title="Align center" aria-label="Align center">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+        <button class="fmt-btn" data-cmd="justifyRight" title="Align right" aria-label="Align right">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <button class="fmt-btn" data-cmd="justifyFull" title="Justify" aria-label="Justify">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="fmt-divider"></div>
+        <!-- Font size -->
+        <div class="fmt-fontsize-wrap" id="fmt-fontsize-wrap">
+          <button class="fmt-btn fmt-fontsize-dec" id="fmt-fontsize-dec" title="Decrease font size" aria-label="Decrease font size">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <span class="fmt-fontsize-label" id="fmt-fontsize-label">16</span>
+          <button class="fmt-btn fmt-fontsize-inc" id="fmt-fontsize-inc" title="Increase font size" aria-label="Increase font size">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
         <div class="fmt-divider"></div>
         <button class="fmt-btn" id="fmt-link-btn" title="Insert link" aria-label="Insert link">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>

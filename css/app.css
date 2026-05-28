@@ -1635,6 +1635,36 @@ mark {
   font-family: var(--font);
 }
 
+/* ── Font size picker in tray ── */
+
+.fmt-fontsize-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.fmt-fontsize-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-500);
+  min-width: 26px;
+  text-align: center;
+  line-height: 1;
+  user-select: none;
+}
+
+.fmt-fontsize-dec,
+.fmt-fontsize-inc {
+  width: 36px;
+  height: 36px;
+}
+
+.fmt-fontsize-dec .icon,
+.fmt-fontsize-inc .icon {
+  width: 16px;
+  height: 16px;
+}
+
 /* ── Code block ── */
 .code-block-wrapper {
   position: relative;
@@ -1960,9 +1990,11 @@ mark {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
   width: 100%;
-  padding: 20px 0 40px 0;
+  padding: 32px 0 80px 0;
+  /* Scale pages to 85% so there's visible canvas breathing room around each page */
+  transform-origin: top center;
 }
 
 .page-sheet {
@@ -1970,8 +2002,8 @@ mark {
   width: 210mm;
   min-height: 297mm;
   padding: 0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  border-radius: 1px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  border-radius: 2px;
   box-sizing: border-box;
   outline: none;
   font-size: 12pt;
@@ -1979,6 +2011,13 @@ mark {
   color: #000;
   position: relative;
   font-family: var(--font-main, system-ui, sans-serif);
+  transform: scale(0.85);
+  transform-origin: top center;
+  margin-bottom: calc(-297mm * 0.15); /* compensate for scale shrink */
+}
+
+.page-sheet:focus-within {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18), 0 0 0 2px rgba(0,0,0,0.35);
 }
 
 .page-sheet:focus {
@@ -1999,8 +2038,7 @@ mark {
 .page-side-btns {
   position: fixed;
   right: 24px;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 88px;
   display: flex;
   flex-direction: column;
   gap: 8px;

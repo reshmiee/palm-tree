@@ -71,6 +71,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let trayOpen = false;
 
+  // ── Font size state ──────────────────────────────────
+  let currentFontSize = 16;
+  const FONT_SIZES = [10, 11, 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64];
+
+  function applyFontSize(px) {
+    currentFontSize = px;
+    const label = document.getElementById('fmt-fontsize-label');
+    if (label) label.textContent = px;
+    // Use a span with inline style — execCommand fontSize only supports 1-7
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) {
+      // No selection — set a data attr so next typed chars get the size
+      bodyEl.dataset.nextFontSize = px;
+      return;
+    }
+    const span = document.createElement('span');
+    span.style.fontSize = px + 'px';
+    try {
+      range.surroundContents(span);
+    } catch (e) {
+      // surroundContents fails on partial selections — use execCommand fallback
+      document.execCommand('fontSize', false, '7');
+      bodyEl.querySelectorAll('font[size="7"]').forEach(el => {
+        el.style.fontSize = px + 'px';
+        el.removeAttribute('size');
+        el.outerHTML = el.outerHTML.replace(/^<font/, '<span').replace(/font>$/, 'span>');
+      });
+    }
+    scheduleAutoSave();
+  }
+
+  function detectFontSize() {
+    const sel = window.getSelection();
+    if (!sel || !sel.anchorNode) return;
+    const node = sel.anchorNode.nodeType === Node.TEXT_NODE
+      ? sel.anchorNode.parentElement
+      : sel.anchorNode;
+    if (!node) return;
+    const computed = window.getComputedStyle(node).fontSize;
+    if (computed) {
+      const px = Math.round(parseFloat(computed));
+      currentFontSize = px;
+      const label = document.getElementById('fmt-fontsize-label');
+      if (label) label.textContent = px;
+    }
+  }
+
   function initFormatToolbar() {
     const toolbar = document.getElementById('format-toolbar');
     const tray = document.getElementById('fmt-tray');
@@ -85,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
       aBtn.setAttribute('aria-expanded', trayOpen ? 'true' : 'false');
     });
 
-    // Bottom bar buttons (bullet / numbered list)
+    // Bottom bar buttons (bullet / numbered list / indent / outdent)
     toolbar.addEventListener('mousedown', (e) => {
       const btn = e.target.closest('.fmt-btn');
       if (!btn || btn === aBtn) return;
@@ -98,10 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Tray buttons (B/I/U/S + headings)
+    // Tray buttons (B/I/U + headings + alignment)
     tray.addEventListener('mousedown', (e) => {
       const btn = e.target.closest('.fmt-btn');
       if (!btn) return;
+      // Don't intercept font size buttons here — handled below
+      if (btn.id === 'fmt-fontsize-dec' || btn.id === 'fmt-fontsize-inc') return;
       e.preventDefault();
       const cmd = btn.dataset.cmd;
       const heading = btn.dataset.heading;
@@ -124,7 +175,33 @@ document.addEventListener('DOMContentLoaded', () => {
         updateToolbarState();
       }
     });
-    document.addEventListener('selectionchange', updateToolbarState);
+
+    // Font size buttons
+    const decBtn = document.getElementById('fmt-fontsize-dec');
+    const incBtn = document.getElementById('fmt-fontsize-inc');
+    if (decBtn) {
+      decBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const idx = FONT_SIZES.indexOf(currentFontSize);
+        const next = idx > 0 ? FONT_SIZES[idx - 1] : FONT_SIZES[0];
+        applyFontSize(next);
+        bodyEl.focus();
+      });
+    }
+    if (incBtn) {
+      incBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const idx = FONT_SIZES.indexOf(currentFontSize);
+        const next = idx < FONT_SIZES.length - 1 ? FONT_SIZES[idx + 1] : FONT_SIZES[FONT_SIZES.length - 1];
+        applyFontSize(next);
+        bodyEl.focus();
+      });
+    }
+
+    document.addEventListener('selectionchange', () => {
+      updateToolbarState();
+      detectFontSize();
+    });
   }
 
   function updateToolbarState() {
