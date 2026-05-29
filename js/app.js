@@ -1279,6 +1279,28 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('back-btn').addEventListener('click', () => goBack());
   document.getElementById('forward-btn').addEventListener('click', () => goForward());
 
+  // ── Sidebar collapse toggle (full-width editor / focus mode) ──
+  const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+  const appEl = document.querySelector('.app');
+  function applySidebarCollapsed(collapsed) {
+    if (!appEl) return;
+    appEl.classList.toggle('sidebar-collapsed', collapsed);
+    if (sidebarToggleBtn) {
+      const label = collapsed ? 'Show notes panel' : 'Hide notes panel';
+      sidebarToggleBtn.title = label;
+      sidebarToggleBtn.dataset.tip = label;
+      sidebarToggleBtn.classList.toggle('active', collapsed);
+    }
+  }
+  if (sidebarToggleBtn && appEl) {
+    applySidebarCollapsed(localStorage.getItem('palmtree_sidebar_collapsed') === '1');
+    sidebarToggleBtn.addEventListener('click', () => {
+      const collapsed = !appEl.classList.contains('sidebar-collapsed');
+      applySidebarCollapsed(collapsed);
+      try { localStorage.setItem('palmtree_sidebar_collapsed', collapsed ? '1' : '0'); } catch (e) {}
+    });
+  }
+
   // ── Menu dropdown ──────────────────────────────────
 
   const menuBtn = document.getElementById('menu-btn');

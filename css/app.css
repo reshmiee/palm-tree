@@ -135,6 +135,62 @@ html, body {
 
 /* ── Folder nav button (in top bar) ── */
 
+.sidebar-toggle-btn {
+  color: var(--gray-500);
+  width: 31.5px;
+  height: 31.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--gray-100);
+  color: var(--black);
+}
+
+.sidebar-toggle-btn.active {
+  background: var(--black);
+  color: var(--white);
+}
+
+.sidebar-toggle-btn .icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Collapsed sidebar (full-width editor / focus mode) ── */
+.app.sidebar-collapsed .sidebar {
+  width: 0;
+  min-width: 0;
+  border-right: none;
+}
+
+/* New-note button stays reachable by pinning to the viewport when collapsed */
+.app.sidebar-collapsed .sidebar-footer {
+  position: fixed;
+}
+
+/* Editor is now full width → recenter the floating toolbar/tray */
+.app.sidebar-collapsed .format-toolbar,
+.app.sidebar-collapsed .fmt-tray {
+  left: 50vw;
+}
+
+/* Keep the content at its normal width (as if the sidebar were still there)
+   and center it, so code/tables/images/text don't stretch edge-to-edge.
+   100vw − (sidebar 345px + editor padding 60px) = the with-sidebar width. */
+.app.sidebar-collapsed .editor-meta,
+.app.sidebar-collapsed .editor-title-row,
+.app.sidebar-collapsed .editor-body {
+  max-width: calc(100vw - 405px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .folder-nav-btn {
   color: var(--gray-500);
   width: 31.5px;

@@ -1,6 +1,6 @@
 // sw.js — service worker for offline / installable PWA.
 // Bump CACHE when you change cached files to force an update.
-const CACHE = 'palmtree-v2';
+const CACHE = 'palmtree-v4';
 
 // Local app files (must all cache successfully).
 const LOCAL = [
