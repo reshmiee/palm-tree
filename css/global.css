@@ -15,18 +15,18 @@
   --font-main: 'Quicksand', sans-serif;
 
   /* Spacing */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 40px;
-  --space-2xl: 64px;
+  --space-xs: 3px;
+  --space-sm: 6px;
+  --space-md: 12px;
+  --space-lg: 18px;
+  --space-xl: 30px;
+  --space-2xl: 48px;
 
   /* Borders */
-  --border: 1px solid var(--gray-200);
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --border: 0.75px solid var(--gray-200);
+  --radius-sm: 4.5px;
+  --radius-md: 7.5px;
+  --radius-lg: 12px;
 
   /* Transitions */
   --transition: 0.2s ease;
@@ -40,7 +40,7 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 12px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

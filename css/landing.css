@@ -12,10 +12,10 @@ body {
   flex-direction: column;
   justify-content: center;
   width: 100%;
-  max-width: 1060px;
-  padding: 0 80px;
-  gap: 64px;
-  margin-top: -80px;
+  max-width: 795px;
+  padding: 0 60px;
+  gap: 48px;
+  margin-top: -60px;
 }
 
 /* ── Branding — stable in normal flow ── */
@@ -23,13 +23,13 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 20px;
-  transform: translateX(-120px);
+  gap: 15px;
+  transform: translateX(-90px);
 }
 
 .brand-logo {
-  width: 96px;
-  height: 96px;
+  width: 72px;
+  height: 72px;
   color: var(--black);
   flex-shrink: 0;
 }
@@ -49,8 +49,8 @@ body {
 }
 
 .carousel-btn .icon {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2.4;
@@ -59,22 +59,22 @@ body {
 .brand-text {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .brand-name {
-  font-size: 58px;
+  font-size: 43.5px;
   font-weight: 700;
   color: var(--black);
-  letter-spacing: -2px;
+  letter-spacing: -1.5px;
   line-height: 1;
 }
 
 .brand-sub {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--gray-500);
-  letter-spacing: 0.1px;
+  letter-spacing: 0.075px;
 }
 
 /* ── Bottom row ── */
@@ -90,19 +90,19 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding-right: 56px;
+  gap: 18px;
+  padding-right: 42px;
   position: relative;
-  min-height: 200px;
+  min-height: 150px;
   justify-content: center;
 }
 
 .carousel-text {
-  font-size: 27px;
+  font-size: 20.25px;
   font-weight: 500;
   color: var(--gray-600);
   line-height: 1.8;
-  height: 200px;
+  height: 150px;
   overflow: hidden;
   transition: opacity 0.35s ease;
 }
@@ -113,19 +113,19 @@ body {
 
 .carousel-nav {
   display: flex;
-  gap: 10px;
+  gap: 7.5px;
   position: absolute;
-  bottom: -48px;
-  right: 32px;
+  bottom: -36px;
+  right: 24px;
 }
 
 .carousel-btn {
-  width: 36px;
-  height: 36px;
+  width: 27px;
+  height: 27px;
   border: none;
   background: none;
   border-radius: var(--radius-sm);
-  font-size: 17px;
+  font-size: 12.75px;
   color: var(--gray-500);
   display: flex;
   align-items: center;
@@ -142,9 +142,9 @@ body {
 /* ── Divider ── */
 
 .divider {
-  width: 1px;
-  height: 260px;
-  border-left: 1.5px dashed var(--gray-300);
+  width: 0.75px;
+  height: 195px;
+  border-left: 1.125px dashed var(--gray-300);
   flex-shrink: 0;
   align-self: flex-end;
 }
@@ -156,11 +156,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 56px;
+  padding-left: 42px;
 }
 
 .cta-text {
-  font-size: 36px;
+  font-size: 27px;
   font-weight: 600;
   color: var(--black);
   line-height: 1.6;
@@ -169,7 +169,7 @@ body {
 
 .cta-now {
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 2.25px;
   color: var(--black);
   font-weight: 700;
   transition: opacity var(--transition);
@@ -180,7 +180,7 @@ body {
 }
 
 /* ── Narrow desktop / smaller windows ──
-   The brand is shifted 120px left for an overhang on wide screens; once the
+   The brand is shifted 90px left for an overhang on wide screens; once the
    window is narrow enough that the shift would push the logo off the left
    edge (and overflow:hidden makes it unreachable), drop the shift so the
    content stays fully visible and centered. Wide desktop is unchanged. */
@@ -191,14 +191,14 @@ body {
 /* ── Mobile ── */
 
 @media (max-width: 680px) {
-  .landing { padding: 0 28px; gap: 40px; }
-  .brand-logo { width: 56px; height: 56px; }
-  .brand-name { font-size: 34px; letter-spacing: -1px; }
+  .landing { padding: 0 21px; gap: 30px; }
+  .brand-logo { width: 42px; height: 42px; }
+  .brand-name { font-size: 25.5px; letter-spacing: -0.75px; }
 
   .bottom-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 32px;
+    gap: 24px;
   }
 
   .left-col { padding-right: 0; }
@@ -207,7 +207,7 @@ body {
     width: 100%;
     height: 0;
     border-left: none;
-    border-top: 1.5px dashed var(--gray-300);
+    border-top: 1.125px dashed var(--gray-300);
   }
 
   .right-col { padding-left: 0; justify-content: flex-start; }
