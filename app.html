@@ -80,6 +80,16 @@
     </button>
   </div>
 
+  <!-- ── Fresh-start backup prompt — shown after "Delete all notes" when you write again ── -->
+  <div class="install-banner hidden" id="backup-prompt-banner" role="dialog" aria-label="Back up new notes">
+    <svg class="install-banner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+    <span class="install-banner-text">Back up your new notes to a file?</span>
+    <button class="install-banner-btn" id="backup-prompt-choose">Choose file</button>
+    <button class="install-banner-close" id="backup-prompt-close" aria-label="Dismiss">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="14" height="14" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+  </div>
+
   <div class="app">
 
     <!-- ── Sidebar ── -->

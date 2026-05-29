@@ -1348,6 +1348,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clear-btn').addEventListener('click', () => {
     menuDropdown.classList.add('hidden');
     showPermissionModal('Delete all notes and folders? This cannot be undone.', () => {
+      // Detach auto-backup first so the deletion never overwrites the backup
+      // file — it's preserved as an archive of the deleted notes.
+      if (window.backupDetachForReset) window.backupDetachForReset();
       clearAllData();
       clearEditor();
       activeNoteId = null;

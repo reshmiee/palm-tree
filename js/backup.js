@@ -5,6 +5,7 @@
 (function () {
   const SUPPORTED = 'showSaveFilePicker' in window;
   const FLAG = 'palmtree_backup_enabled';
+  const PENDING = 'palmtree_backup_pending'; // set after "Delete all": offer a fresh file when writing resumes
   let handle = null;   // FileSystemFileHandle (the chosen file)
   let active = false;  // permitted + currently auto-saving
   let timer = null;
@@ -67,25 +68,55 @@
     }
   }
 
+  const promptBanner = () => document.getElementById('backup-prompt-banner');
+  function showPrompt() { const b = promptBanner(); if (b) b.classList.remove('hidden'); }
+  function hidePrompt() { const b = promptBanner(); if (b) b.classList.add('hidden'); }
+
   // Called by storage.js after every note/folder change (debounced).
   function scheduleBackup() {
-    if (!active) return;
-    clearTimeout(timer);
-    timer = setTimeout(writeBackup, 1500);
+    if (active) {
+      clearTimeout(timer);
+      timer = setTimeout(writeBackup, 1500);
+      return;
+    }
+    // Fresh start after "Delete all": once the user writes again, offer a NEW
+    // file (the old backup file is left untouched as an archive).
+    if (localStorage.getItem(PENDING) === '1' && getAllNotes().length > 0) {
+      showPrompt();
+    }
   }
   window.scheduleBackup = scheduleBackup;
 
+  // Called by the "Delete all notes" flow: stop auto-saving and forget the
+  // current file WITHOUT touching it on disk, so it stays as an archive of the
+  // deleted notes. Flag that a fresh file should be offered on the next write.
+  function detachForReset() {
+    const wasOn = active || localStorage.getItem(FLAG) === '1' || !!handle;
+    clearTimeout(timer);
+    active = false;
+    handle = null;
+    localStorage.removeItem(FLAG);
+    if (wasOn) localStorage.setItem(PENDING, '1');
+    updateMenu();
+    idbDel('handle').catch(() => {});   // forget the handle (file on disk untouched)
+  }
+  window.backupDetachForReset = detachForReset;
+
   async function setup() {
     if (!SUPPORTED) { toast('This browser can’t auto-backup to a file. Use Export instead.', true); return; }
+    // After a reset, suggest a different name so the old archive isn't overwritten.
+    const fresh = localStorage.getItem(PENDING) === '1';
     let h;
     try {
       h = await window.showSaveFilePicker({
-        suggestedName: 'palmtree-notes.json',
+        suggestedName: fresh ? 'palmtree-notes-2.json' : 'palmtree-notes.json',
         types: [{ description: 'Palm Tree backup', accept: { 'application/json': ['.json'] } }],
       });
     } catch (e) { return; } // user cancelled the picker
     handle = h; active = true;
     localStorage.setItem(FLAG, '1');
+    localStorage.removeItem(PENDING);
+    hidePrompt();
     try { await idbSet('handle', h); } catch (e) {}
     await writeBackup();        // write current notes immediately
     updateMenu();
@@ -139,6 +170,12 @@
   function init() {
     const btn = document.getElementById('backup-btn');
     if (btn) btn.addEventListener('click', onClick);
+
+    const choose = document.getElementById('backup-prompt-choose');
+    if (choose) choose.addEventListener('click', setup);
+    const close = document.getElementById('backup-prompt-close');
+    if (close) close.addEventListener('click', () => { hidePrompt(); localStorage.removeItem(PENDING); });
+
     resumeOnLoad();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
