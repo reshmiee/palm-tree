@@ -1,11 +1,14 @@
 // sw.js — service worker for offline / installable PWA.
 // Strategy: network-first for our own files (edits show on a normal reload when
-// online, cache used offline); cache-first for the version-pinned CDN libraries.
-// You no longer need to bump CACHE for your own file edits — only bump it if you
-// change the CDN library list below.
-const CACHE = 'palmtree-v6';
+// online, cache used offline). Libraries are now self-hosted under lib/, so they
+// are first-party too. Bump CACHE only if you add/remove cached files.
+const CACHE = 'palmtree-v8';
 
-// Local app files (must all cache successfully).
+const CM = 'lib/cm';
+const MODES = ['javascript','python','htmlmixed','css','clike','php','ruby','go','rust','swift','sql','shell','yaml','xml','markdown'];
+
+// All local files (app + self-hosted libraries). Best-effort: a single failure
+// won't block install.
 const LOCAL = [
   './',
   'index.html',
@@ -27,31 +30,31 @@ const LOCAL = [
   'js/export.js',
   'js/landing.js',
   'js/app.js',
-];
-
-// CDN libraries (best-effort: a failure here won't block install).
-const CM = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17';
-const CDN = [
+  // self-hosted libraries
   `${CM}/codemirror.min.css`,
   `${CM}/addon/lint/lint.min.css`,
   `${CM}/codemirror.min.js`,
-  ...['javascript','python','htmlmixed','css','clike','php','ruby','go','rust','swift','sql','shell','yaml','xml','markdown']
-      .map(m => `${CM}/mode/${m}/${m}.min.js`),
+  `${CM}/addon/mode/simple.min.js`,
+  ...MODES.map(m => `${CM}/mode/${m}/${m}.min.js`),
   `${CM}/addon/edit/matchbrackets.min.js`,
   `${CM}/addon/edit/closebrackets.min.js`,
   `${CM}/addon/lint/lint.min.js`,
   `${CM}/addon/lint/javascript-lint.min.js`,
-  'https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+  'lib/jshint.min.js',
+  'lib/html2pdf.bundle.min.js',
+  'lib/jszip.min.js',
+];
+
+// Only third party left: the Google Font (best-effort).
+const CDN = [
   'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
-    await cache.addAll(LOCAL);                                  // critical
-    await Promise.allSettled(CDN.map(u => cache.add(u)));       // best-effort
+    await Promise.allSettled(LOCAL.map(u => cache.add(u)));     // app + libs
+    await Promise.allSettled(CDN.map(u => cache.add(u)));       // font (best-effort)
     self.skipWaiting();
   })());
 });

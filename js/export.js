@@ -271,7 +271,7 @@ function downloadPdf(title, name) {
     render();
   } else {
     showToast('Preparing PDF…');
-    loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js')
+    loadScriptOnce('lib/html2pdf.bundle.min.js')
       .then(render)
       .catch(() => printFallback(title));
   }
@@ -443,7 +443,7 @@ function _blockToDocx(node) {
 function downloadDocx(title, name) {
   if (typeof JSZip === 'undefined') {
     showToast('Preparing DOCX…');
-    loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js')
+    loadScriptOnce('lib/jszip.min.js')
       .then(() => downloadDocx(title, name))
       .catch(() => showToast('Could not load DOCX library', true));
     return;

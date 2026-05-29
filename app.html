@@ -12,32 +12,34 @@
   <link rel="stylesheet" href="css/app.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" />
   <!-- CodeMirror 5 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/codemirror.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/lint/lint.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/codemirror.min.js"></script>
+  <link rel="stylesheet" href="lib/cm/codemirror.min.css" />
+  <link rel="stylesheet" href="lib/cm/addon/lint/lint.min.css" />
+  <script src="lib/cm/codemirror.min.js"></script>
+  <!-- Required by the Rust mode (it's built with defineSimpleMode); must load before it -->
+  <script src="lib/cm/addon/mode/simple.min.js"></script>
   <!-- Modes -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/python/python.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/clike/clike.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/php/php.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/ruby/ruby.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/go/go.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/rust/rust.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/swift/swift.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/sql/sql.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/shell/shell.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/yaml/yaml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/xml/xml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/markdown/markdown.min.js"></script>
+  <script src="lib/cm/mode/javascript/javascript.min.js"></script>
+  <script src="lib/cm/mode/python/python.min.js"></script>
+  <script src="lib/cm/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="lib/cm/mode/css/css.min.js"></script>
+  <script src="lib/cm/mode/clike/clike.min.js"></script>
+  <script src="lib/cm/mode/php/php.min.js"></script>
+  <script src="lib/cm/mode/ruby/ruby.min.js"></script>
+  <script src="lib/cm/mode/go/go.min.js"></script>
+  <script src="lib/cm/mode/rust/rust.min.js"></script>
+  <script src="lib/cm/mode/swift/swift.min.js"></script>
+  <script src="lib/cm/mode/sql/sql.min.js"></script>
+  <script src="lib/cm/mode/shell/shell.min.js"></script>
+  <script src="lib/cm/mode/yaml/yaml.min.js"></script>
+  <script src="lib/cm/mode/xml/xml.min.js"></script>
+  <script src="lib/cm/mode/markdown/markdown.min.js"></script>
   <!-- Addons -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/edit/matchbrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/edit/closebrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/lint/lint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/lint/javascript-lint.min.js"></script>
+  <script src="lib/cm/addon/edit/matchbrackets.min.js"></script>
+  <script src="lib/cm/addon/edit/closebrackets.min.js"></script>
+  <script src="lib/cm/addon/lint/lint.min.js"></script>
+  <script src="lib/cm/addon/lint/javascript-lint.min.js"></script>
   <!-- JSHint for JS linting -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js"></script>
+  <script src="lib/jshint.min.js"></script>
   <style>
     @media print {
       body * { visibility: hidden; }
