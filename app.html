@@ -51,18 +51,20 @@
 
   <!-- ── Full-width search overlay (outside sidebar so it can escape it) ── -->
   <div class="search-overlay hidden" id="search-overlay">
-    <div class="search-overlay-bar">
-      <span class="search-icon" aria-hidden="true">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
-      </span>
-      <input type="text" class="search-input" placeholder="Search notes..." id="search-input" />
-      <button class="search-close-btn" id="search-close-btn">
-        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
-        Close
-      </button>
-    </div>
-    <div class="search-overlay-results" id="panel-search">
-      <!-- search results render here -->
+    <div class="search-panel" role="dialog" aria-label="Search notes">
+      <div class="search-overlay-bar">
+        <span class="search-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+        </span>
+        <input type="text" class="search-input" placeholder="Search notes..." id="search-input" />
+        <button class="search-close-btn" id="search-close-btn">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          Close
+        </button>
+      </div>
+      <div class="search-overlay-results" id="panel-search">
+        <!-- search results render here -->
+      </div>
     </div>
   </div>
 
@@ -91,6 +93,7 @@
               <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
             </span>
             <span class="search-trigger-text">Search...</span>
+            <kbd class="search-trigger-kbd" id="search-trigger-kbd">Ctrl K</kbd>
           </button>
         </div>
         <button class="folder-nav-btn" id="folder-nav-btn" aria-label="Folders" title="Folders">

@@ -12,6 +12,7 @@ function initSearch() {
 
   function openOverlay() {
     overlay.classList.remove('hidden');
+    renderSearchResults([], '');   // show the "start typing" prompt, never blank
     input.focus();
   }
 
@@ -21,6 +22,10 @@ function initSearch() {
     searchQuery = '';
     renderSearchResults([], '');
   }
+
+  // Show the platform-correct shortcut hint (⌘K on Mac, Ctrl K elsewhere)
+  const kbdHint = document.getElementById('search-trigger-kbd');
+  if (kbdHint && /Mac|iPhone|iPad/.test(navigator.platform)) kbdHint.textContent = '⌘ K';
 
   trigger.addEventListener('click', openOverlay);
   closeBtn.addEventListener('click', closeOverlay);
@@ -41,6 +46,19 @@ function initSearch() {
   // click outside the bar to close
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeOverlay();
+  });
+
+  // Ctrl+K / ⌘K — open (or close, if already open) the search palette.
+  // Shift is excluded so Ctrl+Shift+K stays free for "insert link".
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      if (overlay.classList.contains('hidden')) {
+        openOverlay();
+      } else {
+        closeOverlay();
+      }
+    }
   });
 }
 

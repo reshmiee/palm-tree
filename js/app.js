@@ -1200,7 +1200,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'i') { e.preventDefault(); document.execCommand('italic', false, null); updateToolbarState(); }
       if (e.key === 'u') { e.preventDefault(); document.execCommand('underline', false, null); updateToolbarState(); }
       if (e.key === 's') { e.preventDefault(); document.execCommand('strikeThrough', false, null); updateToolbarState(); }
-      if (e.key === 'k') {
+      // Ctrl/⌘+Shift+K inserts a link (Ctrl/⌘+K opens the search palette)
+      if ((e.key === 'k' || e.key === 'K') && e.shiftKey) {
         e.preventDefault();
         const linkBtn = document.getElementById('fmt-link-btn');
         if (linkBtn) linkBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
