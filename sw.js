@@ -2,7 +2,7 @@
 // Strategy: network-first for our own files (edits show on a normal reload when
 // online, cache used offline). Libraries are now self-hosted under lib/, so they
 // are first-party too. Bump CACHE only if you add/remove cached files.
-const CACHE = 'palmtree-v8';
+const CACHE = 'palmtree-v9';
 
 const CM = 'lib/cm';
 const MODES = ['javascript','python','htmlmixed','css','clike','php','ruby','go','rust','swift','sql','shell','yaml','xml','markdown'];
@@ -17,6 +17,7 @@ const LOCAL = [
   'assets/favicon.svg',
   'assets/icon-192.png',
   'assets/icon-512.png',
+  'assets/icon-maskable.png',
   'css/global.css',
   'css/app.css',
   'css/landing.css',
