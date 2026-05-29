@@ -482,6 +482,20 @@ html, body {
   padding: var(--space-lg) 40px;
   overflow-y: auto;
   position: relative;
+  transition: padding-right 0.2s ease;
+}
+
+/* When the folder side panel (460px, flush right) is open, reserve its width
+   plus the normal 40px gutter so the editor's content re-centers in the
+   remaining visible area instead of sitting underneath the panel. The sidebar
+   and panel are both 460px, so the visible region is symmetric around 50vw. */
+.editor:has(.folder-side-panel) {
+  padding-right: calc(460px + 40px);
+}
+
+.editor:has(.folder-side-panel) .format-toolbar,
+.editor:has(.folder-side-panel) .fmt-tray {
+  left: 50vw;
 }
 
 .editor-title {
