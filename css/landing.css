@@ -179,6 +179,15 @@ body {
   opacity: 0.5;
 }
 
+/* ── Narrow desktop / smaller windows ──
+   The brand is shifted 120px left for an overhang on wide screens; once the
+   window is narrow enough that the shift would push the logo off the left
+   edge (and overflow:hidden makes it unreachable), drop the shift so the
+   content stays fully visible and centered. Wide desktop is unchanged. */
+@media (max-width: 1200px) {
+  .brand { transform: none; }
+}
+
 /* ── Mobile ── */
 
 @media (max-width: 680px) {
