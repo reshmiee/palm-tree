@@ -15,6 +15,7 @@ function getAllNotes() {
 
 function saveAllNotes(notes) {
   localStorage.setItem(KEYS.NOTES, JSON.stringify(notes));
+  if (window.scheduleBackup) window.scheduleBackup();
 }
 
 function getNoteById(id) {
@@ -46,6 +47,7 @@ function getAllFolders() {
 
 function saveAllFolders(folders) {
   localStorage.setItem(KEYS.FOLDERS, JSON.stringify(folders));
+  if (window.scheduleBackup) window.scheduleBackup();
 }
 
 function saveFolder(folder) {

@@ -1,6 +1,9 @@
 // sw.js — service worker for offline / installable PWA.
-// Bump CACHE when you change cached files to force an update.
-const CACHE = 'palmtree-v4';
+// Strategy: network-first for our own files (edits show on a normal reload when
+// online, cache used offline); cache-first for the version-pinned CDN libraries.
+// You no longer need to bump CACHE for your own file edits — only bump it if you
+// change the CDN library list below.
+const CACHE = 'palmtree-v6';
 
 // Local app files (must all cache successfully).
 const LOCAL = [
@@ -16,6 +19,7 @@ const LOCAL = [
   'css/landing.css',
   'js/tooltip.js',
   'js/install.js',
+  'js/backup.js',
   'js/storage.js',
   'js/search.js',
   'js/notes.js',
@@ -64,24 +68,41 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
-  event.respondWith((async () => {
-    // Cache-first: instant load + works offline.
-    const cached = await caches.match(req, { ignoreSearch: false });
-    if (cached) return cached;
-    try {
+  const sameOrigin = new URL(req.url).origin === self.location.origin;
+
+  if (sameOrigin) {
+    // ── Our own files: network-first ──
+    // When online, always load the freshest version (so edits show on a normal
+    // reload, no hard-refresh needed) and refresh the cache. Offline → cache.
+    event.respondWith((async () => {
+      try {
+        const res = await fetch(req);
+        if (res && res.ok) {
+          const cache = await caches.open(CACHE);
+          cache.put(req, res.clone());
+        }
+        return res;
+      } catch (err) {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        if (req.mode === 'navigate') {
+          return (await caches.match('app.html')) || (await caches.match('index.html'));
+        }
+        throw err;
+      }
+    })());
+  } else {
+    // ── CDN libraries (version-pinned, immutable): cache-first ──
+    // Instant load + offline; no need to re-fetch unchanging files.
+    event.respondWith((async () => {
+      const cached = await caches.match(req);
+      if (cached) return cached;
       const res = await fetch(req);
-      // Cache successful same-origin and CORS responses (e.g. fonts) for next time.
       if (res && (res.ok || res.type === 'opaque')) {
         const cache = await caches.open(CACHE);
         cache.put(req, res.clone());
       }
       return res;
-    } catch (err) {
-      // Offline and not cached: fall back to the app shell for navigations.
-      if (req.mode === 'navigate') {
-        return (await caches.match('app.html')) || (await caches.match('index.html'));
-      }
-      throw err;
-    }
-  })());
+    })());
+  }
 });
