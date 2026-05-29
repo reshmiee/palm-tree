@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Palm Tree</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2d7a4f" />
   <meta name="description" content="Place all your thoughts under this tree." />
   <link rel="stylesheet" href="css/global.css" />
   <link rel="stylesheet" href="css/app.css" />
@@ -68,6 +70,16 @@
     </div>
   </div>
 
+  <!-- ── Install ("Add to Desktop") banner — shown only when installable ── -->
+  <div class="install-banner hidden" id="install-banner" role="dialog" aria-label="Add to desktop">
+    <svg class="install-banner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+    <span class="install-banner-text">Add Palm Tree to your desktop for quick access</span>
+    <button class="install-banner-btn" id="install-banner-btn">Add</button>
+    <button class="install-banner-close" id="install-banner-close" aria-label="Dismiss">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="14" height="14" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+  </div>
+
   <div class="app">
 
     <!-- ── Sidebar ── -->
@@ -117,6 +129,7 @@
             <button class="menu-item" id="export-btn">Export as JSON</button>
             <button class="menu-item" id="import-btn">Import JSON</button>
             <input type="file" id="import-file" accept=".json" class="hidden" />
+            <button class="menu-item" id="install-btn">Add to Desktop</button>
             <hr class="menu-divider" />
             <button class="menu-item danger" id="clear-btn">Delete all notes</button>
           </div>
@@ -550,5 +563,11 @@
   <script src="js/folders.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/install.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+  </script>
 </body>
 </html>

@@ -285,6 +285,74 @@ html, body {
   color: var(--black);
 }
 
+/* ── Install ("Add to Desktop") banner ── */
+.install-banner {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--white);
+  border: var(--border);
+  border-radius: 999px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+  padding: 6px 6px 6px 15px;
+  z-index: 300;
+  max-width: calc(100vw - 24px);
+}
+
+.install-banner.hidden { display: none; }
+
+.install-banner:not(.hidden) { animation: installBannerIn 0.25s ease; }
+
+@keyframes installBannerIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-14px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.install-banner-icon {
+  width: 17px;
+  height: 17px;
+  color: var(--gray-500);
+  flex-shrink: 0;
+}
+
+.install-banner-text {
+  font-size: 12.75px;
+  font-weight: 500;
+  color: var(--black);
+  white-space: nowrap;
+}
+
+.install-banner-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--black);
+  padding: 6px 15px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  transition: opacity var(--transition);
+}
+
+.install-banner-btn:hover { opacity: 0.82; }
+
+.install-banner-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--gray-400);
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+
+.install-banner-close:hover { background: var(--gray-100); color: var(--black); }
+
 .menu-dropdown {
   position: absolute;
   top: calc(100% + 4.5px);
