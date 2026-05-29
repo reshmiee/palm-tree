@@ -178,8 +178,7 @@ function openNote(id) {
 
   titleEl.value = note.title === 'Untitled' ? '' : note.title;
   bodyEl.innerHTML = note.body || '';
-  if (typeof initExistingImages === 'function') initExistingImages();
-  if (typeof reinitTableDeleteBtns === 'function') reinitTableDeleteBtns();
+  if (typeof window.reinitEditorWidgets === 'function') window.reinitEditorWidgets();
 
   autoResizeTitle();
   highlightActiveCard(id);
@@ -206,7 +205,12 @@ function persistCurrentNote() {
   const bodyEl = document.getElementById('editor-body');
 
   const titleVal = titleEl.value.trim();
-  const bodyVal = bodyEl.innerHTML.trim();
+  // Lean serialization: strips regenerated widget DOM (CodeMirror, table
+  // toolbars/resizers) so stored notes stay small.
+  const cleanBody = (typeof window.getCleanEditorHTML === 'function')
+    ? window.getCleanEditorHTML()
+    : bodyEl.innerHTML;
+  const bodyVal = cleanBody.trim();
 
   // If both empty, clean up
   const bodyText = bodyEl.innerText.trim();
@@ -239,7 +243,7 @@ function persistCurrentNote() {
     };
     newNote.id = activeNoteId;
     newNote.title = titleVal;
-    newNote.body = bodyEl.innerHTML;
+    newNote.body = cleanBody;
     newNote.updatedAt = new Date().toISOString();
     if (!newNote.title && newNote.body.trim()) {
       newNote.title = newNote.body.trim().split('\n')[0].slice(0, 60);
@@ -255,7 +259,7 @@ function persistCurrentNote() {
   }
 
   note.title = titleVal;
-  note.body = bodyEl.innerHTML;
+  note.body = cleanBody;
 
   // auto title from first line of body if title is empty or still the placeholder
   if ((!note.title || note.title === 'Untitled') && bodyEl.innerText.trim()) {

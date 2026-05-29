@@ -1,0 +1,22 @@
+{
+  "name": "Palm Tree",
+  "short_name": "Palm Tree",
+  "description": "Palm all your thoughts under the tree",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2d7a4f",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/favicon.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}

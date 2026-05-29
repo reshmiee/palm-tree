@@ -58,6 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const titleEl = document.getElementById('editor-title');
   const bodyEl = document.getElementById('editor-body');
 
+  // Hoisted to this scope so reinitTableDeleteBtns() can reach it on note
+  // reload; the actual implementation is assigned inside initTableInsertion().
+  let initTableFeatures;
+
   titleEl.addEventListener('input', () => {
     autoResizeTitle();
     scheduleAutoSave();
@@ -305,7 +309,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ── Table features: col resize + row/col add/delete ──
-    function initTableFeatures(wrapper) {
+    // Assigned to the outer-scope variable (declared above) so the reload path
+    // reinitTableDeleteBtns() → initTableFeatures() can re-wire saved tables.
+    initTableFeatures = function (wrapper) {
       const table = wrapper.querySelector('table');
       if (!table) return;
 
@@ -692,6 +698,51 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Rebuild live CodeMirror editors from saved (frozen) code blocks.
+  function reinitCodeBlocks() {
+    bodyEl.querySelectorAll('.code-block-wrapper').forEach(wrapper => {
+      // Skip blocks that are already live (have an active CodeMirror instance)
+      const liveCm = wrapper.querySelector('.CodeMirror');
+      if (liveCm && liveCm.CodeMirror) return;
+
+      // Recover source: prefer the data-attr, else read the frozen CM DOM
+      let code = wrapper.dataset.code;
+      if (code == null) {
+        // Strip zero-width spaces (U+200B) / BOM (U+FEFF) that CodeMirror
+        // injects into rendered empty lines.
+        const ZW = new RegExp('[\\u200B\\uFEFF]', 'g');
+        const lines = wrapper.querySelectorAll('.CodeMirror-line');
+        code = Array.from(lines)
+          .map(l => l.textContent.replace(ZW, ''))
+          .join('\n');
+      }
+      const lang = wrapper.dataset.lang || 'plaintext';
+      insertCodeBlock(code, wrapper, lang);
+    });
+  }
+
+  // Single entry point for re-wiring interactive widgets after a note loads.
+  // Exposed on window so openNote() (global scope) can reach it.
+  function reinitEditorWidgets() {
+    reinitTableDeleteBtns();
+    initExistingImages();
+    reinitCodeBlocks();
+  }
+  window.reinitEditorWidgets = reinitEditorWidgets;
+
+  // Produce a lean version of the editor body for storage: strip the heavy
+  // rendered DOM that gets regenerated on load anyway. Code blocks keep only
+  // their data-code/data-lang attrs; tables drop their toolbar/resizers/delete
+  // button. Images are left intact (their handle/delete button are reused).
+  function getCleanEditorHTML() {
+    const clone = bodyEl.cloneNode(true);
+    clone.querySelectorAll('.code-block-wrapper').forEach(w => { w.innerHTML = ''; });
+    clone.querySelectorAll('.table-toolbar, .col-resizer, .table-delete-btn')
+      .forEach(el => el.remove());
+    return clone.innerHTML;
+  }
+  window.getCleanEditorHTML = getCleanEditorHTML;
+
   initImageInsertion();
 
   // ── Code block insertion ──────────────────────────────
@@ -729,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function insertCodeBlock(initialCode = '') {
+  function insertCodeBlock(initialCode = '', existingWrapper = null, initialLang = 'plaintext') {
     const LANGUAGES = [
       { value: 'plaintext',   label: 'Plain Text',  mode: null },
       { value: 'javascript',  label: 'JavaScript',  mode: 'javascript' },
@@ -754,9 +805,10 @@ document.addEventListener('DOMContentLoaded', () => {
       { value: 'markdown',    label: 'Markdown',    mode: 'markdown' },
     ];
 
-    const wrapper = document.createElement('div');
+    const wrapper = existingWrapper || document.createElement('div');
     wrapper.className = 'code-block-wrapper';
     wrapper.contentEditable = 'false';
+    if (existingWrapper) wrapper.innerHTML = ''; // clear the frozen/saved markup before rebuilding
 
     // Header
     const header = document.createElement('div');
@@ -800,13 +852,16 @@ document.addEventListener('DOMContentLoaded', () => {
     cmContainer.className = 'code-block-cm';
     wrapper.appendChild(cmContainer);
 
-    // Insert into editor
-    const range = window.getSelection().getRangeAt(0);
-    range.deleteContents();
-    range.insertNode(wrapper);
-    const p = document.createElement('p');
-    p.innerHTML = '<br>';
-    wrapper.after(p);
+    // Insert into editor (only for newly created blocks; rehydrated blocks
+    // are already in the DOM).
+    if (!existingWrapper) {
+      const range = window.getSelection().getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(wrapper);
+      const p = document.createElement('p');
+      p.innerHTML = '<br>';
+      wrapper.after(p);
+    }
 
     // Init CodeMirror
     const cm = CodeMirror(cmContainer, {
@@ -825,9 +880,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     cm.on('change', () => {
+      wrapper.dataset.code = cm.getValue();
       scheduleAutoSave();
       runLint();
     });
+    // Persist source + language as data-attrs so the block can be rebuilt
+    // (rehydrated) into a live editor after the note is saved and reloaded.
+    wrapper.dataset.code = cm.getValue();
+    wrapper.dataset.lang = initialLang;
 
     function universalLint(code) {
       const errors = [];
@@ -929,12 +989,17 @@ document.addEventListener('DOMContentLoaded', () => {
       runLint();
     }
 
-    select.addEventListener('change', () => applyLanguage(select.value));
+    select.value = initialLang;
+    applyLanguage(initialLang);
+    select.addEventListener('change', () => {
+      wrapper.dataset.lang = select.value;
+      applyLanguage(select.value);
+    });
     select.addEventListener('mousedown', (e) => e.stopPropagation());
     select.addEventListener('click', (e) => e.stopPropagation());
     select.addEventListener('pointerdown', (e) => e.stopPropagation());
 
-    setTimeout(() => { cm.refresh(); cm.focus(); }, 50);
+    setTimeout(() => { cm.refresh(); if (!existingWrapper) cm.focus(); }, 50);
   }
 
   initCodeBlock();
