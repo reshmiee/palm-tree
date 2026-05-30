@@ -359,6 +359,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       attachColResizers();
 
+      // ── Serial-number column ──────────────────────────
+      // If the first <th> contains a serial-number label (S. No., Sr. No., #, etc.)
+      // auto-fill the first <td> of each body row with 1, 2, 3 … and keep it
+      // updated whenever rows are added or removed.
+      const SERIAL_RE = /^(s\.?\s*no\.?|sr\.?\s*no\.?|serial\s*no\.?|#)$/i;
+
+      function autoNumber() {
+        const firstTh = table.querySelector('thead tr th:first-child');
+        if (!firstTh || !SERIAL_RE.test(firstTh.textContent.trim())) return;
+        const tbody = table.querySelector('tbody') || table;
+        Array.from(tbody.rows).forEach((row, i) => {
+          const cell = row.cells[0];
+          if (cell) cell.innerHTML = `<p>${i + 1}</p>`;
+        });
+      }
+      autoNumber();
+
+      // Trigger immediately when user types the header label
+      const _firstTh = table.querySelector('thead tr th:first-child');
+      if (_firstTh) _firstTh.addEventListener('input', autoNumber);
+
       function buildTableToolbar() {
         let tb = wrapper.querySelector('.table-toolbar');
         if (tb) tb.remove();
@@ -416,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.appendChild(tr);
           }
           attachColResizers();
+          autoNumber();
           scheduleAutoSave();
         }));
         tb.appendChild(mkBtn('− Row', 'Delete row at cursor', () => {
@@ -426,6 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
           } else if (tbody.rows.length > 0) {
             tbody.deleteRow(tbody.rows.length - 1);
           }
+          autoNumber();
           scheduleAutoSave();
         }));
         tb.appendChild(mkBtn('+ Col', 'Add column after cursor', () => {
