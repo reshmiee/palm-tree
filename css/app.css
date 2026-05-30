@@ -2462,6 +2462,264 @@ mark {
   box-shadow: 0 0.75px 2.25px rgba(0,0,0,0.1);
 }
 
+/* ── Typing test navbar button ── */
+
+.typing-test-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray-400, #999);
+  padding: 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.typing-test-btn:hover {
+  color: var(--black);
+  background: rgba(0,0,0,0.06);
+}
+
+.typing-test-btn .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Typing test overlay ── */
+
+.tt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tt-overlay.hidden { display: none; }
+
+.tt-modal {
+  background: var(--surface, #fff);
+  border-radius: 14px;
+  width: min(600px, 94vw);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.18);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* header */
+.tt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+
+.tt-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.tt-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--gray-300, #bbb);
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.tt-close:hover { color: var(--black); }
+
+/* body */
+.tt-body {
+  padding: 28px 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* passage */
+.tt-passage {
+  font-size: 19px;
+  line-height: 1.75;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  color: rgba(0,0,0,0.22);
+  letter-spacing: 0.01em;
+  cursor: text;
+  user-select: none;
+  min-height: 5.25em;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.tt-ch { transition: color 0.05s; }
+.tt-ch.ok  { color: var(--black); }
+.tt-ch.err { color: #e74c3c; text-decoration: underline; }
+
+/* blinking cursor on the next untyped character */
+.tt-ch.cur {
+  border-left: 2px solid var(--black);
+  margin-left: -1px;
+  animation: tt-blink 1s step-start infinite;
+}
+
+@keyframes tt-blink {
+  0%, 100% { border-left-color: var(--black); }
+  50%       { border-left-color: transparent; }
+}
+
+/* hidden input */
+.tt-hidden-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+}
+
+/* stats row */
+.tt-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: rgba(0,0,0,0.03);
+  border-radius: 10px;
+  padding: 14px 0;
+}
+
+.tt-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+
+.tt-stat-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(0,0,0,0.1);
+}
+
+.tt-stat-val {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--black);
+  font-variant-numeric: tabular-nums;
+  min-width: 3ch;
+  text-align: center;
+}
+
+.tt-stat-lbl {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-400, #999);
+}
+
+/* action buttons */
+.tt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tt-btn {
+  padding: 7px 16px;
+  border-radius: 7px;
+  border: 1.5px solid rgba(0,0,0,0.13);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--black);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.tt-btn:hover { background: rgba(0,0,0,0.05); }
+
+.tt-btn-primary {
+  background: var(--black);
+  color: #fff;
+  border-color: var(--black);
+}
+
+.tt-btn-primary:hover { background: #222; }
+
+/* result screen */
+.tt-result {
+  padding: 36px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid rgba(0,0,0,0.07);
+}
+
+.tt-result.hidden { display: none; }
+
+.tt-result-wpm {
+  font-size: 72px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--black);
+  line-height: 1;
+}
+
+.tt-result-wpm-label {
+  font-size: 13px;
+  color: var(--gray-400, #999);
+  margin-bottom: 4px;
+}
+
+.tt-result-sub {
+  font-size: 14px;
+  color: var(--gray-400, #999);
+  margin-bottom: 16px;
+}
+
+/* ── Live editor WPM badge ── */
+
+.editor-wpm-badge {
+  position: fixed;
+  bottom: 72px;   /* above the format toolbar */
+  right: 24px;
+  background: var(--black);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 5px 11px;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.editor-wpm-badge.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.editor-wpm-badge.hidden {
+  display: none;
+}
+
 /* ── Page View ── */
 
 .editor.page-view {

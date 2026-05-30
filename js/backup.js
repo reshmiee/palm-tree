@@ -42,15 +42,18 @@
   }
 
   function updateMenu() {
-    const btn = document.getElementById('backup-btn');
+    const btn       = document.getElementById('backup-btn');
+    const changeBtn = document.getElementById('backup-change-btn');
     if (!btn) return;
-    if (!SUPPORTED) { btn.style.display = 'none'; return; }
+    if (!SUPPORTED) { btn.style.display = 'none'; if (changeBtn) changeBtn.style.display = 'none'; return; }
     const s = state();
     btn.textContent =
-      s === 'on'     ? 'Auto-backup: On' + (handle ? ' · ' + handle.name : '') :
+      s === 'on'     ? 'Auto-backup: On · ' + (handle ? handle.name : '') :
       s === 'paused' ? 'Resume auto-backup' :
                        'Back up to a file…';
     btn.classList.toggle('active', s === 'on');
+    // Show "Change location" only when a backup file is active
+    if (changeBtn) changeBtn.classList.toggle('hidden', s !== 'on');
   }
 
   async function writeBackup() {
@@ -170,6 +173,13 @@
   function init() {
     const btn = document.getElementById('backup-btn');
     if (btn) btn.addEventListener('click', onClick);
+
+    const changeBtn = document.getElementById('backup-change-btn');
+    if (changeBtn) changeBtn.addEventListener('click', () => {
+      const dd = document.getElementById('menu-dropdown');
+      if (dd) dd.classList.add('hidden');
+      setup();   // setup() replaces the current handle with a newly picked one
+    });
 
     const choose = document.getElementById('backup-prompt-choose');
     if (choose) choose.addEventListener('click', setup);
