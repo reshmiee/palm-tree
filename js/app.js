@@ -1007,14 +1007,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Link insertion ───────────────────────────────────
 
   function initLinkInsertion() {
-    const linkBtn = document.getElementById('fmt-link-btn');
-    const overlay = document.getElementById('link-modal-overlay');
-    const urlInput = document.getElementById('link-modal-url');
-    const cancelBtn = document.getElementById('link-modal-cancel');
+    const linkBtn    = document.getElementById('fmt-link-btn');
+    const overlay    = document.getElementById('link-modal-overlay');
+    const urlInput   = document.getElementById('link-modal-url');
+    const cancelBtn  = document.getElementById('link-modal-cancel');
     const confirmBtn = document.getElementById('link-modal-confirm');
+    const btnLink    = document.getElementById('link-toggle-link');
+    const btnEmbed   = document.getElementById('link-toggle-embed');
     if (!linkBtn || !overlay) return;
 
-    let savedRange = null;
+    let savedRange  = null;
+    let embedMode   = false;
+
+    // Toggle between Link / Embed mode
+    btnLink && btnLink.addEventListener('click', () => {
+      embedMode = false;
+      btnLink.classList.add('active');
+      btnEmbed && btnEmbed.classList.remove('active');
+    });
+    btnEmbed && btnEmbed.addEventListener('click', () => {
+      embedMode = true;
+      btnEmbed.classList.add('active');
+      btnLink && btnLink.classList.remove('active');
+    });
 
     linkBtn.addEventListener('mousedown', (e) => {
       e.preventDefault();
@@ -1036,8 +1051,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function insertLink() {
       let url = urlInput.value.trim();
       if (!url) { closeModal(); return; }
-      // Auto-prefix https if missing
       if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+      if (embedMode) {
+        if (typeof window.insertEmbed === 'function') window.insertEmbed(url);
+        closeModal();
+        return;
+      }
 
       // Restore the saved selection
       if (savedRange) {
@@ -1086,6 +1106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tooltip.id = 'link-hover-tooltip';
     tooltip.innerHTML = `
       <span class="link-tooltip-url"></span>
+      <button class="link-tooltip-embed" title="Embed as card">Embed</button>
       <button class="link-tooltip-open" title="Open link">Open ↗</button>
     `;
     document.body.appendChild(tooltip);
@@ -1097,6 +1118,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = anchor.href;
       tooltip.querySelector('.link-tooltip-url').textContent = url.length > 50 ? url.slice(0, 50) + '…' : url;
       tooltip.querySelector('.link-tooltip-open').onclick = () => window.open(url, '_blank', 'noopener');
+      tooltip.querySelector('.link-tooltip-embed').onclick = () => {
+        if (typeof window.insertEmbed === 'function') window.insertEmbed(url);
+        tooltip.style.display = 'none';
+      };
 
       const rect = anchor.getBoundingClientRect();
       tooltip.style.display = 'flex';
