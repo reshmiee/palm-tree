@@ -2341,27 +2341,44 @@ mark {
 }
 
 .embed-card-open {
-  font-size: 11px;
+  font-size: 15px;
   color: var(--gray-400, #999);
   text-decoration: none;
   flex-shrink: 0;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
 }
 
-.embed-card-open:hover { color: var(--black); }
+.embed-card-open:hover {
+  color: var(--black);
+  background: rgba(0,0,0,0.09);
+}
 
 .embed-card-remove {
   background: none;
   border: none;
-  font-size: 15px;
+  font-size: 22px;
   line-height: 1;
-  color: var(--gray-300, #bbb);
+  color: var(--gray-400, #999);
   cursor: pointer;
-  padding: 0;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  padding: 0;
 }
 
-.embed-card-remove:hover { color: #c0392b; }
+.embed-card-remove:hover {
+  color: #c0392b;
+  background: rgba(192,57,43,0.09);
+}
 
 .embed-card-body {
   width: 100%;
