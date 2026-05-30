@@ -304,8 +304,9 @@
     if (!body) return;
 
     body.addEventListener('input', (e) => {
-      // Only count actual character insertions, not deletions/pastes
-      if (e.inputType && !e.inputType.startsWith('insert')) return;
+      // Only count keyboard-typed characters; exclude paste, drop, undo, etc.
+      const COUNTABLE = ['insertText', 'insertCompositionText', 'insertLineBreak', 'insertParagraph'];
+      if (e.inputType && !COUNTABLE.includes(e.inputType)) return;
 
       const inserted = e.data ? e.data.length : 1;
       const now = Date.now();

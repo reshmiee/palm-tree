@@ -2717,7 +2717,8 @@ mark {
 }
 
 .editor-wpm-badge.hidden {
-  display: none;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* ── Page View ── */

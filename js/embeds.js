@@ -19,9 +19,10 @@
     // Vimeo
     const vi = url.match(/vimeo\.com\/(\d+)/);
     if (vi) return `https://player.vimeo.com/video/${vi[1]}`;
-    // Google Maps share link → embed
-    if (/google\.[a-z.]+\/maps/.test(url)) {
-      return url.replace('/maps/', '/maps/embed/').split('?')[0] + '?pb=' + (url.split('?pb=')[1] || '');
+    // Google Maps — embed URL requires ?pb= param from the share link;
+    // only convert if it already has one, otherwise let the iframe try as-is
+    if (/google\.[a-z.]+\/maps/.test(url) && url.includes('?pb=')) {
+      return 'https://www.google.com/maps/embed?pb=' + url.split('?pb=')[1].split('&')[0];
     }
     return url;
   }
