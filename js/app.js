@@ -71,6 +71,82 @@ document.addEventListener('DOMContentLoaded', () => {
     scheduleAutoSave();
   });
 
+  // ── Undo / redo ───────────────────────────────────────
+  // Browser native undo clears whenever innerHTML is written inside
+  // a contenteditable (table ops, autoNumber, image insert, etc.).
+  // This custom stack snapshots at word boundaries and before every
+  // deletion or structural op, giving consistent Ctrl+Z behaviour.
+  (function initUndoRedo() {
+    const stack  = [];
+    const rstack = [];
+    const MAX    = 60;
+    let   timer  = null;
+
+    function getSnap() {
+      return window.getCleanEditorHTML ? window.getCleanEditorHTML() : bodyEl.innerHTML;
+    }
+
+    function push() {
+      const s = getSnap();
+      if (stack.length && stack[stack.length - 1] === s) return;
+      stack.push(s);
+      if (stack.length > MAX) stack.shift();
+      rstack.length = 0;
+    }
+
+    // Called before any structural DOM mutation (table rows/cols, image, embed, etc.)
+    window.pushEditorSnapshot  = function () { clearTimeout(timer); push(); };
+    // Called when a different note loads so history doesn't bleed across notes
+    window.clearEditorHistory  = function () { clearTimeout(timer); stack.length = 0; rstack.length = 0; };
+
+    function restore(html) {
+      bodyEl.innerHTML = html;
+      if (window.reinitEditorWidgets) window.reinitEditorWidgets();
+      scheduleAutoSave();
+    }
+
+    const WORD_KEYS = new Set([' ', 'Enter', '.', ',', '!', '?', ';', ':']);
+    const DEL_KEYS  = new Set(['Backspace', 'Delete']);
+
+    bodyEl.addEventListener('keydown', (e) => {
+      // Let CodeMirror handle its own undo inside code blocks
+      if (e.target.closest && e.target.closest('.CodeMirror')) return;
+
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' && !e.shiftKey) {
+          if (!stack.length) return;         // nothing in our stack → native handles
+          e.preventDefault();
+          clearTimeout(timer);
+          rstack.push(getSnap());
+          restore(stack.pop());
+        } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+          if (!rstack.length) return;
+          e.preventDefault();
+          clearTimeout(timer);
+          stack.push(getSnap());
+          restore(rstack.pop());
+        }
+        return;
+      }
+
+      if (DEL_KEYS.has(e.key)) {
+        // Flush snapshot immediately before any deletion
+        clearTimeout(timer);
+        push();
+      } else if (WORD_KEYS.has(e.key)) {
+        // Snapshot shortly after word-boundary keys (space, enter, punctuation)
+        clearTimeout(timer);
+        timer = setTimeout(push, 150);
+      }
+    });
+
+    // Safety fallback: snapshot after 3 s of continuous typing
+    bodyEl.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(push, 3000);
+    });
+  })();
+
     // ── Formatting toolbar (two-layer) ──────────────────────
 
   let trayOpen = false;
@@ -371,14 +447,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbody = table.querySelector('tbody') || table;
         Array.from(tbody.rows).forEach((row, i) => {
           const cell = row.cells[0];
-          if (cell) cell.innerHTML = `<p>${i + 1}</p>`;
+          if (cell) cell.innerHTML = `<p>${i}</p>`;
         });
       }
       autoNumber();
-
-      // Trigger immediately when user types the header label
-      const _firstTh = table.querySelector('thead tr th:first-child');
-      if (_firstTh) _firstTh.addEventListener('input', autoNumber);
 
       function buildTableToolbar() {
         let tb = wrapper.querySelector('.table-toolbar');
@@ -420,6 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tb.appendChild(mkBtn('+ Row', 'Add row below cursor', () => {
+          if (window.pushEditorSnapshot) window.pushEditorSnapshot();
           const tbody = table.querySelector('tbody') || table;
           const cols = table.rows[0] ? table.rows[0].cells.length : 1;
           const tr = document.createElement('tr');
@@ -441,6 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
           scheduleAutoSave();
         }));
         tb.appendChild(mkBtn('− Row', 'Delete row at cursor', () => {
+          if (window.pushEditorSnapshot) window.pushEditorSnapshot();
           const { rowIndex } = getFocusedCell();
           const tbody = table.querySelector('tbody') || table;
           if (rowIndex >= 0 && tbody.rows.length > 0) {
@@ -452,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
           scheduleAutoSave();
         }));
         tb.appendChild(mkBtn('+ Col', 'Add column after cursor', () => {
+          if (window.pushEditorSnapshot) window.pushEditorSnapshot();
           const { colIndex } = getFocusedCell();
           Array.from(table.rows).forEach((row, ri) => {
             const cell = ri === 0 ? document.createElement('th') : document.createElement('td');
@@ -466,6 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
           scheduleAutoSave();
         }));
         tb.appendChild(mkBtn('− Col', 'Delete column at cursor', () => {
+          if (window.pushEditorSnapshot) window.pushEditorSnapshot();
           const { colIndex } = getFocusedCell();
           const targetCol = colIndex >= 0 ? colIndex : -1;
           Array.from(table.rows).forEach(row => {
@@ -502,6 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         e.stopPropagation();
         showDeleteConfirmModal('Delete this table?', () => {
+          if (window.pushEditorSnapshot) window.pushEditorSnapshot();
           tableWrapper.remove();
           scheduleAutoSave();
         });
@@ -613,7 +690,7 @@ document.addEventListener('DOMContentLoaded', () => {
       deleteBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        // Remove the whole .img-block if present, else just the wrapper
+        if (window.pushEditorSnapshot) window.pushEditorSnapshot();
         const block = wrapper.closest('.img-block');
         (block || wrapper).remove();
         scheduleAutoSave();
@@ -621,6 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
       deleteBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (window.pushEditorSnapshot) window.pushEditorSnapshot();
         const block = wrapper.closest('.img-block');
         (block || wrapper).remove();
         scheduleAutoSave();
@@ -712,6 +790,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         e.stopPropagation();
         showDeleteConfirmModal('Delete this table?', () => {
+          if (window.pushEditorSnapshot) window.pushEditorSnapshot();
           wrapper.remove();
           scheduleAutoSave();
         });
@@ -859,6 +938,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       showDeleteConfirmModal('Delete this code block?', () => {
+        if (window.pushEditorSnapshot) window.pushEditorSnapshot();
         const block = wrapper.closest('.code-block-wrapper') || wrapper;
         block.remove();
         scheduleAutoSave();

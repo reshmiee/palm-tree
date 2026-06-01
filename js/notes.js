@@ -178,8 +178,9 @@ function openNote(id) {
 
   titleEl.value = note.title === 'Untitled' ? '' : note.title;
   bodyEl.innerHTML = note.body || '';
+  if (typeof window.clearEditorHistory  === 'function') window.clearEditorHistory();
   if (typeof window.reinitEditorWidgets === 'function') window.reinitEditorWidgets();
-  if (typeof window.loadNoteEmbeds === 'function') window.loadNoteEmbeds(note);
+  if (typeof window.loadNoteEmbeds      === 'function') window.loadNoteEmbeds(note);
 
   autoResizeTitle();
   highlightActiveCard(id);
@@ -299,7 +300,8 @@ function deleteActiveNote() {
 function clearEditor() {
   document.getElementById('editor-title').value = '';
   document.getElementById('editor-body').innerHTML = '';
-  if (typeof window.loadNoteEmbeds === 'function') window.loadNoteEmbeds(null);
+  if (typeof window.clearEditorHistory  === 'function') window.clearEditorHistory();
+  if (typeof window.loadNoteEmbeds      === 'function') window.loadNoteEmbeds(null);
 }
 
 function autoResizeTitle() {
