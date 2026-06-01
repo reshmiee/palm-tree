@@ -17,12 +17,25 @@ function closeActiveCardMenu() {
   }
 }
 
+function togglePinNote(noteId) {
+  const note = getNoteById(noteId);
+  if (!note) return;
+  note.pinned = !note.pinned;
+  note.updatedAt = new Date().toISOString();
+  saveNote(note);
+  renderRecentNotes();
+}
+
 function showNoteCardMenu(btn, noteId) {
   closeActiveCardMenu();
+
+  const note = getNoteById(noteId);
+  const isPinned = note && note.pinned;
 
   const menu = document.createElement('div');
   menu.className = 'note-card-menu';
   menu.innerHTML = `
+    <button class="note-card-menu-item" data-action="pin">${isPinned ? 'Unpin note' : 'Pin note'}</button>
     <button class="note-card-menu-item" data-action="rename">Rename note</button>
     <button class="note-card-menu-item" data-action="folder">Add to folder</button>
     <hr class="note-card-menu-divider" />
@@ -36,6 +49,12 @@ function showNoteCardMenu(btn, noteId) {
   menu.style.left = (rect.left - 120) + 'px';
   document.body.appendChild(menu);
   activeCardMenu = menu;
+
+  menu.querySelector('[data-action="pin"]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeActiveCardMenu();
+    togglePinNote(noteId);
+  });
 
   menu.querySelector('[data-action="rename"]').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -318,11 +337,15 @@ function highlightActiveCard(id) {
 
 // ── Render recent notes list ─────────────────────────
 
+const pinIcon = '<svg class="note-pin-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M16 3a1 1 0 0 1 .7 1.7l-1.1 1.1 1.7 5.1a1 1 0 0 1-.24 1.02L13 15.83V20a1 1 0 0 1-1.7.71l-3-3-3.3 3.3a1 1 0 0 1-1.41-1.41l3.3-3.3-3-3A1 1 0 0 1 4.17 11l3.9-4.06a1 1 0 0 1 1.02-.24l5.1 1.7 1.1-1.1A1 1 0 0 1 16 3z"/></svg>';
+
 function renderRecentNotes() {
   const panel = document.getElementById('panel-recent');
-  const notes = getAllNotes().sort((a, b) =>
-    new Date(b.updatedAt) - new Date(a.updatedAt)
-  );
+  const notes = getAllNotes().sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return new Date(b.updatedAt) - new Date(a.updatedAt);
+  });
 
   if (notes.length === 0) {
     panel.innerHTML = `<div class="empty-state">No notes yet.<br>Start writing!</div>`;
@@ -347,10 +370,10 @@ function renderRecentNotes() {
   }
 
   panel.innerHTML = notes.map(note => `
-    <div class="note-card ${note.id === activeNoteId ? 'active' : ''}" data-id="${note.id}">
+    <div class="note-card ${note.id === activeNoteId ? 'active' : ''} ${note.pinned ? 'pinned' : ''}" data-id="${note.id}">
       <button class="note-card-dots" data-id="${note.id}" title="Options" aria-label="Note options">${threeDotIcon}</button>
       <div class="note-card-title">${escapeHtml(note.title || 'Untitled')}</div>
-      <div class="note-card-date">${formatDate(note.updatedAt)}</div>
+      <div class="note-card-date">${note.pinned ? pinIcon + ' Pinned' : formatDate(note.updatedAt)}</div>
     </div>
   `).join('');
 
