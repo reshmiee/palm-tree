@@ -51,6 +51,31 @@ function goForward() {
   navigateTo(navHistory[navCursor]);
 }
 
+// ── Dark mode ─────────────────────────────────────────
+(function () {
+  const KEY = 'palmtree_dark';
+
+  function applyTheme(dark) {
+    document.body.classList.toggle('dark', dark);
+    const btn = document.getElementById('dark-mode-btn');
+    if (btn) btn.textContent = dark ? 'Light mode' : 'Dark mode';
+  }
+
+  // Apply on load before first paint
+  applyTheme(localStorage.getItem(KEY) === '1');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTheme(localStorage.getItem(KEY) === '1');
+    const btn = document.getElementById('dark-mode-btn');
+    if (btn) btn.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark');
+      localStorage.setItem(KEY, isDark ? '1' : '0');
+      applyTheme(isDark);
+      document.getElementById('menu-dropdown')?.classList.add('hidden');
+    });
+  });
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // ── Editor events ──────────────────────────────────

@@ -1,6 +1,7 @@
-/* app.css */
+﻿/* app.css */
+/* Dark mode overrides are at the very bottom of this file */
 
-/* ── Instant tooltip (replaces slow native title tooltips) ── */
+/* â”€â”€ Instant tooltip (replaces slow native title tooltips) â”€â”€ */
 .instant-tooltip {
   position: fixed;
   z-index: 9999;
@@ -24,7 +25,7 @@
   transform: translateY(0);
 }
 
-/* ── Layout ── */
+/* â”€â”€ Layout â”€â”€ */
 
 .icon {
   width: 1em;
@@ -50,7 +51,7 @@ html, body {
   box-sizing: border-box;
 }
 
-/* ── Sidebar ── */
+/* â”€â”€ Sidebar â”€â”€ */
 
 .sidebar {
   position: relative;
@@ -64,7 +65,7 @@ html, body {
   overflow: hidden;
 }
 
-/* ── Sidebar Top ── */
+/* â”€â”€ Sidebar Top â”€â”€ */
 
 .sidebar-top {
   position: fixed;
@@ -133,7 +134,7 @@ html, body {
   flex-shrink: 0;
 }
 
-/* ── Folder nav button (in top bar) ── */
+/* â”€â”€ Folder nav button (in top bar) â”€â”€ */
 
 .sidebar-toggle-btn {
   color: var(--gray-500);
@@ -162,7 +163,7 @@ html, body {
   height: 18px;
 }
 
-/* ── Collapsed sidebar (full-width editor / focus mode) ── */
+/* â”€â”€ Collapsed sidebar (full-width editor / focus mode) â”€â”€ */
 .app.sidebar-collapsed .sidebar {
   width: 0;
   min-width: 0;
@@ -174,7 +175,7 @@ html, body {
   position: fixed;
 }
 
-/* Editor is now full width → recenter the floating toolbar/tray */
+/* Editor is now full width â†’ recenter the floating toolbar/tray */
 .app.sidebar-collapsed .format-toolbar,
 .app.sidebar-collapsed .fmt-tray {
   left: 50vw;
@@ -182,7 +183,7 @@ html, body {
 
 /* Keep the content at its normal width (as if the sidebar were still there)
    and center it, so code/tables/images/text don't stretch edge-to-edge.
-   100vw − (sidebar 345px + editor padding 60px) = the with-sidebar width. */
+   100vw âˆ’ (sidebar 345px + editor padding 60px) = the with-sidebar width. */
 .app.sidebar-collapsed .editor-meta,
 .app.sidebar-collapsed .editor-title-row,
 .app.sidebar-collapsed .editor-body {
@@ -219,9 +220,9 @@ html, body {
   height: 19.5px;
 }
 
-/* ── Full-width Search Overlay ── */
+/* â”€â”€ Full-width Search Overlay â”€â”€ */
 
-/* Dimmed backdrop — the app stays visible behind it */
+/* Dimmed backdrop â€” the app stays visible behind it */
 .search-overlay {
   position: fixed;
   inset: 0;
@@ -318,7 +319,7 @@ html, body {
   padding: var(--space-sm) var(--space-md);
 }
 
-/* ── Menu ── */
+/* â”€â”€ Menu â”€â”€ */
 
 .menu-wrap {
   position: relative;
@@ -341,7 +342,7 @@ html, body {
   color: var(--black);
 }
 
-/* ── Install ("Add to Desktop") banner ── */
+/* â”€â”€ Install ("Add to Desktop") banner â”€â”€ */
 .install-banner {
   position: fixed;
   top: 68px;
@@ -448,7 +449,7 @@ html, body {
   margin: 1.5px 0;
 }
 
-/* ── Tabs ── */
+/* â”€â”€ Tabs â”€â”€ */
 
 .tabs {
   display: flex;
@@ -506,7 +507,7 @@ html, body {
   color: var(--white);
 }
 
-/* ── Tab Panels ── */
+/* â”€â”€ Tab Panels â”€â”€ */
 
 .tab-panel {
   flex: 1;
@@ -529,7 +530,7 @@ html, body {
   border-radius: 1.5px;
 }
 
-/* ── Note Cards ── */
+/* â”€â”€ Note Cards â”€â”€ */
 
 .note-card {
   padding: 16.5px 21px;
@@ -570,7 +571,7 @@ html, body {
   color: #858585;
 }
 
-/* ── Pinned note card ── */
+/* â”€â”€ Pinned note card â”€â”€ */
 
 .note-card.pinned {
   border-left: 2.5px solid var(--black);
@@ -587,7 +588,7 @@ html, body {
   opacity: 0.6;
 }
 
-/* ── Empty State ── */
+/* â”€â”€ Empty State â”€â”€ */
 
 .empty-state {
   padding: var(--space-xl) var(--space-md);
@@ -598,7 +599,7 @@ html, body {
   line-height: 1.8;
 }
 
-/* ── Sidebar Footer ── */
+/* â”€â”€ Sidebar Footer â”€â”€ */
 
 .sidebar-footer {
   position: absolute;
@@ -637,7 +638,7 @@ html, body {
   transform: translateY(-1.5px);
 }
 
-/* ── Editor ── */
+/* â”€â”€ Editor â”€â”€ */
 
 .editor {
   flex: 1;
@@ -695,7 +696,7 @@ html, body {
   color: var(--gray-300);
 }
 
-/* ── Folder view (renders in editor area) ── */
+/* â”€â”€ Folder view (renders in editor area) â”€â”€ */
 
 .folder-view {
   position: absolute;
@@ -792,7 +793,7 @@ html, body {
   background: var(--white);
 }
 
-/* ── Folder right side panel ── */
+/* â”€â”€ Folder right side panel â”€â”€ */
 
 .folder-side-panel {
   position: absolute;
@@ -894,7 +895,7 @@ html, body {
   background: var(--white);
 }
 
-/* ── Month Group ── */
+/* â”€â”€ Month Group â”€â”€ */
 
 .month-group {
   margin-bottom: var(--space-sm);
@@ -909,13 +910,13 @@ html, body {
   padding: 7.5px var(--space-md) 3px;
 }
 
-/* ── Utility ── */
+/* â”€â”€ Utility â”€â”€ */
 
 .hidden {
   display: none !important;
 }
 
-/* ── Folders ── */
+/* â”€â”€ Folders â”€â”€ */
 
 .folder-actions {
   display: flex;
@@ -1094,7 +1095,7 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
   color: var(--black);
 }
 
-/* ── Add-to-folder modal ── */
+/* â”€â”€ Add-to-folder modal â”€â”€ */
 
 .folder-modal-overlay {
   position: fixed;
@@ -1196,7 +1197,7 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
   color: var(--black);
 }
 
-/* ── Inline name input modal ── */
+/* â”€â”€ Inline name input modal â”€â”€ */
 
 .name-modal-overlay {
   position: fixed;
@@ -1283,7 +1284,7 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
   opacity: 0.8;
 }
 
-/* ── Search ── */
+/* â”€â”€ Search â”€â”€ */
 
 .note-card-snippet {
   font-size: 10.5px;
@@ -1303,7 +1304,7 @@ mark {
   font-weight: 600;
 }
 
-/* ── Toast ── */
+/* â”€â”€ Toast â”€â”€ */
 
 .toast {
   position: fixed;
@@ -1333,7 +1334,7 @@ mark {
   background: #c0392b;
 }
 
-/* ── Month count badge ── */
+/* â”€â”€ Month count badge â”€â”€ */
 
 .month-count {
   font-size: 9.75px;
@@ -1346,7 +1347,7 @@ mark {
   vertical-align: middle;
 }
 
-/* ── Transitions ── */
+/* â”€â”€ Transitions â”€â”€ */
 
 .note-card {
   transition: background var(--transition), opacity 0.15s ease;
@@ -1365,7 +1366,7 @@ mark {
   transition: width 0.2s ease;
 }
 
-/* ── Focus states ── */
+/* â”€â”€ Focus states â”€â”€ */
 
 .search-input:focus {
   outline: none;
@@ -1380,7 +1381,7 @@ mark {
   outline: none;
 }
 
-/* ── Sidebar resize handle ── */
+/* â”€â”€ Sidebar resize handle â”€â”€ */
 
 .sidebar::after {
   content: '';
@@ -1393,7 +1394,7 @@ mark {
   z-index: 10;
 }
 
-/* ── Note card 3-dot on hover ── */
+/* â”€â”€ Note card 3-dot on hover â”€â”€ */
 
 .note-card {
   position: relative;
@@ -1432,7 +1433,7 @@ mark {
   stroke-width: 2.5;
 }
 
-/* ── Note card context menu ── */
+/* â”€â”€ Note card context menu â”€â”€ */
 
 .note-card-menu {
   background: var(--white);
@@ -1471,7 +1472,7 @@ mark {
   margin: 1.5px 0;
 }
 
-/* ── Unsaved indicator ── */
+/* â”€â”€ Unsaved indicator â”€â”€ */
 
 .unsaved-dot {
   display: inline-block;
@@ -1489,7 +1490,7 @@ mark {
   opacity: 1;
 }
 
-/* ── Mobile ── */
+/* â”€â”€ Mobile â”€â”€ */
 
 @media (max-width: 640px) {
   .app {
@@ -1527,7 +1528,7 @@ mark {
   }
 }
 
-/* ── Scrollbar global ── */
+/* â”€â”€ Scrollbar global â”€â”€ */
 
 * {
   scrollbar-width: thin;
@@ -1551,7 +1552,7 @@ mark {
   background: var(--gray-300);
 }
 
-/* ── Editor meta bar ── */
+/* â”€â”€ Editor meta bar â”€â”€ */
 
 .editor-meta {
   display: flex;
@@ -1561,7 +1562,7 @@ mark {
   margin-bottom: 0.75px;
 }
 
-/* ── Title row (title + download button) ── */
+/* â”€â”€ Title row (title + download button) â”€â”€ */
 
 .editor-title-row {
   display: flex;
@@ -1574,7 +1575,7 @@ mark {
   min-width: 0;
 }
 
-/* ── Download button ── */
+/* â”€â”€ Download button â”€â”€ */
 
 .download-wrap {
   position: relative;
@@ -1632,7 +1633,7 @@ mark {
   color: var(--black);
 }
 
-/* ── Back button ── */
+/* â”€â”€ Back button â”€â”€ */
 
 .back-btn {
   color: var(--gray-500);
@@ -1661,7 +1662,7 @@ mark {
   height: 19.5px;
 }
 
-/* ── Home button ── */
+/* â”€â”€ Home button â”€â”€ */
 
 .home-btn {
   font-size: 15px;
@@ -1679,7 +1680,7 @@ mark {
   transform: scale(1.15);
   background: var(--gray-100);
 }
-/* ── Multi-select ── */
+/* â”€â”€ Multi-select â”€â”€ */
 
 .bulk-bar {
   display: flex;
@@ -1782,7 +1783,7 @@ mark {
 .note-card.selectable:hover .note-select-check {
   border-color: var(--black);
 }
-/* ── Rich Text Editor Body (contenteditable) ── */
+/* â”€â”€ Rich Text Editor Body (contenteditable) â”€â”€ */
 
 .editor-body[contenteditable] {
   flex: 1;
@@ -1814,9 +1815,9 @@ mark {
 .editor-body s,
 .editor-body strike { text-decoration: line-through; }
 
-/* ── Two-layer Formatting Toolbar ── */
+/* â”€â”€ Two-layer Formatting Toolbar â”€â”€ */
 
-/* Bottom bar pill — centered within the editor content area (sidebar 345px + 75px padding each side) */
+/* Bottom bar pill â€” centered within the editor content area (sidebar 345px + 75px padding each side) */
 .format-toolbar {
   position: fixed;
   bottom: 18px;
@@ -1932,9 +1933,9 @@ mark {
   font-family: var(--font);
 }
 
-/* ── Font size picker in tray ── */
+/* â”€â”€ Font size picker in tray â”€â”€ */
 
-/* ── Code block ── */
+/* â”€â”€ Code block â”€â”€ */
 .code-block-wrapper {
   position: relative;
   margin: 12px 0;
@@ -2057,7 +2058,7 @@ mark {
   padding-left: 1.5em;
   margin: 4.5px 0;
 }
-/* ── Inline images in editor ── */
+/* â”€â”€ Inline images in editor â”€â”€ */
 
 .img-block {
   display: block;
@@ -2129,7 +2130,7 @@ mark {
   opacity: 1;
 }
 
-/* ── Link hover tooltip ── */
+/* â”€â”€ Link hover tooltip â”€â”€ */
 
 #link-hover-tooltip {
   display: none;
@@ -2191,7 +2192,7 @@ mark {
   background: rgba(255,255,255,0.22);
 }
 
-/* ── Link modal ── */
+/* â”€â”€ Link modal â”€â”€ */
 
 .link-modal-overlay {
   position: fixed;
@@ -2263,7 +2264,7 @@ mark {
   background: var(--black);
 }
 
-/* ── Link / Embed mode toggle ── */
+/* â”€â”€ Link / Embed mode toggle â”€â”€ */
 
 .link-modal-toggle {
   display: flex;
@@ -2290,7 +2291,7 @@ mark {
   border-color: var(--black);
 }
 
-/* ── Embed cards ── */
+/* â”€â”€ Embed cards â”€â”€ */
 
 #embeds-layer {
   position: absolute;
@@ -2457,7 +2458,7 @@ mark {
   text-decoration: underline;
   cursor: pointer;
 }
-/* ── View Toggle ── */
+/* â”€â”€ View Toggle â”€â”€ */
 
 .view-toggle {
   display: flex;
@@ -2496,7 +2497,7 @@ mark {
   box-shadow: 0 0.75px 2.25px rgba(0,0,0,0.1);
 }
 
-/* ── Typing test navbar button ── */
+/* â”€â”€ Typing test navbar button â”€â”€ */
 
 .typing-test-btn {
   background: none;
@@ -2522,7 +2523,7 @@ mark {
   height: 20px;
 }
 
-/* ── Typing test overlay ── */
+/* â”€â”€ Typing test overlay â”€â”€ */
 
 .tt-overlay {
   position: fixed;
@@ -2725,7 +2726,7 @@ mark {
   margin-bottom: 16px;
 }
 
-/* ── Live editor WPM badge ── */
+/* â”€â”€ Live editor WPM badge â”€â”€ */
 
 .editor-wpm-badge {
   position: fixed;
@@ -2755,7 +2756,7 @@ mark {
   pointer-events: none;
 }
 
-/* ── Page View ── */
+/* â”€â”€ Page View â”€â”€ */
 
 .editor.page-view {
   background: #c7c7c7;
@@ -2764,7 +2765,7 @@ mark {
   overflow-y: auto;
 }
 
-/* ── Pages container ── */
+/* â”€â”€ Pages container â”€â”€ */
 
 .pages-container {
   display: flex;
@@ -2815,7 +2816,7 @@ mark {
   font-family: var(--font-main, system-ui, sans-serif);
 }
 
-/* ── Page side buttons ── */
+/* â”€â”€ Page side buttons â”€â”€ */
 
 .page-side-btns {
   position: fixed;
@@ -2880,13 +2881,13 @@ mark {
   flex: 1;
 }
 
-/* ── Toolbar centering override in page view ── */
+/* â”€â”€ Toolbar centering override in page view â”€â”€ */
 .editor.page-view ~ .format-toolbar,
 .editor.page-view ~ .fmt-tray {
   left: 50%;
 }
 
-/* ── Page Settings Panel ── */
+/* â”€â”€ Page Settings Panel â”€â”€ */
 
 .page-settings {
   position: relative;
@@ -2979,7 +2980,7 @@ mark {
 .ps-apply:hover {
   opacity: 0.75;
 }
-/* ── Level 3: Font Family Picker ── */
+/* â”€â”€ Level 3: Font Family Picker â”€â”€ */
 
 .fmt-fontfamily-wrap {
   display: flex;
@@ -3006,7 +3007,7 @@ mark {
   border-color: var(--gray-400);
 }
 
-/* ── Level 3: Table Insertion ── */
+/* â”€â”€ Level 3: Table Insertion â”€â”€ */
 
 .table-picker-overlay {
   position: fixed;
@@ -3062,7 +3063,7 @@ mark {
   min-height: 12px;
 }
 
-/* ── Level 3: Table Styles in Editor ── */
+/* â”€â”€ Level 3: Table Styles in Editor â”€â”€ */
 
 .editor-body table,
 .page-content table {
@@ -3121,7 +3122,7 @@ mark {
 }
 
 
-/* ── Code block delete button ──────────────────────────── */
+/* â”€â”€ Code block delete button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .code-block-delete-btn {
   margin-left: auto;
@@ -3144,7 +3145,7 @@ mark {
   color: #c0392b;
 }
 
-/* ── Table block wrapper + delete button ──────────────────── */
+/* â”€â”€ Table block wrapper + delete button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .table-block-wrapper {
   position: relative;
@@ -3157,7 +3158,7 @@ mark {
   width: auto;
 }
 
-/* ── Column resize handle ── */
+/* â”€â”€ Column resize handle â”€â”€ */
 .col-resizer {
   position: absolute;
   top: 0; right: -3px;
@@ -3173,7 +3174,7 @@ mark {
   border-radius: 1.5px;
 }
 
-/* ── Table toolbar (add/delete row/col) ── */
+/* â”€â”€ Table toolbar (add/delete row/col) â”€â”€ */
 .table-toolbar {
   display: none;
   gap: 3px;
@@ -3201,7 +3202,7 @@ mark {
   background: var(--gray-100);
   border-color: var(--gray-400);
 }
-/* + buttons → black */
+/* + buttons â†’ black */
 .table-tb-btn:first-child,
 .table-tb-btn:nth-child(3) {
   color: #111;
@@ -3211,7 +3212,7 @@ mark {
 .table-tb-btn:nth-child(3):hover {
   background: var(--gray-100);
 }
-/* − buttons → red */
+/* âˆ’ buttons â†’ red */
 .table-tb-btn:nth-child(2),
 .table-tb-btn:nth-child(4) {
   color: #c0392b;
@@ -3250,7 +3251,7 @@ mark {
   color: #c0392b;
   border-color: #f5c6cb;
 }
-/* ── Level 3: Page Header & Footer ── */
+/* â”€â”€ Level 3: Page Header & Footer â”€â”€ */
 
 .page-header-editable,
 .page-footer-editable {
@@ -3309,7 +3310,7 @@ mark {
   margin-left: 9px;
 }
 
-/* ── Level 3: Document title treatment ── */
+/* â”€â”€ Level 3: Document title treatment â”€â”€ */
 
 .page-doc-title {
   font-size: 22pt;
@@ -3320,7 +3321,7 @@ mark {
   font-family: var(--font-main, system-ui, sans-serif);
 }
 
-/* ── Level 3: Print page-side button divider ── */
+/* â”€â”€ Level 3: Print page-side button divider â”€â”€ */
 
 .page-side-divider {
   width: 15px;
@@ -3329,11 +3330,11 @@ mark {
   margin: 1.5px 6px;
 }
 
-/* ══════════════════════════════════════════════
-   LEVEL 4 — Polish / Google Docs feel
-   ══════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   LEVEL 4 â€” Polish / Google Docs feel
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Ruler ── */
+/* â”€â”€ Ruler â”€â”€ */
 
 .page-ruler {
   position: sticky;
@@ -3447,7 +3448,7 @@ mark {
   pointer-events: none;
 }
 
-/* ── Zoom control ── */
+/* â”€â”€ Zoom control â”€â”€ */
 
 .page-zoom-wrap {
   display: flex;
@@ -3472,7 +3473,7 @@ mark {
   min-width: 24px;
 }
 
-/* ── Line spacing select ── */
+/* â”€â”€ Line spacing select â”€â”€ */
 
 .page-linespacing-wrap {
   display: flex;
@@ -3504,13 +3505,13 @@ mark {
   background: rgba(255,255,255,0.25);
 }
 
-/* ── Per-page active focus highlight ── */
+/* â”€â”€ Per-page active focus highlight â”€â”€ */
 
 .page-sheet.page-active {
   box-shadow: 0 1.5px 6px rgba(0,0,0,0.18), 0 0 0 1.5px rgba(66,133,244,0.6);
 }
 
-/* ── Styled page numbers ── */
+/* â”€â”€ Styled page numbers â”€â”€ */
 
 .page-footer-right {
   font-size: 9pt;
@@ -3526,7 +3527,7 @@ mark {
   user-select: none;
 }
 
-/* Add "Page X of Y" format — set via JS data attrs */
+/* Add "Page X of Y" format â€” set via JS data attrs */
 .page-footer-right[data-total]::before {
   content: attr(data-page) ' / ' attr(data-total);
 }
@@ -3539,15 +3540,15 @@ mark {
   font-size: 9pt;
 }
 
-/* ── Page view ruler visibility ── */
+/* â”€â”€ Page view ruler visibility â”€â”€ */
 .editor.page-view ~ * .page-ruler,
 .page-ruler.visible {
   display: flex;
 }
 
-/* ══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    DOC TOOLBAR (page view top bar)
-   ══════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .doc-toolbar {
   position: sticky;
@@ -3570,7 +3571,7 @@ mark {
 
 .doc-toolbar::-webkit-scrollbar { display: none; }
 
-/* Hide in scroll view — animated show/hide */
+/* Hide in scroll view â€” animated show/hide */
 .doc-toolbar {
   transition: opacity 0.18s ease, transform 0.18s ease, max-height 0.18s ease;
   max-height: 36px;
@@ -3596,7 +3597,7 @@ mark {
   pointer-events: auto;
 }
 
-/* ── Buttons ── */
+/* â”€â”€ Buttons â”€â”€ */
 
 .doc-tb-btn {
   display: flex;
@@ -3623,7 +3624,7 @@ mark {
   color: #1a1a8c;
 }
 
-/* ── Divider ── */
+/* â”€â”€ Divider â”€â”€ */
 
 .doc-tb-divider {
   width: 0.75px;
@@ -3633,7 +3634,7 @@ mark {
   flex-shrink: 0;
 }
 
-/* ── Selects ── */
+/* â”€â”€ Selects â”€â”€ */
 
 .doc-tb-select {
   height: 21px;
@@ -3658,7 +3659,7 @@ mark {
 .doc-tb-para { width: 90px; }
 .doc-tb-font { width: 82.5px; }
 
-/* ── Font size control ── */
+/* â”€â”€ Font size control â”€â”€ */
 
 .doc-tb-fontsize {
   display: flex;
@@ -3677,13 +3678,13 @@ mark {
   user-select: none;
 }
 
-/* ── Hide the floating bottom toolbar + tray in page view ── */
+/* â”€â”€ Hide the floating bottom toolbar + tray in page view â”€â”€ */
 .page-view-active .format-toolbar,
 .page-view-active .fmt-tray {
   display: none !important;
 }
 
-/* ── Doc Toolbar Level 2: Colour buttons ── */
+/* â”€â”€ Doc Toolbar Level 2: Colour buttons â”€â”€ */
 
 .doc-tb-colour-wrap {
   position: relative;
@@ -3719,7 +3720,7 @@ mark {
   padding: 0;
   border: none;
 }
-/* ── Level 3: Zoom input in toolbar ── */
+/* â”€â”€ Level 3: Zoom input in toolbar â”€â”€ */
 
 .doc-tb-zoom-wrap {
   display: flex;
@@ -3754,7 +3755,7 @@ mark {
   background: #f6f8ff;
 }
 
-/* ── Level 3: Line spacing in toolbar ── */
+/* â”€â”€ Level 3: Line spacing in toolbar â”€â”€ */
 
 .doc-tb-linespacing-wrap {
   display: flex;
@@ -3767,7 +3768,7 @@ mark {
   width: 46.5px;
 }
 
-/* ── Level 4: Custom dropdown panels ── */
+/* â”€â”€ Level 4: Custom dropdown panels â”€â”€ */
 
 .doc-tb-dropdown {
   position: relative;
@@ -3871,7 +3872,7 @@ mark {
 }
 
 .doc-tb-dropdown-item--selected::after {
-  content: '✓';
+  content: 'âœ“';
   margin-left: auto;
   font-size: 8.25px;
   opacity: 0.7;
@@ -3882,7 +3883,7 @@ mark {
 #doc-tb-para-panel { min-width: 97.5px; }
 #doc-tb-ls-panel   { min-width: 60px; }
 
-/* ── Level 4: Narrow screen horizontal scroll polish ── */
+/* â”€â”€ Level 4: Narrow screen horizontal scroll polish â”€â”€ */
 
 @media (max-width: 680px) {
   .doc-toolbar {
@@ -3894,7 +3895,7 @@ mark {
   .doc-tb-divider   { margin: 0 1.5px; }
 }
 
-/* ── Level 4: Toolbar overflow indicator (fades at edges) ── */
+/* â”€â”€ Level 4: Toolbar overflow indicator (fades at edges) â”€â”€ */
 
 .doc-toolbar::after {
   content: '';
@@ -3907,3 +3908,204 @@ mark {
   background: linear-gradient(to right, transparent, #f8f8f8 80%);
   pointer-events: none;
 }
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   DARK MODE â€” body.dark overrides
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+/* Base */
+body.dark { background: var(--white); color: var(--black); }
+
+/* Sidebar */
+body.dark .sidebar { background: var(--white); border-color: var(--gray-200); }
+body.dark .sidebar-top { background: var(--white); border-color: var(--gray-200); }
+body.dark .tabs { background: var(--white); border-color: var(--gray-200); }
+body.dark .tab-panel { background: var(--white); }
+body.dark .tab-btn { color: var(--gray-400); }
+body.dark .tab-btn.active { background: var(--gray-300); color: var(--black); }
+body.dark .tab-btn:hover { background: var(--gray-200); }
+
+/* Search */
+body.dark .search-trigger { background: var(--gray-100); color: var(--gray-400); }
+body.dark .search-trigger:hover { background: var(--gray-200); }
+body.dark .search-trigger-text { color: var(--gray-400); }
+body.dark .search-overlay { background: rgba(0,0,0,0.6); }
+body.dark .search-overlay-box { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .search-input { background: var(--gray-100); color: var(--black); }
+body.dark .search-input::placeholder { color: var(--gray-400); }
+body.dark .search-result-item:hover { background: var(--gray-200); }
+
+/* Note cards */
+body.dark .note-card { background: transparent; }
+body.dark .note-card:hover { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .note-card.active { background: var(--gray-100); border-color: var(--gray-300); }
+body.dark .note-card-title { color: var(--black); }
+body.dark .note-card-date { color: var(--gray-400); }
+body.dark .note-card.pinned { border-left-color: var(--gray-500); }
+
+/* Menu dropdown */
+body.dark .menu-dropdown {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+body.dark .menu-item { color: var(--black); }
+body.dark .menu-item:hover { background: var(--gray-200); }
+body.dark .menu-item.active { background: var(--gray-200); }
+body.dark .menu-divider { border-color: var(--gray-200); }
+
+/* Editor */
+body.dark .editor { background: var(--white); }
+body.dark .editor-title { color: var(--black); }
+body.dark .editor-title::placeholder { color: var(--gray-300); }
+body.dark .editor-body { color: var(--black); }
+body.dark .editor-body[contenteditable]:empty::before { color: var(--gray-300); }
+
+/* Format toolbar */
+body.dark .format-toolbar { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .fmt-btn { color: var(--gray-500); }
+body.dark .fmt-btn:hover { background: var(--gray-200); color: var(--black); }
+body.dark .fmt-btn.active { background: var(--gray-200); color: var(--black); }
+body.dark .fmt-tray { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .fmt-tray-btn { color: var(--gray-500); }
+body.dark .fmt-tray-btn:hover { background: var(--gray-200); color: var(--black); }
+body.dark .toolbar-divider { background: var(--gray-200); }
+
+/* Toolbar dropdowns */
+body.dark .toolbar-dropdown-btn { color: var(--gray-500); }
+body.dark .toolbar-dropdown-btn:hover { background: var(--gray-200); }
+body.dark .toolbar-dropdown-panel {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+body.dark .toolbar-dropdown-item { color: var(--black); }
+body.dark .toolbar-dropdown-item:hover { background: var(--gray-200); }
+
+/* Tables */
+body.dark table { border-color: var(--gray-200); }
+body.dark th, body.dark td { border-color: var(--gray-200); color: var(--black); }
+body.dark th { background: var(--gray-100); }
+body.dark .table-toolbar { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .table-tb-btn { color: var(--gray-500); border-color: var(--gray-200); }
+body.dark .table-tb-btn:hover { background: var(--gray-200); color: var(--black); }
+body.dark .table-delete-btn { color: var(--gray-400); }
+body.dark .table-delete-btn:hover { color: #e05252; }
+
+/* Code blocks */
+body.dark .code-block-wrapper { background: #3a3a3c; border-color: var(--gray-200); }
+body.dark .code-block-header { background: #444446; border-color: var(--gray-200); }
+body.dark .code-block-lang-select { background: #444446; color: var(--gray-500); border-color: var(--gray-300); }
+body.dark .code-block-lang-select option { background: #444446; color: var(--black); }
+body.dark .code-block-cm .CodeMirror { background: #3a3a3c; color: #d4d4d4; }
+body.dark .code-block-cm .CodeMirror-gutters { background: #444446; border-color: #606064; }
+body.dark .code-block-cm .CodeMirror-linenumber { color: var(--gray-400); }
+body.dark .code-block-delete-btn { color: var(--gray-400); }
+body.dark .code-block-delete-btn:hover { color: #e05252; }
+
+/* Modals */
+body.dark .name-modal-overlay { background: rgba(0,0,0,0.55); }
+body.dark .name-modal { background: var(--gray-100); }
+body.dark .name-modal-label { color: var(--black); }
+body.dark .name-modal-input { background: var(--gray-200); color: var(--black); border-color: var(--gray-300); }
+body.dark .name-modal-cancel { color: var(--black); background: var(--gray-200); }
+body.dark .name-modal-confirm { background: var(--black); color: var(--white); }
+
+/* Link modal */
+body.dark .link-modal-overlay { background: rgba(0,0,0,0.55); }
+body.dark .link-modal { background: var(--gray-100); }
+body.dark .link-modal-label { color: var(--black); }
+body.dark .link-modal-input { background: var(--gray-200); color: var(--black); border-color: var(--gray-300); }
+body.dark .link-modal-input:focus { border-color: var(--gray-500); }
+body.dark .link-modal-cancel { color: var(--black); background: var(--gray-200); }
+body.dark .link-toggle-btn { color: var(--gray-400); border-color: var(--gray-300); }
+body.dark .link-toggle-btn.active { background: var(--gray-300); color: var(--black); }
+
+/* Embed cards */
+body.dark .embed-card { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .embed-card-header { background: var(--gray-200); border-color: var(--gray-300); }
+body.dark .embed-card-domain { color: var(--gray-500); }
+body.dark .embed-card-body { background: var(--gray-200); }
+body.dark .embed-card-iframe { background: #3a3a3c; }
+body.dark .embed-card-fallback-domain { color: var(--black); }
+body.dark .embed-card-fallback-link { color: var(--gray-400); }
+
+/* Folder view */
+body.dark .folder-view { background: var(--white); }
+body.dark .folder-card { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .folder-card:hover { background: var(--gray-200); }
+body.dark .folder-card.open { background: var(--gray-200); }
+body.dark .folder-card-name { color: var(--black); }
+body.dark .folder-side-panel { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .folder-side-panel-header { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .folder-modal-overlay { background: rgba(0,0,0,0.55); }
+body.dark .folder-modal { background: var(--gray-100); }
+body.dark .folder-modal-list-item:hover { background: var(--gray-200); }
+body.dark .folder-modal-list-item.selected { background: var(--gray-200); }
+
+/* Typing test */
+body.dark .tt-modal { background: var(--gray-100); }
+body.dark .tt-title { color: var(--black); }
+body.dark .tt-close { color: var(--gray-400); }
+body.dark .tt-close:hover { color: var(--black); background: var(--gray-200); }
+body.dark .tt-passage { color: var(--gray-300); }
+body.dark .tt-ch.ok { color: var(--black); }
+body.dark .tt-ch.err { color: #e05252; background: rgba(224,82,82,0.15); }
+body.dark .tt-ch.cur { border-left-color: var(--black); }
+body.dark .tt-stats { background: var(--gray-200); }
+body.dark .tt-stat-val { color: var(--black); }
+body.dark .tt-stat-lbl { color: var(--gray-400); }
+body.dark .tt-stat-divider { background: var(--gray-300); }
+body.dark .tt-btn { color: var(--black); border-color: var(--gray-300); }
+body.dark .tt-btn:hover { background: var(--gray-200); }
+body.dark .tt-btn-primary { background: var(--black); color: var(--white); }
+body.dark .tt-result-wpm { color: var(--black); }
+body.dark .tt-result-sub { color: var(--gray-400); }
+
+/* Table picker */
+body.dark .table-picker { background: var(--gray-100); border-color: var(--gray-200); box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+body.dark .table-picker-cell { background: var(--gray-200); border-color: var(--gray-300); }
+body.dark .table-picker-cell.hover { background: var(--gray-400); }
+
+/* Page view */
+body.dark .editor.page-view { background: #343436; }
+body.dark .page-sheet { background: #3a3a3c; box-shadow: 0 2px 12px rgba(0,0,0,0.5); color: var(--black); }
+body.dark .page-ruler { background: #343436; border-color: #2e2e32; }
+body.dark .ruler-track { background: #343436; border-color: #2e2e32; }
+body.dark .doc-toolbar { background: var(--gray-100); border-color: var(--gray-200); }
+body.dark .doc-tb-select,
+body.dark .doc-tb-zoom-input,
+body.dark .doc-tb-dropdown-btn { background: var(--gray-200); color: var(--black); border-color: var(--gray-300); }
+body.dark .doc-tb-dropdown-panel { background: var(--gray-100); border-color: var(--gray-200); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+body.dark .page-settings-panel { background: var(--gray-100); border-color: var(--gray-200); }
+
+/* Sidebar footer */
+body.dark .sidebar-footer { background: var(--white); border-color: var(--gray-200); }
+body.dark .new-note-btn { background: var(--gray-600); box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+body.dark .new-note-btn::before { color: var(--white); }
+body.dark .new-note-btn:hover { background: var(--black); }
+
+/* Nav buttons */
+body.dark .back-btn { color: var(--gray-400); }
+body.dark .back-btn:not([disabled]):hover { background: var(--gray-100); color: var(--black); }
+body.dark .view-toggle { background: var(--gray-100); }
+body.dark .view-toggle-btn { color: var(--gray-400); }
+body.dark .view-toggle-btn.active { background: var(--gray-200); color: var(--black); }
+body.dark .typing-test-btn { color: var(--gray-400); }
+body.dark .typing-test-btn:hover { color: var(--black); background: var(--gray-100); }
+body.dark .sidebar-toggle-btn { color: var(--gray-500); }
+body.dark .sidebar-toggle-btn:hover { background: var(--gray-200); color: var(--black); }
+body.dark .sidebar-toggle-btn.active { background: var(--gray-300); color: var(--black); }
+body.dark .menu-btn { color: var(--gray-500); }
+body.dark .menu-btn:hover { background: var(--gray-100); }
+body.dark .folder-nav-btn { color: var(--gray-500); }
+body.dark .folder-nav-btn:hover { background: var(--gray-200); color: var(--black); }
+body.dark .folder-nav-btn.active { background: var(--gray-300); color: var(--black); }
+body.dark .download-btn { color: var(--gray-500); }
+body.dark .download-btn:hover { background: var(--gray-100); color: var(--black); }
+body.dark .download-dropdown { background: var(--gray-100); border-color: var(--gray-200); box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+body.dark .download-item { color: var(--black); }
+body.dark .download-item:hover { background: var(--gray-200); }
+body.dark .doc-tb-fade-right { background: linear-gradient(to right, transparent, var(--gray-100) 80%); }
+
+
