@@ -682,7 +682,7 @@ html, body {
 
 .editor-body {
   flex: 1;
-  font-size: 18px;
+  font-size: 15.5px;
   font-weight: 400;
   color: var(--black);
   line-height: 1.05;
@@ -1786,7 +1786,7 @@ mark {
 
 .editor-body[contenteditable] {
   flex: 1;
-  font-size: 18px;
+  font-size: 15.5px;
   font-weight: 400;
   color: var(--black);
   line-height: 1.2;
