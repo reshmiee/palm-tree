@@ -1513,9 +1513,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const tooltip = document.createElement('div');
     tooltip.id = 'link-hover-tooltip';
     tooltip.innerHTML = `
-      <span class="link-tooltip-url"></span>
       <button class="link-tooltip-embed" title="Embed as card">Embed</button>
-      <button class="link-tooltip-open" title="Open link">Open ↗</button>
+      <button class="link-tooltip-open" title="Open link">Open</button>
     `;
     document.body.appendChild(tooltip);
 
@@ -1524,7 +1523,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function showTooltip(anchor) {
       clearTimeout(hideTimer);
       const url = anchor.href;
-      tooltip.querySelector('.link-tooltip-url').textContent = url.length > 50 ? url.slice(0, 50) + '…' : url;
       tooltip.querySelector('.link-tooltip-open').onclick = () => window.open(url, '_blank', 'noopener');
       tooltip.querySelector('.link-tooltip-embed').onclick = () => {
         if (typeof window.insertEmbed === 'function') window.insertEmbed(url);
@@ -1532,19 +1530,21 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const rect = anchor.getBoundingClientRect();
+      tooltip.style.visibility = 'hidden';
       tooltip.style.display = 'flex';
-      // Position below the link; clamp to viewport right edge
-      let left = rect.left + window.scrollX;
-      tooltip.style.left = left + 'px';
-      tooltip.style.top = (rect.bottom + window.scrollY + 6) + 'px';
 
-      // After paint, clamp if overflowing
+      // Position to the right of the link so moving toward it is horizontal,
+      // never crossing adjacent links above/below
       requestAnimationFrame(() => {
+        const th = tooltip.offsetHeight;
         const tw = tooltip.offsetWidth;
         const vw = window.innerWidth;
-        if (left + tw > vw - 12) {
-          tooltip.style.left = Math.max(8, vw - tw - 12) + 'px';
-        }
+        const top = rect.top + window.scrollY + (rect.height / 2) - (th / 2);
+        let left = rect.right + window.scrollX + 8;
+        if (left + tw > vw - 12) left = rect.left + window.scrollX - tw - 8; // flip left
+        tooltip.style.top  = top + 'px';
+        tooltip.style.left = Math.max(8, left) + 'px';
+        tooltip.style.visibility = 'visible';
       });
     }
 
