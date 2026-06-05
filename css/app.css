@@ -2057,6 +2057,65 @@ mark {
   padding-left: 1.5em;
   margin: 4.5px 0;
 }
+
+/* ── Checklist ── */
+.editor-body ul.checklist {
+  list-style: none;
+  padding-left: 0;
+  margin: 4px 0;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 3px 0;
+  min-height: 26px;
+  line-height: 1.5;
+}
+
+.checklist-box {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  margin-top: 0;
+  border: 1.75px solid var(--gray-300);
+  border-radius: 3.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+  position: relative;
+}
+
+.checklist-box:hover {
+  border-color: var(--gray-500);
+}
+
+.checklist-item.checked .checklist-box {
+  background: var(--black);
+  border-color: var(--black);
+}
+
+.checklist-item.checked .checklist-box::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 7px;
+  border-right: 2px solid var(--white);
+  border-bottom: 2px solid var(--white);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%) rotate(45deg);
+}
+
+.checklist-item.checked > :not(.checklist-box) {
+  text-decoration: line-through;
+  color: var(--gray-400);
+}
 /* â”€â”€ Inline images in editor â”€â”€ */
 
 .img-block {

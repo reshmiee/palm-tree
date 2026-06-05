@@ -1202,6 +1202,311 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initLinkInsertion();
 
+  // ── Checklist ─────────────────────────────────────────
+  (function initChecklist() {
+    const btn = document.getElementById('fmt-checklist-btn');
+    if (!btn) return;
+
+    function makeBox() {
+      const s = document.createElement('span');
+      s.className = 'checklist-box';
+      s.contentEditable = 'false';
+      return s;
+    }
+
+    function makeItem(text) {
+      const li = document.createElement('li');
+      li.className = 'checklist-item';
+      li.appendChild(makeBox());
+      const content = document.createElement('span');
+      content.className = 'checklist-content';
+      if (text) content.textContent = text;
+      else      content.innerHTML = '<br>';
+      li.appendChild(content);
+      return li;
+    }
+
+    // Walk up from a node to find the nearest .checklist-item ancestor
+    function nearestItem(node) {
+      while (node && node !== bodyEl) {
+        if (node.nodeType === 1 && node.classList.contains('checklist-item')) return node;
+        node = node.parentNode;
+      }
+      return null;
+    }
+
+    // Find the current block for the cursor (Chrome uses <div>, others use <p>)
+    function currentBlock(sel) {
+      if (!sel || !sel.rangeCount) return null;
+      let n = sel.getRangeAt(0).commonAncestorContainer;
+      if (n.nodeType === 3) n = n.parentElement;
+      if (!n || n === bodyEl) return null;
+      const b = n.closest('p,h1,h2,h3,h4,h5,h6,div');
+      return (b && b !== bodyEl) ? b : null;
+    }
+
+    // Ensure a paragraph follows an element (so cursor can exit)
+    function ensureParaAfter(el) {
+      if (!el.nextElementSibling) {
+        const p = document.createElement('p'); p.innerHTML = '<br>'; el.after(p);
+      }
+    }
+
+    // Place cursor inside the content span of a list item
+    function focusAfterBox(li, sel) {
+      const content = li.querySelector('.checklist-content');
+      const r = document.createRange();
+      if (content) {
+        r.setStart(content, 0);
+      } else {
+        const box = li.querySelector('.checklist-box');
+        r.setStartAfter(box || li);
+      }
+      r.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(r);
+    }
+
+    // ── Toolbar button ────────────────────────────────────
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      bodyEl.focus();
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+
+      // Toggle OFF — cursor is already inside a checklist
+      const inList = sel.anchorNode?.parentElement?.closest('.checklist');
+      if (inList) {
+        const list = inList.closest('.checklist');
+        const frag = document.createDocumentFragment();
+        list.querySelectorAll('.checklist-item').forEach(li => {
+          const p = document.createElement('p');
+          li.querySelectorAll('.checklist-box').forEach(b => b.remove());
+          p.innerHTML = li.innerHTML || '<br>';
+          frag.appendChild(p);
+        });
+        list.replaceWith(frag);
+        scheduleAutoSave(); updateBtnState(); return;
+      }
+
+      if (window.pushEditorSnapshot) window.pushEditorSnapshot();
+      const range        = sel.getRangeAt(0);
+      const selectedText = sel.toString().trim();
+
+      if (selectedText) {
+        // Multi-line selection → find each selected block, replace with checklist items
+        // Using block-level replacement avoids inserting <ul> inside a <p>
+        function directChild(node) {
+          while (node && node.parentNode !== bodyEl) node = node.parentNode;
+          return (node && node.parentNode === bodyEl) ? node : null;
+        }
+        const startBlock = directChild(range.startContainer);
+        const endBlock   = directChild(range.endContainer);
+
+        if (startBlock && endBlock) {
+          // Collect all direct-child blocks in the selection range
+          const blocks = [];
+          let cur = startBlock;
+          while (cur) {
+            blocks.push(cur);
+            if (cur === endBlock) break;
+            cur = cur.nextElementSibling;
+          }
+          const ul = document.createElement('ul');
+          ul.className = 'checklist';
+          blocks.forEach(b => {
+            const text = b.textContent.trim();
+            ul.appendChild(text ? makeItem(text) : makeItem());
+          });
+          startBlock.replaceWith(ul);
+          blocks.slice(1).forEach(b => b.remove());
+          ensureParaAfter(ul);
+          focusAfterBox(ul.querySelector('.checklist-item'), sel);
+        } else {
+          // Fallback for raw text in bodyEl — use text split
+          const ul = document.createElement('ul');
+          ul.className = 'checklist';
+          selectedText.split('\n').filter(l => l.trim()).forEach(l => ul.appendChild(makeItem(l)));
+          if (!ul.children.length) ul.appendChild(makeItem());
+          range.deleteContents();
+          if (range.startContainer === bodyEl || range.startContainer.parentNode === bodyEl) {
+            bodyEl.insertBefore(ul, range.startContainer.nextSibling || null);
+          } else {
+            range.insertNode(ul);
+          }
+          ensureParaAfter(ul);
+          focusAfterBox(ul.querySelector('.checklist-item'), sel);
+        }
+      } else {
+        // No selection — convert the current line to a checklist item
+        const ul = document.createElement('ul');
+        ul.className = 'checklist';
+        const li = document.createElement('li');
+        li.className = 'checklist-item';
+        li.appendChild(makeBox());
+
+        const rawNode = range.startContainer;
+
+        if (rawNode.nodeType === Node.TEXT_NODE && rawNode.parentNode === bodyEl) {
+          // Raw text node sitting directly inside bodyEl (no <p> wrapper)
+          const text = rawNode.textContent.trim();
+          if (text) li.appendChild(document.createTextNode(text));
+          else      li.appendChild(document.createElement('br'));
+          ul.appendChild(li);
+          bodyEl.insertBefore(ul, rawNode);
+          rawNode.remove();
+        } else {
+          // Cursor is inside a block element (<p>, heading, div…)
+          const block = currentBlock(sel);
+          if (block && block.textContent.trim()) {
+            Array.from(block.childNodes).forEach(c => li.appendChild(c.cloneNode(true)));
+            ul.appendChild(li);
+            block.replaceWith(ul);
+          } else {
+            li.appendChild(document.createElement('br'));
+            ul.appendChild(li);
+            if (block) block.replaceWith(ul);
+            else       range.insertNode(ul);
+          }
+        }
+
+        ensureParaAfter(ul);
+        focusAfterBox(li, sel);
+      }
+
+      scheduleAutoSave(); updateBtnState();
+    });
+
+    // ── Enter / Backspace keys ────────────────────────────
+    bodyEl.addEventListener('keydown', (e) => {
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      const li    = nearestItem(range.startContainer);
+      if (!li) return;
+
+      // ── Backspace at start of item ──
+      if (e.key === 'Backspace' && range.collapsed) {
+        const content = li.querySelector('.checklist-content');
+        const sc = range.startContainer;
+        const atStart = content && (
+          (sc === content && range.startOffset === 0) ||
+          (sc.nodeType === 3 && sc.parentNode === content && range.startOffset === 0 && !sc.previousSibling)
+        );
+        if (!atStart) return;
+        e.preventDefault();
+
+        const list  = li.closest('.checklist');
+        const items = Array.from(list.querySelectorAll('.checklist-item'));
+        const idx   = items.indexOf(li);
+
+        if (!li.innerText.trim()) {
+          // Empty item → remove it
+          if (items.length <= 1) {
+            const p = document.createElement('p'); p.innerHTML = '<br>';
+            list.replaceWith(p);
+            const r = document.createRange(); r.setStart(p, 0); r.collapse(true);
+            sel.removeAllRanges(); sel.addRange(r);
+          } else {
+            const prevLi = items[idx - 1];
+            li.remove();
+            if (prevLi) {
+              const prevContent = prevLi.querySelector('.checklist-content');
+              if (prevContent) {
+                const r = document.createRange();
+                r.selectNodeContents(prevContent); r.collapse(false);
+                sel.removeAllRanges(); sel.addRange(r);
+              }
+            }
+          }
+        } else if (idx === 0) {
+          // First item with content → convert to plain paragraph before the list
+          const p = document.createElement('p');
+          p.innerHTML = content.innerHTML;
+          list.before(p);
+          li.remove();
+          if (!list.querySelector('.checklist-item')) list.remove();
+          const r = document.createRange(); r.selectNodeContents(p); r.collapse(false);
+          sel.removeAllRanges(); sel.addRange(r);
+        } else {
+          // Non-first item with content → merge into end of previous item
+          const prevLi      = items[idx - 1];
+          const prevContent = prevLi.querySelector('.checklist-content');
+          if (prevContent) {
+            // Remove trailing <br> in prev if present
+            const br = prevContent.querySelector('br');
+            if (br && !prevContent.textContent.trim()) br.remove();
+            // Append this item's content nodes
+            Array.from(content.childNodes).forEach(n => prevContent.appendChild(n.cloneNode(true)));
+            li.remove();
+            const r = document.createRange(); r.selectNodeContents(prevContent); r.collapse(false);
+            sel.removeAllRanges(); sel.addRange(r);
+          }
+        }
+        scheduleAutoSave();
+        return;
+      }
+
+      // ── Enter ──
+      if (e.key !== 'Enter' || e.shiftKey) return;
+      e.preventDefault();
+
+      if (!li.innerText.trim()) {
+        // Empty item → exit list into a new paragraph
+        const list = li.closest('.checklist');
+        const p    = document.createElement('p');
+        p.innerHTML = '<br>';
+        if (list.querySelectorAll('.checklist-item').length <= 1) {
+          list.replaceWith(p);
+        } else {
+          li.remove();
+          list.after(p);
+        }
+        const r = document.createRange();
+        r.setStart(p, 0); r.collapse(true);
+        sel.removeAllRanges(); sel.addRange(r);
+      } else {
+        // Split item at cursor — content after cursor goes to a new item
+        const tail = range.cloneRange();
+        tail.selectNodeContents(li);
+        tail.setStart(range.endContainer, range.endOffset);
+        const frag = tail.extractContents();
+        frag.querySelectorAll('.checklist-box').forEach(b => b.remove());
+
+        const newLi  = document.createElement('li');
+        newLi.className = 'checklist-item';
+        newLi.appendChild(makeBox());
+        const newContent = document.createElement('span');
+        newContent.className = 'checklist-content';
+        newContent.appendChild(frag);
+        if (!newContent.textContent.trim()) newContent.innerHTML = '<br>';
+        newLi.appendChild(newContent);
+        li.after(newLi);
+        focusAfterBox(newLi, sel);
+      }
+      scheduleAutoSave();
+    });
+
+    // ── Checkbox click ────────────────────────────────────
+    bodyEl.addEventListener('click', (e) => {
+      const box = e.target.closest('.checklist-box');
+      if (!box) return;
+      const li = box.closest('.checklist-item');
+      if (!li) return;
+      if (window.pushEditorSnapshot) window.pushEditorSnapshot();
+      li.classList.toggle('checked');
+      scheduleAutoSave();
+    });
+
+    // ── Toolbar active state ──────────────────────────────
+    function updateBtnState() {
+      const sel = window.getSelection();
+      btn.classList.toggle('active', !!sel?.anchorNode?.parentElement?.closest('.checklist'));
+    }
+    bodyEl.addEventListener('keyup',  updateBtnState);
+    bodyEl.addEventListener('mouseup', updateBtnState);
+  })();
+
   // ── Link hover tooltip ───────────────────────────────
 
   (function initLinkTooltip() {
