@@ -180,9 +180,7 @@ html, body {
   left: 50vw;
 }
 
-/* Keep the content at its normal width (as if the sidebar were still there)
-   and center it, so code/tables/images/text don't stretch edge-to-edge.
-   100vw âˆ’ (sidebar 345px + editor padding 60px) = the with-sidebar width. */
+/* Keep content at its normal with-sidebar width when sidebar is collapsed */
 .app.sidebar-collapsed .editor-meta,
 .app.sidebar-collapsed .editor-title-row,
 .app.sidebar-collapsed .editor-body {
