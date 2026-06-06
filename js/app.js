@@ -1390,13 +1390,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let savedRange = null;
 
     function openPicker() {
-      const r = btn.getBoundingClientRect();
       const pickerW = 8 * 32 + 2 * 8 + 7 * 2;
-      let left = r.left + r.width / 2 - pickerW / 2;
-      left = Math.max(8, Math.min(left, window.innerWidth - pickerW - 8));
-      picker.style.left   = left + 'px';
-      picker.style.top    = '';
-      picker.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+      picker.style.left   = (window.innerWidth - pickerW - 20) + 'px';
+      picker.style.top    = '160px';
+      picker.style.bottom = '';
       picker.classList.remove('hidden');
     }
 
@@ -1414,18 +1411,41 @@ document.addEventListener('DOMContentLoaded', () => {
       const emojiBtn = e.target.closest('.emoji-picker-btn');
       if (!emojiBtn) return;
 
-      if (savedRange) {
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(savedRange);
-      }
-      document.execCommand('insertText', false, emojiBtn.dataset.emoji);
-      // Update savedRange so next emoji inserts after this one
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+      const emoji = emojiBtn.dataset.emoji;
+
+      // Focus editor first, then restore cursor
       bodyEl.focus();
+
+      if (savedRange) {
+        try {
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(savedRange);
+          // Direct DOM insertion — reliable even after dragging
+          savedRange.deleteContents();
+          const textNode = document.createTextNode(emoji);
+          savedRange.insertNode(textNode);
+          savedRange.setStartAfter(textNode);
+          savedRange.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(savedRange);
+          savedRange = sel.getRangeAt(0).cloneRange();
+        } catch (err) {
+          document.execCommand('insertText', false, emoji);
+        }
+      } else {
+        document.execCommand('insertText', false, emoji);
+      }
+
       scheduleAutoSave();
       if (window.pushEditorSnapshot) window.pushEditorSnapshot();
+    });
+
+    // Refresh savedRange when user clicks back into editor while picker is open
+    bodyEl.addEventListener('mouseup', () => {
+      if (picker.classList.contains('hidden')) return;
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
     });
 
   })();
