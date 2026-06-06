@@ -1253,6 +1253,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
+  // ── List picker ───────────────────────────────────────
+  (function initListPicker() {
+    const btn    = document.getElementById('fmt-list-btn');
+    const picker = document.getElementById('list-picker');
+    if (!btn || !picker) return;
+
+    function closePicker() { picker.classList.remove('open'); }
+    function openPicker() {
+      const r = btn.getBoundingClientRect();
+      picker.style.left = (r.left + r.width / 2) + 'px';
+      picker.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+      picker.classList.add('open');
+    }
+
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      picker.classList.contains('open') ? closePicker() : openPicker();
+    });
+
+    // Bullet / numbered list options
+    ['fmt-ul-btn', 'fmt-ol-btn'].forEach(id => {
+      const el  = document.getElementById(id);
+      const cmd = id === 'fmt-ul-btn' ? 'insertUnorderedList' : 'insertOrderedList';
+      if (!el) return;
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closePicker();
+        bodyEl.focus();
+        document.execCommand(cmd, false, null);
+        scheduleAutoSave();
+      });
+    });
+
+    // Close when clicking outside
+    document.addEventListener('mousedown', (e) => {
+      if (picker.classList.contains('open') &&
+          !picker.contains(e.target) && e.target !== btn) {
+        closePicker();
+      }
+    });
+  })();
+
   // ── Checklist ─────────────────────────────────────────
   (function initChecklist() {
     const btn = document.getElementById('fmt-checklist-btn');
@@ -1321,6 +1365,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Toolbar button ────────────────────────────────────
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('list-picker')?.classList.remove('open');
+
       bodyEl.focus();
       const sel = window.getSelection();
       if (!sel || !sel.rangeCount) return;

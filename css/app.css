@@ -1910,8 +1910,19 @@ mark {
   color: var(--white);
 }
 
-.fmt-a-btn {
+.fmt-a-btn,
+#fmt-list-btn {
   color: var(--gray-500) !important;
+}
+
+#fmt-list-btn {
+  background: var(--black) !important;
+  color: var(--white) !important;
+  border-radius: 8.25px;
+}
+
+#fmt-list-btn .icon {
+  stroke: var(--white);
 }
 
 .fmt-a-btn:hover {
@@ -2232,6 +2243,52 @@ mark {
 .link-tooltip-embed:hover {
   background: rgba(255,255,255,0.22);
 }
+
+/* ── List picker — matches fmt-tray styling ── */
+.list-picker {
+  position: fixed;
+  transform: translateX(-50%) translateY(4.5px);
+  display: flex;
+  align-items: center;
+  gap: 1.5px;
+  background: var(--white);
+  border: 0.75px solid var(--gray-200);
+  border-radius: 13.5px;
+  padding: 4.5px 10.5px;
+  z-index: 101;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.list-picker.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.list-picker-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8.25px;
+  background: transparent;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.list-picker-btn .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.list-picker-btn:hover { background: var(--gray-100); color: var(--black); }
+.list-picker-btn.active { background: var(--black); color: var(--white); }
+.list-picker-btn .icon { stroke: currentColor; }
 
 /* ── Highlight picker ── */
 .highlight-picker {

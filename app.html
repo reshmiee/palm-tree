@@ -544,17 +544,9 @@
 
       <!-- Layer 2: Always-visible bottom bar -->
       <div class="format-toolbar" id="format-toolbar">
-        <!-- Bullet list -->
-        <button class="fmt-btn" data-cmd="insertUnorderedList" title="Bullet list" aria-label="Bullet list">
+        <!-- List picker trigger -->
+        <button class="fmt-btn" id="fmt-list-btn" title="Lists" aria-label="Lists">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
-        </button>
-        <!-- Numbered list -->
-        <button class="fmt-btn" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><text x="1" y="8" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">1</text><text x="1" y="13.5" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">2</text><text x="1" y="19" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">3</text></svg>
-        </button>
-        <!-- Checklist -->
-        <button class="fmt-btn" id="fmt-checklist-btn" title="Checklist" aria-label="Checklist">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"/><polyline points="3 12 6 15 9 11" stroke-width="2.2"/><rect x="3" y="17" width="6" height="0" rx="1" style="display:none"/><line x1="13" y1="8" x2="21" y2="8"/><line x1="13" y1="13" x2="21" y2="13"/></svg>
         </button>
         <!-- Indent -->
         <button class="fmt-btn" data-cmd="indent" title="Indent" aria-label="Indent">
@@ -594,6 +586,19 @@
         <!-- A button — opens/closes the formatting tray -->
         <button class="fmt-btn fmt-a-btn" id="fmt-a-btn" title="Formatting" aria-label="Formatting options" aria-expanded="false">
           <span>A</span>
+        </button>
+      </div>
+
+      <!-- List picker — sibling of toolbar so it's not inside its stacking context -->
+      <div class="list-picker" id="list-picker">
+        <button class="list-picker-btn" id="fmt-ul-btn" title="Bullet list" aria-label="Bullet list">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button class="list-picker-btn" id="fmt-ol-btn" title="Numbered list" aria-label="Numbered list">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><text x="1" y="8" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">1</text><text x="1" y="13.5" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">2</text><text x="1" y="19" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif">3</text></svg>
+        </button>
+        <button class="list-picker-btn" id="fmt-checklist-btn" title="Checklist" aria-label="Checklist">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"/><polyline points="3 12 6 15 9 11" stroke-width="2.2"/><line x1="13" y1="8" x2="21" y2="8"/><line x1="13" y1="13" x2="21" y2="13"/></svg>
         </button>
       </div>
     </main>
