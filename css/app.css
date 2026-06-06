@@ -2233,6 +2233,57 @@ mark {
   background: rgba(255,255,255,0.22);
 }
 
+/* ── Highlight picker ── */
+.highlight-picker {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background: var(--black);
+  border-radius: 10px;
+  padding: 7px 10px;
+  z-index: 120;
+  white-space: nowrap;
+}
+
+.highlight-picker.hidden { display: none; }
+
+.hl-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.hl-swatch:hover {
+  transform: scale(1.2);
+  border-color: rgba(255,255,255,0.5);
+}
+
+.hl-remove {
+  background: transparent !important;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.35) !important;
+}
+
+.hl-remove:hover {
+  border-color: rgba(255,255,255,0.8) !important;
+}
+
 /* â”€â”€ Link modal â”€â”€ */
 
 .link-modal-overlay {

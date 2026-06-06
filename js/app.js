@@ -1202,6 +1202,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initLinkInsertion();
 
+  // ── Highlight ─────────────────────────────────────────
+  (function initHighlight() {
+    const btn    = document.getElementById('fmt-highlight-btn');
+    const picker = document.getElementById('highlight-picker');
+    if (!btn || !picker) return;
+
+    let savedRange = null;
+
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // prevent tray's generic handler from interfering
+      const isOpen = !picker.classList.contains('hidden');
+      if (isOpen) {
+        picker.classList.add('hidden');
+        return;
+      }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+      picker.classList.remove('hidden');
+    });
+
+    picker.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const swatch = e.target.closest('.hl-swatch');
+      if (!swatch) return;
+      picker.classList.add('hidden');
+
+      if (savedRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
+
+      // styleWithCSS required in Chrome for hiliteColor to emit a <span> not <font>
+      document.execCommand('styleWithCSS', false, true);
+      const color = swatch.dataset.color;
+      document.execCommand('hiliteColor', false, color === 'transparent' ? 'transparent' : color);
+      bodyEl.focus();
+      scheduleAutoSave();
+    });
+
+    // Close picker when clicking outside
+    document.addEventListener('mousedown', (e) => {
+      if (!picker.classList.contains('hidden') &&
+          !picker.contains(e.target) && e.target !== btn) {
+        picker.classList.add('hidden');
+      }
+    });
+  })();
+
   // ── Checklist ─────────────────────────────────────────
   (function initChecklist() {
     const btn = document.getElementById('fmt-checklist-btn');
