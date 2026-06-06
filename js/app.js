@@ -191,7 +191,24 @@ document.addEventListener('DOMContentLoaded', () => {
         updateToolbarState();
       } else if (heading) {
         if (heading === 'p') {
-          document.execCommand('formatBlock', false, 'p');
+          // Use 'div' — Chrome's native contenteditable block, avoids <p> margin issues
+          document.execCommand('formatBlock', false, 'div');
+          // DOM fallback: any headings that execCommand missed
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount) {
+            const range = sel.getRangeAt(0);
+            let editRoot = range.commonAncestorContainer;
+            while (editRoot && !editRoot.isContentEditable) editRoot = editRoot.parentNode;
+            if (editRoot) {
+              Array.from(editRoot.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(h => {
+                if (range.intersectsNode(h)) {
+                  const div = document.createElement('div');
+                  while (h.firstChild) div.appendChild(h.firstChild);
+                  h.parentNode.replaceChild(div, h);
+                }
+              });
+            }
+          }
         } else {
           const tag = document.queryCommandValue('formatBlock').toLowerCase();
           if (tag === heading) {
@@ -221,8 +238,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Heading buttons in tray
     const currentBlock = document.queryCommandValue('formatBlock').toLowerCase();
+    const isHeading = ['h1','h2','h3','h4','h5','h6'].includes(currentBlock);
     document.querySelectorAll('.fmt-btn[data-heading]').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.heading === currentBlock);
+      if (btn.dataset.heading === 'p') {
+        btn.classList.toggle('active', !isHeading);
+      } else {
+        btn.classList.toggle('active', btn.dataset.heading === currentBlock);
+      }
     });
 
     // Link button — light up when cursor is inside a link
