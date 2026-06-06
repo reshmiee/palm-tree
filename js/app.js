@@ -1156,9 +1156,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnLink && btnLink.classList.remove('active');
     });
 
-    linkBtn.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      // Save current selection before modal opens
+    function openLinkModal() {
       const sel = window.getSelection();
       if (sel && sel.rangeCount > 0) {
         savedRange = sel.getRangeAt(0).cloneRange();
@@ -1166,7 +1164,10 @@ document.addEventListener('DOMContentLoaded', () => {
       urlInput.value = '';
       overlay.classList.remove('hidden');
       setTimeout(() => urlInput.focus(), 50);
-    });
+    }
+
+    linkBtn.addEventListener('mousedown', (e) => { e.preventDefault(); openLinkModal(); });
+
 
     function closeModal() {
       overlay.classList.add('hidden');
@@ -1234,12 +1235,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault();
-      e.stopPropagation(); // prevent tray's generic handler from interfering
+      e.stopPropagation();
       const isOpen = !picker.classList.contains('hidden');
-      if (isOpen) {
-        picker.classList.add('hidden');
-        return;
-      }
+      if (isOpen) { picker.classList.add('hidden'); return; }
       const sel = window.getSelection();
       if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
       picker.classList.remove('hidden');

@@ -507,24 +507,6 @@
         <button class="fmt-btn" data-cmd="justifyFull" title="Justify" aria-label="Justify">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div class="fmt-divider"></div>
-        <button class="fmt-btn" id="fmt-link-btn" title="Insert link" aria-label="Insert link">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        </button>
-        <div class="fmt-divider"></div>
-        <!-- Highlight -->
-        <button class="fmt-btn" id="fmt-highlight-btn" title="Highlight text" aria-label="Highlight text">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 6-7 4-7-4 4-6z"/><path d="M12 13v5"/><path d="M9 18h6"/></svg>
-        </button>
-        <!-- Highlight color picker -->
-        <div class="highlight-picker hidden" id="highlight-picker">
-          <button class="hl-swatch" data-color="#FFF59D" title="Yellow"  style="background:#FFF59D"></button>
-          <button class="hl-swatch" data-color="#C8E6C9" title="Green"   style="background:#C8E6C9"></button>
-          <button class="hl-swatch" data-color="#B3E5FC" title="Blue"    style="background:#B3E5FC"></button>
-          <button class="hl-swatch" data-color="#F8BBD0" title="Pink"    style="background:#F8BBD0"></button>
-          <button class="hl-swatch" data-color="#FFE0B2" title="Orange"  style="background:#FFE0B2"></button>
-          <button class="hl-swatch hl-remove" data-color="transparent"   title="Remove highlight">✕</button>
-        </div>
       </div>
 
       <!-- Link modal -->
@@ -557,8 +539,25 @@
         <button class="fmt-btn" data-cmd="outdent" title="Outdent" aria-label="Outdent">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/><polyline points="15 8 11 12 15 16"/><line x1="11" y1="12" x2="21" y2="12"/></svg>
         </button>
+        <!-- Link -->
+        <button class="fmt-btn" id="fmt-link-btn" title="Insert link" aria-label="Insert link">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+        <!-- Highlight -->
+        <button class="fmt-btn" id="fmt-highlight-btn" title="Highlight text" aria-label="Highlight text">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 6-7 4-7-4 4-6z"/><path d="M12 13v5"/><path d="M9 18h6"/></svg>
+        </button>
 
         <div class="fmt-divider"></div>
+        <!-- Highlight color picker (shared, positioned by JS) -->
+        <div class="highlight-picker hidden" id="highlight-picker">
+          <button class="hl-swatch" data-color="#FFF59D" title="Yellow"  style="background:#FFF59D"></button>
+          <button class="hl-swatch" data-color="#C8E6C9" title="Green"   style="background:#C8E6C9"></button>
+          <button class="hl-swatch" data-color="#B3E5FC" title="Blue"    style="background:#B3E5FC"></button>
+          <button class="hl-swatch" data-color="#F8BBD0" title="Pink"    style="background:#F8BBD0"></button>
+          <button class="hl-swatch" data-color="#FFE0B2" title="Orange"  style="background:#FFE0B2"></button>
+          <button class="hl-swatch hl-remove" data-color="transparent"   title="Remove highlight">✕</button>
+        </div>
 
         <!-- Image insert -->
         <button class="fmt-btn" id="fmt-img-btn" title="Insert image" aria-label="Insert image">
