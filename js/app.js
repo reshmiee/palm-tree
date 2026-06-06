@@ -82,6 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX    = 60;
     let   timer  = null;
 
+    function syncBtns() {
+      const canUndo = stack.length > 0;
+      const canRedo = rstack.length > 0;
+      const u = document.getElementById('doc-tb-undo'); if (u) u.disabled = !canUndo;
+      const r = document.getElementById('doc-tb-redo'); if (r) r.disabled = !canRedo;
+    }
+
     function getSnap() {
       return window.getCleanEditorHTML ? window.getCleanEditorHTML() : bodyEl.innerHTML;
     }
@@ -92,12 +99,28 @@ document.addEventListener('DOMContentLoaded', () => {
       stack.push(s);
       if (stack.length > MAX) stack.shift();
       rstack.length = 0;
+      syncBtns();
     }
 
     // Called before any structural DOM mutation (table rows/cols, image, embed, etc.)
     window.pushEditorSnapshot  = function () { clearTimeout(timer); push(); };
     // Called when a different note loads so history doesn't bleed across notes
-    window.clearEditorHistory  = function () { clearTimeout(timer); stack.length = 0; rstack.length = 0; };
+    window.clearEditorHistory  = function () { clearTimeout(timer); stack.length = 0; rstack.length = 0; syncBtns(); };
+    // Exposed for toolbar undo/redo buttons
+    window.editorUndo = function () {
+      if (!stack.length) return;
+      clearTimeout(timer);
+      rstack.push(getSnap());
+      restore(stack.pop());
+      syncBtns();
+    };
+    window.editorRedo = function () {
+      if (!rstack.length) return;
+      clearTimeout(timer);
+      stack.push(getSnap());
+      restore(rstack.pop());
+      syncBtns();
+    };
 
     function restore(html) {
       bodyEl.innerHTML = html;
@@ -105,26 +128,34 @@ document.addEventListener('DOMContentLoaded', () => {
       scheduleAutoSave();
     }
 
+    syncBtns(); // initial state — both disabled
+
     const WORD_KEYS = new Set([' ', 'Enter', '.', ',', '!', '?', ';', ':']);
     const DEL_KEYS  = new Set(['Backspace', 'Delete']);
 
-    bodyEl.addEventListener('keydown', (e) => {
+    // Listen on the whole document so page-view typing is also captured
+    document.addEventListener('keydown', (e) => {
+      const target = e.target;
+      const inEditor = target === bodyEl || (target && target.classList && target.classList.contains('page-content'));
+      if (!inEditor) return;
       // Let CodeMirror handle its own undo inside code blocks
       if (e.target.closest && e.target.closest('.CodeMirror')) return;
 
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'z' && !e.shiftKey) {
-          if (!stack.length) return;         // nothing in our stack → native handles
+          if (!stack.length) return;
           e.preventDefault();
           clearTimeout(timer);
           rstack.push(getSnap());
           restore(stack.pop());
+          syncBtns();
         } else if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
           if (!rstack.length) return;
           e.preventDefault();
           clearTimeout(timer);
           stack.push(getSnap());
           restore(rstack.pop());
+          syncBtns();
         }
         return;
       }
@@ -140,10 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Safety fallback: snapshot after 3 s of continuous typing
-    bodyEl.addEventListener('input', () => {
+    // Safety fallback: snapshot after 1.5 s of continuous typing
+    document.addEventListener('input', (e) => {
+      const t = e.target;
+      if (t !== bodyEl && !(t && t.classList && t.classList.contains('page-content'))) return;
       clearTimeout(timer);
-      timer = setTimeout(push, 3000);
+      timer = setTimeout(push, 1500);
     });
   })();
 
@@ -170,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = e.target.closest('.fmt-btn');
       if (!btn || btn === aBtn) return;
       e.preventDefault();
+      if (window.pushEditorSnapshot) window.pushEditorSnapshot();
       const cmd = btn.dataset.cmd;
       if (cmd) {
         document.execCommand(cmd, false, null);
@@ -183,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = e.target.closest('.fmt-btn');
       if (!btn) return;
       e.preventDefault();
+      if (window.pushEditorSnapshot) window.pushEditorSnapshot();
       const cmd = btn.dataset.cmd;
       const heading = btn.dataset.heading;
       if (cmd) {
@@ -191,22 +226,39 @@ document.addEventListener('DOMContentLoaded', () => {
         updateToolbarState();
       } else if (heading) {
         if (heading === 'p') {
-          // Use 'div' — Chrome's native contenteditable block, avoids <p> margin issues
-          document.execCommand('formatBlock', false, 'div');
-          // DOM fallback: any headings that execCommand missed
           const sel = window.getSelection();
           if (sel && sel.rangeCount) {
             const range = sel.getRangeAt(0);
-            let editRoot = range.commonAncestorContainer;
+            let editRoot = range.startContainer;
             while (editRoot && !editRoot.isContentEditable) editRoot = editRoot.parentNode;
             if (editRoot) {
-              Array.from(editRoot.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(h => {
-                if (range.intersectsNode(h)) {
+              const toConvert = new Set();
+              const HEADING_RE = /^H[1-6]$/;
+              // Walk up from start container
+              let node = range.startContainer;
+              while (node && node !== editRoot) {
+                if (HEADING_RE.test(node.nodeName)) { toConvert.add(node); break; }
+                node = node.parentNode;
+              }
+              // Walk up from end container (catches multi-block selections)
+              node = range.endContainer;
+              while (node && node !== editRoot) {
+                if (HEADING_RE.test(node.nodeName)) { toConvert.add(node); break; }
+                node = node.parentNode;
+              }
+              // Also sweep all headings in editorRoot that intersect the range
+              editRoot.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h => {
+                try { if (range.intersectsNode(h)) toConvert.add(h); } catch(e) {}
+              });
+              if (toConvert.size > 0) {
+                toConvert.forEach(h => {
                   const div = document.createElement('div');
                   while (h.firstChild) div.appendChild(h.firstChild);
                   h.parentNode.replaceChild(div, h);
-                }
-              });
+                });
+              } else {
+                document.execCommand('formatBlock', false, 'div');
+              }
             }
           }
         } else {
@@ -1265,7 +1317,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       const swatch = e.target.closest('.hl-swatch');
       if (!swatch) return;
-      picker.classList.add('hidden');
 
       if (savedRange) {
         const sel = window.getSelection();
@@ -1281,13 +1332,72 @@ document.addEventListener('DOMContentLoaded', () => {
       scheduleAutoSave();
     });
 
-    // Close picker when clicking outside
-    document.addEventListener('mousedown', (e) => {
-      if (!picker.classList.contains('hidden') &&
-          !picker.contains(e.target) && e.target !== btn) {
-        picker.classList.add('hidden');
-      }
+  })();
+
+  // ── Emoji picker ─────────────────────────────────────
+  (function initEmojiPicker() {
+    const btn    = document.getElementById('fmt-emoji-btn');
+    const picker = document.getElementById('emoji-picker');
+    if (!btn || !picker) return;
+
+    const EMOJIS = [
+      '😀','😂','😊','😍','🥰','😎','😢','😭',
+      '😤','😡','🤔','😴','🤗','😏','🥳','🤩',
+      '👍','👎','👏','🙌','👋','✌️','💪','🙏',
+      '❤️','🧡','💛','💚','💙','💜','🖤','✨',
+      '💯','🔥','⭐','🌟','💎','🎯','⚡','💫',
+      '🌈','🌙','☀️','🌊','🌺','🌸','🍀','🌿',
+      '🐶','🐱','🐭','🐰','🦊','🐻','🐼','🐸',
+      '🍎','🍕','🍔','☕','🍦','🎂','🍩','🥑',
+      '📝','📌','🔑','💡','🎉','🎊','🚀','💻',
+      '🎵','🎮','⚽','🏆','🎨','📚','🌍','🕐',
+      '👀','🤝','✊','🤙','💀','🤓','🧐','😅',
+    ];
+
+    picker.innerHTML = EMOJIS.map(e =>
+      `<button class="emoji-picker-btn" data-emoji="${e}" title="${e}">${e}</button>`
+    ).join('');
+
+    let savedRange = null;
+
+    function openPicker() {
+      const r = btn.getBoundingClientRect();
+      const pickerW = 8 * 32 + 2 * 8 + 7 * 2; // 8 cols × 32px + padding + gaps ≈ 286px
+      let left = r.left + r.width / 2 - pickerW / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - pickerW - 8));
+      picker.style.left   = left + 'px';
+      picker.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+      picker.classList.remove('hidden');
+    }
+
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!picker.classList.contains('hidden')) { picker.classList.add('hidden'); return; }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+      openPicker();
     });
+
+    picker.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const emojiBtn = e.target.closest('.emoji-picker-btn');
+      if (!emojiBtn) return;
+
+      if (savedRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
+      document.execCommand('insertText', false, emojiBtn.dataset.emoji);
+      // Update savedRange so next emoji inserts after this one
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+      bodyEl.focus();
+      scheduleAutoSave();
+      if (window.pushEditorSnapshot) window.pushEditorSnapshot();
+    });
+
   })();
 
   // ── List picker ───────────────────────────────────────
@@ -3130,8 +3240,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (body) body.focus();
     document.execCommand(cmd, false, null);
   }
-  if (undoBtn) undoBtn.addEventListener('mousedown', (e) => { e.preventDefault(); docExec('undo'); });
-  if (redoBtn) redoBtn.addEventListener('mousedown', (e) => { e.preventDefault(); docExec('redo'); });
+  if (undoBtn) undoBtn.addEventListener('mousedown', (e) => { e.preventDefault(); if (window.editorUndo) window.editorUndo(); else docExec('undo'); });
+  if (redoBtn) redoBtn.addEventListener('mousedown', (e) => { e.preventDefault(); if (window.editorRedo) window.editorRedo(); else docExec('redo'); });
 
   // Keyboard undo/redo when in page view
   document.addEventListener('keydown', (e) => {

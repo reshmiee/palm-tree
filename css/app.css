@@ -2297,6 +2297,45 @@ mark {
 .list-picker-btn .icon { stroke: currentColor; }
 
 /* ── Highlight picker ── */
+/* ── Emoji picker ── */
+
+.emoji-picker {
+  position: fixed;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(8, 32px);
+  gap: 2px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+  z-index: 200;
+}
+
+.emoji-picker.hidden { display: none; }
+
+.emoji-picker-btn {
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  transition: background 0.1s;
+  line-height: 1;
+  padding: 0;
+}
+
+.emoji-picker-btn:hover {
+  background: var(--gray-100);
+}
+
+/* ── Highlight picker ── */
+
 .highlight-picker {
   position: absolute;
   bottom: calc(100% + 8px);
