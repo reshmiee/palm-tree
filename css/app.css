@@ -2305,14 +2305,33 @@ mark {
   border: 1px solid var(--gray-200);
   border-radius: 14px;
   padding: 8px;
-  display: grid;
-  grid-template-columns: repeat(8, 32px);
-  gap: 2px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.13);
   z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
 }
 
 .emoji-picker.hidden { display: none; }
+
+.emoji-picker-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--gray-300);
+  border-radius: 2px;
+  margin: 0 auto;
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.emoji-picker-handle:active { cursor: grabbing; }
+
+.emoji-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 32px);
+  gap: 2px;
+}
 
 .emoji-picker-btn {
   width: 32px;

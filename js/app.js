@@ -1353,18 +1353,49 @@ document.addEventListener('DOMContentLoaded', () => {
       '👀','🤝','✊','🤙','💀','🤓','🧐','😅',
     ];
 
-    picker.innerHTML = EMOJIS.map(e =>
-      `<button class="emoji-picker-btn" data-emoji="${e}" title="${e}">${e}</button>`
-    ).join('');
+    picker.innerHTML =
+      '<div class="emoji-picker-handle"></div>' +
+      '<div class="emoji-picker-grid">' +
+      EMOJIS.map(e => `<button class="emoji-picker-btn" data-emoji="${e}" title="${e}">${e}</button>`).join('') +
+      '</div>';
+
+    // ── Drag to move ──
+    const handle = picker.querySelector('.emoji-picker-handle');
+    let dragging = false, dragDX = 0, dragDY = 0;
+
+    handle.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      dragging = true;
+      const r = picker.getBoundingClientRect();
+      picker.style.top    = r.top + 'px';
+      picker.style.bottom = '';
+      dragDX = e.clientX - r.left;
+      dragDY = e.clientY - r.top;
+      document.addEventListener('mousemove', onDragMove);
+      document.addEventListener('mouseup',   onDragEnd);
+    });
+
+    function onDragMove(e) {
+      if (!dragging) return;
+      const w = picker.offsetWidth, h = picker.offsetHeight;
+      picker.style.left = Math.max(0, Math.min(e.clientX - dragDX, window.innerWidth  - w)) + 'px';
+      picker.style.top  = Math.max(0, Math.min(e.clientY - dragDY, window.innerHeight - h)) + 'px';
+    }
+    function onDragEnd() {
+      dragging = false;
+      document.removeEventListener('mousemove', onDragMove);
+      document.removeEventListener('mouseup',   onDragEnd);
+    }
 
     let savedRange = null;
 
     function openPicker() {
       const r = btn.getBoundingClientRect();
-      const pickerW = 8 * 32 + 2 * 8 + 7 * 2; // 8 cols × 32px + padding + gaps ≈ 286px
+      const pickerW = 8 * 32 + 2 * 8 + 7 * 2;
       let left = r.left + r.width / 2 - pickerW / 2;
       left = Math.max(8, Math.min(left, window.innerWidth - pickerW - 8));
       picker.style.left   = left + 'px';
+      picker.style.top    = '';
       picker.style.bottom = (window.innerHeight - r.top + 8) + 'px';
       picker.classList.remove('hidden');
     }
