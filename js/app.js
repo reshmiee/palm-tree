@@ -1141,8 +1141,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnEmbed   = document.getElementById('link-toggle-embed');
     if (!linkBtn || !overlay) return;
 
-    let savedRange  = null;
-    let embedMode   = false;
+    let savedRange   = null;
+    let embedMode    = false;
+    let existingLink = null; // <a> element if cursor is inside one
 
     // Toggle between Link / Embed mode
     btnLink && btnLink.addEventListener('click', () => {
@@ -1161,7 +1162,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sel && sel.rangeCount > 0) {
         savedRange = sel.getRangeAt(0).cloneRange();
       }
-      urlInput.value = '';
+      // Check if cursor is inside an existing link
+      const anchor = sel && sel.anchorNode && sel.anchorNode.parentElement.closest('a');
+      existingLink = anchor || null;
+      urlInput.value = existingLink ? existingLink.href : '';
+      confirmBtn.textContent = existingLink ? 'Update' : 'Insert';
       overlay.classList.remove('hidden');
       setTimeout(() => urlInput.focus(), 50);
     }
@@ -1172,10 +1177,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal() {
       overlay.classList.add('hidden');
       savedRange = null;
+      existingLink = null;
+      confirmBtn.textContent = 'Insert';
     }
 
     function insertLink() {
       let url = urlInput.value.trim();
+      // Empty URL while editing an existing link → remove it
+      if (!url && existingLink) {
+        const parent = existingLink.parentNode;
+        while (existingLink.firstChild) parent.insertBefore(existingLink.firstChild, existingLink);
+        parent.removeChild(existingLink);
+        existingLink = null;
+        closeModal();
+        scheduleAutoSave();
+        return;
+      }
       if (!url) { closeModal(); return; }
       if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
