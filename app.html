@@ -509,21 +509,6 @@
         </button>
       </div>
 
-      <!-- Link modal -->
-      <div class="link-modal-overlay hidden" id="link-modal-overlay">
-        <div class="link-modal">
-          <div class="link-modal-label">Insert</div>
-          <div class="link-modal-toggle">
-            <button class="link-toggle-btn active" id="link-toggle-link">Link</button>
-            <button class="link-toggle-btn" id="link-toggle-embed">Embed</button>
-          </div>
-          <input class="link-modal-input" id="link-modal-url" type="url" placeholder="https://..." />
-          <div class="link-modal-actions">
-            <button class="link-modal-cancel" id="link-modal-cancel">Cancel</button>
-            <button class="link-modal-confirm" id="link-modal-confirm">Insert</button>
-          </div>
-        </div>
-      </div>
 
       <!-- Layer 2: Always-visible bottom bar -->
       <div class="format-toolbar" id="format-toolbar">
@@ -591,6 +576,19 @@
         <button class="fmt-btn fmt-a-btn" id="fmt-a-btn" title="Formatting" aria-label="Formatting options" aria-expanded="false">
           <span>A</span>
         </button>
+      </div>
+
+      <!-- Link popover — sibling of toolbar -->
+      <div class="link-popover hidden" id="link-popover">
+        <div class="link-popover-tabs">
+          <button class="link-popover-tab active" id="lp-tab-link">Link</button>
+          <button class="link-popover-tab" id="lp-tab-embed">Embed</button>
+        </div>
+        <input class="link-popover-input" id="lp-url" type="url" placeholder="https://..." autocomplete="off" />
+        <div class="link-popover-actions">
+          <button class="link-popover-remove hidden" id="lp-remove">Remove</button>
+          <button class="link-popover-insert" id="lp-insert">Insert</button>
+        </div>
       </div>
 
       <!-- Emoji picker — sibling of toolbar so it's not inside its stacking context -->

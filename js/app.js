@@ -1184,111 +1184,110 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Link insertion ───────────────────────────────────
 
   function initLinkInsertion() {
-    const linkBtn    = document.getElementById('fmt-link-btn');
-    const overlay    = document.getElementById('link-modal-overlay');
-    const urlInput   = document.getElementById('link-modal-url');
-    const cancelBtn  = document.getElementById('link-modal-cancel');
-    const confirmBtn = document.getElementById('link-modal-confirm');
-    const btnLink    = document.getElementById('link-toggle-link');
-    const btnEmbed   = document.getElementById('link-toggle-embed');
-    if (!linkBtn || !overlay) return;
+    const linkBtn   = document.getElementById('fmt-link-btn');
+    const popover   = document.getElementById('link-popover');
+    const urlInput  = document.getElementById('lp-url');
+    const insertBtn = document.getElementById('lp-insert');
+    const removeBtn = document.getElementById('lp-remove');
+    const tabLink   = document.getElementById('lp-tab-link');
+    const tabEmbed  = document.getElementById('lp-tab-embed');
+    if (!linkBtn || !popover) return;
 
     let savedRange   = null;
     let embedMode    = false;
-    let existingLink = null; // <a> element if cursor is inside one
+    let existingLink = null;
 
-    // Toggle between Link / Embed mode
-    btnLink && btnLink.addEventListener('click', () => {
+    tabLink.addEventListener('click', () => {
       embedMode = false;
-      btnLink.classList.add('active');
-      btnEmbed && btnEmbed.classList.remove('active');
+      tabLink.classList.add('active');
+      tabEmbed.classList.remove('active');
     });
-    btnEmbed && btnEmbed.addEventListener('click', () => {
+    tabEmbed.addEventListener('click', () => {
       embedMode = true;
-      btnEmbed.classList.add('active');
-      btnLink && btnLink.classList.remove('active');
+      tabEmbed.classList.add('active');
+      tabLink.classList.remove('active');
     });
 
-    function openLinkModal() {
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        savedRange = sel.getRangeAt(0).cloneRange();
-      }
-      // Check if cursor is inside an existing link
-      const anchor = sel && sel.anchorNode && sel.anchorNode.parentElement.closest('a');
-      existingLink = anchor || null;
-      urlInput.value = existingLink ? existingLink.href : '';
-      confirmBtn.textContent = existingLink ? 'Update' : 'Insert';
-      overlay.classList.remove('hidden');
+    function openPopover() {
+      const r = linkBtn.getBoundingClientRect();
+      const pw = 270;
+      let left = r.left + r.width / 2 - pw / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+      popover.style.left   = left + 'px';
+      popover.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+      popover.classList.remove('hidden');
       setTimeout(() => urlInput.focus(), 50);
     }
 
-    linkBtn.addEventListener('mousedown', (e) => { e.preventDefault(); openLinkModal(); });
-
-
-    function closeModal() {
-      overlay.classList.add('hidden');
+    function closePopover() {
+      popover.classList.add('hidden');
       savedRange = null;
       existingLink = null;
-      confirmBtn.textContent = 'Insert';
+      insertBtn.textContent = 'Insert';
+      removeBtn.classList.add('hidden');
     }
+
+    linkBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      if (!popover.classList.contains('hidden')) { closePopover(); return; }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
+      const anchor = sel && sel.anchorNode && sel.anchorNode.parentElement
+        ? sel.anchorNode.parentElement.closest('a') : null;
+      existingLink = anchor || null;
+      urlInput.value = existingLink ? existingLink.href : '';
+      insertBtn.textContent = existingLink ? 'Update' : 'Insert';
+      existingLink ? removeBtn.classList.remove('hidden') : removeBtn.classList.add('hidden');
+      embedMode = false;
+      tabLink.classList.add('active');
+      tabEmbed.classList.remove('active');
+      openPopover();
+    });
+
+    removeBtn.addEventListener('click', () => {
+      if (!existingLink) return;
+      const parent = existingLink.parentNode;
+      while (existingLink.firstChild) parent.insertBefore(existingLink.firstChild, existingLink);
+      parent.removeChild(existingLink);
+      closePopover();
+      scheduleAutoSave();
+    });
 
     function insertLink() {
       let url = urlInput.value.trim();
-      // Empty URL while editing an existing link → remove it
-      if (!url && existingLink) {
-        const parent = existingLink.parentNode;
-        while (existingLink.firstChild) parent.insertBefore(existingLink.firstChild, existingLink);
-        parent.removeChild(existingLink);
-        existingLink = null;
-        closeModal();
-        scheduleAutoSave();
-        return;
-      }
-      if (!url) { closeModal(); return; }
+      if (!url) { closePopover(); return; }
       if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
       if (embedMode) {
         if (typeof window.insertEmbed === 'function') window.insertEmbed(url);
-        closeModal();
+        closePopover();
         return;
       }
 
-      // Restore the saved selection
       if (savedRange) {
         const sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(savedRange);
       }
-
       bodyEl.focus();
 
       const selectedText = savedRange ? savedRange.toString() : '';
       if (selectedText) {
-        // Wrap selected text in a link
         document.execCommand('createLink', false, url);
-        // Make it open in new tab
-        const links = bodyEl.querySelectorAll('a[href="' + url + '"]');
-        links.forEach(a => a.setAttribute('target', '_blank'));
+        bodyEl.querySelectorAll('a[href="' + url + '"]').forEach(a => a.setAttribute('target', '_blank'));
       } else {
-        // No selection — insert the URL as link text
         const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.textContent = url;
+        a.href = url; a.target = '_blank'; a.textContent = url;
         document.execCommand('insertHTML', false, a.outerHTML);
       }
-
-      closeModal();
+      closePopover();
       scheduleAutoSave();
     }
 
-    confirmBtn.addEventListener('click', insertLink);
-    cancelBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    insertBtn.addEventListener('click', insertLink);
     urlInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') insertLink();
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') closePopover();
     });
   }
 

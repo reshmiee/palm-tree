@@ -2388,102 +2388,92 @@ mark {
 
 /* â”€â”€ Link modal â”€â”€ */
 
-.link-modal-overlay {
+/* ── Link popover ── */
+
+.link-popover {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 300;
-}
-
-.link-modal-overlay.hidden {
-  display: none;
-}
-
-.link-modal {
-  background: var(--surface, #fff);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
   border-radius: 14px;
-  padding: 22px;
-  width: min(400px, 90vw);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+  padding: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+  z-index: 200;
+  width: 270px;
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 9px;
 }
 
-.link-modal-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--black);
+.link-popover.hidden { display: none; }
+
+.link-popover-tabs {
+  display: flex;
+  gap: 4px;
 }
 
-.link-modal-input {
-  width: 100%;
-  border: 1.5px solid rgba(0,0,0,0.15);
+.link-popover-tab {
+  flex: 1;
+  padding: 6px 0;
+  border: 1.5px solid rgba(0,0,0,0.12);
   border-radius: 8px;
-  padding: 10px 13px;
-  font-size: 13.5px;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.link-popover-tab.active {
+  background: var(--black);
+  color: #fff;
+  border-color: var(--black);
+}
+
+.link-popover-input {
+  width: 100%;
+  border: 1.5px solid rgba(0,0,0,0.13);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.15s;
 }
 
-.link-modal-input:focus {
-  border-color: var(--black);
-}
+.link-popover-input:focus { border-color: var(--black); }
 
-.link-modal-actions {
+.link-popover-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-}
-
-.link-modal-cancel {
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--black);
-  background: rgba(0,0,0,0.06);
-}
-
-.link-modal-confirm {
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  background: var(--black);
-}
-
-/* ── Link / Embed mode toggle ── */
-
-.link-modal-toggle {
-  display: flex;
   gap: 6px;
-  margin-bottom: 4px;
 }
 
-.link-toggle-btn {
-  flex: 1;
-  padding: 8px 0;
-  border: 1.5px solid rgba(0,0,0,0.15);
+.link-popover-remove {
+  padding: 6px 12px;
   border-radius: 8px;
+  border: 1.5px solid rgba(0,0,0,0.12);
   background: transparent;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
-  color: var(--gray-400, #888);
+  color: var(--gray-500);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 
-.link-toggle-btn.active {
+.link-popover-remove.hidden { display: none; }
+
+.link-popover-insert {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: none;
   background: var(--black);
   color: #fff;
-  border-color: var(--black);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
 }
+
+.link-popover-insert:hover { opacity: 0.8; }
 
 /* â”€â”€ Embed cards â”€â”€ */
 
