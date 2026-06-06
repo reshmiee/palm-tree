@@ -1221,6 +1221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closePopover() {
       popover.classList.add('hidden');
+      linkBtn.classList.remove('active');
       savedRange = null;
       existingLink = null;
       insertBtn.textContent = 'Insert';
@@ -1241,6 +1242,7 @@ document.addEventListener('DOMContentLoaded', () => {
       embedMode = false;
       tabLink.classList.add('active');
       tabEmbed.classList.remove('active');
+      linkBtn.classList.add('active');
       openPopover();
     });
 
@@ -1305,9 +1307,10 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       const isOpen = !picker.classList.contains('hidden');
-      if (isOpen) { picker.classList.add('hidden'); return; }
+      if (isOpen) { picker.classList.add('hidden'); btn.classList.remove('active'); return; }
       const sel = window.getSelection();
       if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+      btn.classList.add('active');
       picker.classList.remove('hidden');
     });
 
@@ -1400,9 +1403,14 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!picker.classList.contains('hidden')) { picker.classList.add('hidden'); return; }
+      if (!picker.classList.contains('hidden')) {
+        picker.classList.add('hidden');
+        btn.classList.remove('active');
+        return;
+      }
       const sel = window.getSelection();
       if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+      btn.classList.add('active');
       openPicker();
     });
 
